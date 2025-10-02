@@ -9,6 +9,38 @@ interface WompiConfig {
   mode: 'test' | 'production'
 }
 
+/**
+ * Get Wompi API base URL based on environment
+ */
+function getWompiBaseUrl(): string {
+  // Use sandbox in development or if using test keys
+  const isDev = process.env.NODE_ENV === 'development'
+  return isDev ? 'https://sandbox.wompi.co/v1' : 'https://production.wompi.co/v1'
+}
+
+/**
+ * Get platform Wompi credentials (for subscription payments)
+ * These are YOUR Wompi credentials, not the tenant's
+ */
+export function getPlatformWompiConfig(): WompiConfig | null {
+  const publicKey = process.env.PLATFORM_WOMPI_PUBLIC_KEY
+  const privateKey = process.env.PLATFORM_WOMPI_PRIVATE_KEY
+  const integritySecret = process.env.PLATFORM_WOMPI_INTEGRITY_SECRET
+  const eventsSecret = process.env.PLATFORM_WOMPI_EVENTS_SECRET
+
+  if (!publicKey || !privateKey || !integritySecret || !eventsSecret) {
+    return null
+  }
+
+  return {
+    publicKey,
+    privateKey,
+    integritySecret,
+    eventsSecret,
+    mode: process.env.NODE_ENV === 'development' ? 'test' : 'production',
+  }
+}
+
 interface CreateCheckoutParams {
   reference: string
   amountInCents: number
@@ -143,8 +175,9 @@ export async function getTransactionStatus(
   transactionId: string,
   privateKey: string
 ): Promise<any> {
+  const baseUrl = getWompiBaseUrl()
   const response = await fetch(
-    `https://production.wompi.co/v1/transactions/${transactionId}`,
+    `${baseUrl}/transactions/${transactionId}`,
     {
       headers: {
         Authorization: `Bearer ${privateKey}`,
@@ -163,7 +196,8 @@ export async function getTransactionStatus(
  * Create acceptance token (required for tokenization)
  */
 export async function createAcceptanceToken(publicKey: string): Promise<string> {
-  const response = await fetch('https://production.wompi.co/v1/merchants/' + publicKey, {
+  const baseUrl = getWompiBaseUrl()
+  const response = await fetch(`${baseUrl}/merchants/${publicKey}`, {
     method: 'GET',
   })
 
@@ -186,7 +220,8 @@ export async function tokenizeCard(params: {
   card_holder: string
   publicKey: string
 }): Promise<{ id: string; type: string; mask: string }> {
-  const response = await fetch('https://production.wompi.co/v1/tokens/cards', {
+  const baseUrl = getWompiBaseUrl()
+  const response = await fetch(`${baseUrl}/tokens/cards`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -226,7 +261,8 @@ export async function createTokenTransaction(params: {
   reference: string
   privateKey: string
 }): Promise<any> {
-  const response = await fetch('https://production.wompi.co/v1/transactions', {
+  const baseUrl = getWompiBaseUrl()
+  const response = await fetch(`${baseUrl}/transactions`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

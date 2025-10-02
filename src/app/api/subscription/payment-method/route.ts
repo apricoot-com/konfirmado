@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/tenant'
 import { prisma } from '@/lib/prisma'
-import { tokenizeCard, getWompiConfig } from '@/lib/wompi'
+import { tokenizeCard, getPlatformWompiConfig } from '@/lib/wompi'
 import { encrypt } from '@/lib/encryption'
 import { logAudit } from '@/lib/audit'
 import { z } from 'zod'
@@ -30,24 +30,24 @@ export async function POST(req: NextRequest) {
     
     const { cardNumber, cardHolder, expMonth, expYear, cvc } = validated.data
     
-    // Get Wompi config
-    const wompiConfig = getWompiConfig(tenant)
+    // Get PLATFORM Wompi config (not tenant's - subscriptions go to platform account)
+    const platformWompiConfig = getPlatformWompiConfig()
     
-    if (!wompiConfig) {
+    if (!platformWompiConfig) {
       return NextResponse.json(
-        { error: 'Wompi not configured' },
-        { status: 400 }
+        { error: 'Platform payment system not configured. Please contact support.' },
+        { status: 500 }
       )
     }
     
-    // Tokenize card with Wompi
+    // Tokenize card with PLATFORM Wompi credentials
     const tokenData = await tokenizeCard({
       number: cardNumber,
       cvc,
       exp_month: expMonth,
       exp_year: expYear,
       card_holder: cardHolder,
-      publicKey: wompiConfig.publicKey,
+      publicKey: platformWompiConfig.publicKey,
     })
     
     // Save encrypted token

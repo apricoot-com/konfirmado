@@ -36,11 +36,17 @@ export default function CheckoutPage() {
     fetch('/api/tenant')
       .then(res => res.json())
       .then(data => {
+        console.log('Tenant data:', data)
         if (data.paymentMethodMask) {
           setPaymentMethod(data.paymentMethodMask)
+          console.log('Payment method set:', data.paymentMethodMask)
+        } else {
+          console.log('No payment method found')
         }
       })
-      .catch(console.error)
+      .catch(err => {
+        console.error('Error fetching tenant:', err)
+      })
   }, [])
   
   if (!plan) {

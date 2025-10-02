@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { createAcceptanceToken, createTokenTransaction, getWompiConfig } from '@/lib/wompi'
+import { createAcceptanceToken, createTokenTransaction, getPlatformWompiConfig } from '@/lib/wompi'
 import { decrypt } from '@/lib/encryption'
 import { SUBSCRIPTION_PLANS } from '@/lib/subscriptions'
 import { generateToken } from '@/lib/utils'
@@ -41,6 +41,16 @@ export async function POST(req: NextRequest) {
       errors: [] as string[],
     }
     
+    // Get PLATFORM Wompi config (all subscription charges go to platform)
+    const platformWompiConfig = getPlatformWompiConfig()
+    
+    if (!platformWompiConfig) {
+      return NextResponse.json(
+        { error: 'Platform payment system not configured' },
+        { status: 500 }
+      )
+    }
+    
     for (const tenant of tenants) {
       try {
         const planDetails = SUBSCRIPTION_PLANS[tenant.subscriptionPlan]
@@ -50,12 +60,10 @@ export async function POST(req: NextRequest) {
           continue
         }
         
-        const wompiConfig = getWompiConfig(tenant)
-        
-        if (!wompiConfig || !tenant.paymentMethodToken) {
-          console.log(`Skipping ${tenant.id} - no payment config`)
+        if (!tenant.paymentMethodToken) {
+          console.log(`Skipping ${tenant.id} - no payment method`)
           results.failed++
-          results.errors.push(`${tenant.name}: Missing payment configuration`)
+          results.errors.push(`${tenant.name}: No payment method`)
           continue
         }
         
@@ -65,13 +73,13 @@ export async function POST(req: NextRequest) {
           continue
         }
         
-        // Get acceptance token
-        const acceptanceToken = await createAcceptanceToken(wompiConfig.publicKey)
+        // Get acceptance token using PLATFORM credentials
+        const acceptanceToken = await createAcceptanceToken(platformWompiConfig.publicKey)
         
         // Generate reference
         const reference = `SUB-${Date.now()}-${generateToken(8)}`
         
-        // Create transaction
+        // Create transaction using PLATFORM credentials (money goes to platform)
         const transaction = await createTokenTransaction({
           token: decrypt(tenant.paymentMethodToken),
           acceptanceToken,
@@ -79,7 +87,7 @@ export async function POST(req: NextRequest) {
           currency: 'COP',
           customerEmail: user.email,
           reference,
-          privateKey: wompiConfig.privateKey,
+          privateKey: platformWompiConfig.privateKey,
         })
         
         // Calculate new period

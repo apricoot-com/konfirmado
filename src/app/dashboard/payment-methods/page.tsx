@@ -1,6 +1,7 @@
 import { requireAuth } from '@/lib/tenant'
 import { PaymentMethodForm } from '@/components/payment/payment-method-form'
-import { CreditCard, Plus, Trash2 } from 'lucide-react'
+import { DeletePaymentMethodButton } from '@/components/payment/delete-payment-method-button'
+import { CreditCard, Plus } from 'lucide-react'
 
 export default async function PaymentMethodsPage() {
   const { tenant } = await requireAuth()
@@ -34,23 +35,7 @@ export default async function PaymentMethodsPage() {
               </div>
             </div>
             
-            <form action="/api/subscription/payment-method" method="POST">
-              <input type="hidden" name="_method" value="DELETE" />
-              <button
-                type="submit"
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                onClick={(e) => {
-                  e.preventDefault()
-                  if (confirm('¿Estás seguro de eliminar este método de pago?')) {
-                    fetch('/api/subscription/payment-method', { method: 'DELETE' })
-                      .then(() => window.location.reload())
-                  }
-                }}
-              >
-                <Trash2 className="w-4 h-4" />
-                Eliminar
-              </button>
-            </form>
+            <DeletePaymentMethodButton />
           </div>
           
           <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">

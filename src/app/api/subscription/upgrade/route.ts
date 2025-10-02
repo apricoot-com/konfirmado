@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/tenant'
 import { prisma } from '@/lib/prisma'
-import { createAcceptanceToken, createTokenTransaction, getWompiConfig } from '@/lib/wompi'
+import { createAcceptanceToken, createTokenTransaction, getPlatformWompiConfig } from '@/lib/wompi'
 import { decrypt } from '@/lib/encryption'
 import { SUBSCRIPTION_PLANS } from '@/lib/subscriptions'
 import { generateToken } from '@/lib/utils'
@@ -49,23 +49,23 @@ export async function POST(req: NextRequest) {
       )
     }
     
-    // Get Wompi config
-    const wompiConfig = getWompiConfig(tenant)
+    // Get PLATFORM Wompi config (subscriptions go to platform account)
+    const platformWompiConfig = getPlatformWompiConfig()
     
-    if (!wompiConfig) {
+    if (!platformWompiConfig) {
       return NextResponse.json(
-        { error: 'Wompi not configured' },
-        { status: 400 }
+        { error: 'Platform payment system not configured. Please contact support.' },
+        { status: 500 }
       )
     }
     
     // Get acceptance token
-    const acceptanceToken = await createAcceptanceToken(wompiConfig.publicKey)
+    const acceptanceToken = await createAcceptanceToken(platformWompiConfig.publicKey)
     
     // Generate reference
     const reference = `SUB-${Date.now()}-${generateToken(8)}`
     
-    // Create transaction with stored token
+    // Create transaction with stored token using PLATFORM credentials
     const transaction = await createTokenTransaction({
       token: decrypt(tenant.paymentMethodToken),
       acceptanceToken,
@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
       currency: 'COP',
       customerEmail: user.email,
       reference,
-      privateKey: wompiConfig.privateKey,
+      privateKey: platformWompiConfig.privateKey,
     })
     
     // Calculate subscription period (1 month from now)
