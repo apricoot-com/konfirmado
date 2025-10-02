@@ -80,15 +80,22 @@ export default function CheckoutPage() {
       })
       
       const data = await response.json()
+      console.log('Upgrade response:', data)
       
       if (!response.ok) {
         throw new Error(data.error || 'Error al procesar el pago')
       }
       
       if (data.success) {
+        console.log('Redirecting to subscription page...')
         router.push('/dashboard/subscription?upgrade=success')
+      } else if (data.status === 'PENDING') {
+        console.log('Payment pending, redirecting...')
+        // Redirect anyway - webhook will update when approved
+        router.push('/dashboard/subscription?upgrade=pending')
       } else {
-        setError('El pago está siendo procesado. Te notificaremos cuando se complete.')
+        console.log('Payment failed, status:', data.status)
+        setError('El pago no pudo ser procesado. Por favor intenta nuevamente.')
       }
     } catch (err: any) {
       setError(err.message)

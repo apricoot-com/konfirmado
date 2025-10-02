@@ -2,12 +2,16 @@ import { requireAuth } from '@/lib/tenant'
 import { prisma } from '@/lib/prisma'
 import { SUBSCRIPTION_PLANS, getTrialStatus } from '@/lib/subscriptions'
 import { formatPrice } from '@/lib/utils'
-import { Check, AlertCircle, CreditCard, Calendar } from 'lucide-react'
+import { Check, AlertCircle, CreditCard, Calendar, CheckCircle } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import Link from 'next/link'
 
-export default async function SubscriptionPage() {
+export default async function SubscriptionPage({
+  searchParams,
+}: {
+  searchParams: { upgrade?: string }
+}) {
   const { tenant } = await requireAuth()
   
   const currentPlan = SUBSCRIPTION_PLANS[tenant.subscriptionPlan]
@@ -25,6 +29,35 @@ export default async function SubscriptionPage() {
         <h1 className="text-3xl font-bold text-gray-900">Suscripción</h1>
         <p className="text-gray-600 mt-2">Gestiona tu plan y facturación</p>
       </div>
+      
+      {/* Success/Pending Messages */}
+      {searchParams.upgrade === 'success' && (
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+          <div className="flex items-center gap-3">
+            <CheckCircle className="w-5 h-5 text-green-600" />
+            <div>
+              <h3 className="font-semibold text-green-900">¡Suscripción activada!</h3>
+              <p className="text-sm text-green-800 mt-1">
+                Tu plan ha sido actualizado exitosamente.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {searchParams.upgrade === 'pending' && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 text-blue-600" />
+            <div>
+              <h3 className="font-semibold text-blue-900">Pago en proceso</h3>
+              <p className="text-sm text-blue-800 mt-1">
+                Tu pago está siendo procesado. Te notificaremos cuando se complete (generalmente toma unos segundos).
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
       
       {/* Current Plan */}
       <div className="bg-white rounded-lg border border-gray-200 p-6">
