@@ -8,8 +8,6 @@ const registerSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
   tenantName: z.string().min(3).max(100),
-  callbackUrl: z.string().url().startsWith('https://'),
-  returnUrl: z.string().url().startsWith('https://'),
 })
 
 export async function POST(req: NextRequest) {
@@ -24,7 +22,7 @@ export async function POST(req: NextRequest) {
       )
     }
     
-    const { email, password, tenantName, callbackUrl, returnUrl } = validated.data
+    const { email, password, tenantName } = validated.data
     
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
@@ -42,12 +40,12 @@ export async function POST(req: NextRequest) {
     const hashedPassword = await bcrypt.hash(password, 12)
     
     // Create tenant and user in transaction
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: any) => {
       const tenant = await tx.tenant.create({
         data: {
           name: tenantName,
-          callbackUrl,
-          returnUrl,
+          callbackUrl: 'https://example.com/callback', // Placeholder - to be configured in settings
+          returnUrl: 'https://example.com/thanks', // Placeholder - to be configured in settings
         },
       })
       
