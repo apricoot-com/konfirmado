@@ -14,6 +14,7 @@ import {
 interface InviteButtonProps {
   professionalId: string
   status: string
+  showTest?: boolean
 }
 
 export function InviteButton({ professionalId, status }: InviteButtonProps) {
