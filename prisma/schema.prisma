@@ -26,10 +26,12 @@ model Tenant {
   callbackUrl       String
   returnUrl         String
   
-  // Wompi config (encrypted)
-  wompiPublicKey    String?
-  wompiPrivateKey   String?   @db.Text
-  wompiMode         String    @default("test") // test | production
+  // Wompi config
+  wompiPublicKey      String?
+  wompiPrivateKey     String?   @db.Text // Encrypted
+  wompiIntegritySecret String?  @db.Text // Encrypted
+  wompiEventsSecret   String?   @db.Text // Encrypted
+  wompiMode           String    @default("test") // test | production
   
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt

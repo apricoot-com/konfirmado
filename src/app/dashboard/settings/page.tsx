@@ -2,6 +2,7 @@ import { requireAuth } from '@/lib/tenant'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { BrandingSettings } from '@/components/settings/branding-settings'
 import { IntegrationSettings } from '@/components/settings/integration-settings'
+import { PaymentSettings } from '@/components/settings/payment-settings'
 
 export default async function SettingsPage() {
   const { tenant } = await requireAuth()
@@ -29,10 +30,7 @@ export default async function SettingsPage() {
         </TabsContent>
 
         <TabsContent value="payments">
-          <div className="bg-white rounded-lg border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold mb-4">Configuración de Wompi</h3>
-            <p className="text-gray-600">Próximamente...</p>
-          </div>
+          <PaymentSettings tenant={tenant} />
         </TabsContent>
       </Tabs>
     </div>

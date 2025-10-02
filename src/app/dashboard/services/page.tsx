@@ -2,7 +2,7 @@ import { requireAuth } from '@/lib/tenant'
 import { prisma } from '@/lib/prisma'
 import { formatPrice } from '@/lib/utils'
 import Link from 'next/link'
-import { Plus, Edit, Trash2 } from 'lucide-react'
+import { Plus, Edit, Trash2, Briefcase } from 'lucide-react'
 
 export default async function ServicesPage() {
   const { tenant } = await requireAuth()

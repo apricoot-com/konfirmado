@@ -1,7 +1,8 @@
 import { requireAuth } from '@/lib/tenant'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
-import { Plus, Edit, Send, CheckCircle, XCircle, AlertCircle } from 'lucide-react'
+import { Plus, Edit, CheckCircle, XCircle, AlertCircle, Users } from 'lucide-react'
+import { InviteButton } from '@/components/professionals/invite-button'
 
 export default async function ProfessionalsPage() {
   const { tenant } = await requireAuth()
@@ -128,22 +129,8 @@ export default async function ProfessionalsPage() {
                   </div>
                   
                   <div className="flex gap-2">
-                    {professional.calendarStatus === 'pending' && (
-                      <button
-                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                      >
-                        <Send className="w-4 h-4" />
-                        Enviar Invitación
-                      </button>
-                    )}
-                    
-                    {professional.calendarStatus === 'error' && (
-                      <button
-                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-                      >
-                        <Send className="w-4 h-4" />
-                        Reconectar
-                      </button>
+                    {(professional.calendarStatus === 'pending' || professional.calendarStatus === 'error') && (
+                      <InviteButton professionalId={professional.id} status={professional.calendarStatus} />
                     )}
                     
                     <Link
