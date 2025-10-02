@@ -84,6 +84,7 @@ model Service {
   durationMinutes Int
   price           Int       // COP cents (e.g., 120000 = $120.000 COP)
   chargeType      String    // "partial" | "total"
+  partialPercentage Int     @default(25) // Percentage for partial payment (1-100)
   
   isActive        Boolean   @default(true)
   createdAt       DateTime  @default(now())
