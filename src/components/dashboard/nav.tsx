@@ -13,6 +13,7 @@ import {
   Settings,
   BarChart3,
   X,
+  Zap,
 } from 'lucide-react'
 
 const navItems = [
@@ -45,6 +46,16 @@ const navItems = [
     title: 'Métricas',
     href: '/dashboard/metrics',
     icon: BarChart3,
+  },
+  {
+    title: 'Suscripción',
+    href: '/dashboard/subscription',
+    icon: Zap,
+  },
+  {
+    title: 'Métodos de Pago',
+    href: '/dashboard/payment-methods',
+    icon: CreditCard,
   },
   {
     title: 'Configuración',

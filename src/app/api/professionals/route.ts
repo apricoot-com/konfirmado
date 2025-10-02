@@ -3,6 +3,7 @@ import { requireAuth } from '@/lib/tenant'
 import { prisma } from '@/lib/prisma'
 import { logAudit } from '@/lib/audit'
 import { generateToken } from '@/lib/utils'
+import { canAddProfessional, isSubscriptionActive } from '@/lib/subscriptions'
 import { z } from 'zod'
 
 const professionalSchema = z.object({
@@ -42,8 +43,34 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const { user, tenant } = await requireAuth()
-    const body = await req.json()
     
+    // Check subscription status
+    if (!isSubscriptionActive(tenant)) {
+      return NextResponse.json(
+        { error: 'Subscription expired. Please renew to continue.' },
+        { status: 403 }
+      )
+    }
+    
+    // Check professional limit
+    const currentCount = await prisma.professional.count({
+      where: { tenantId: tenant.id, isActive: true },
+    })
+    
+    const { allowed, limit } = canAddProfessional(currentCount, tenant.subscriptionPlan)
+    
+    if (!allowed) {
+      return NextResponse.json(
+        { 
+          error: `Professional limit reached. Your ${tenant.subscriptionPlan} plan allows ${limit} professional(s). Upgrade to add more.`,
+          limit,
+          current: currentCount,
+        },
+        { status: 403 }
+      )
+    }
+    
+    const body = await req.json()
     const validated = professionalSchema.safeParse(body)
     
     if (!validated.success) {

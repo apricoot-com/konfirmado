@@ -35,23 +35,31 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       )
     }
-    
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 12)
     
     // Create tenant and user in transaction
     const result = await prisma.$transaction(async (tx: any) => {
+      // Set trial period (default 1 month)
+      const trialMonths = 1
+      const trialEndsAt = new Date()
+      trialEndsAt.setMonth(trialEndsAt.getMonth() + trialMonths)
+      
       const tenant = await tx.tenant.create({
         data: {
-          name: tenantName,
-          callbackUrl: 'https://example.com/callback', // Placeholder - to be configured in settings
-          returnUrl: 'https://example.com/thanks', // Placeholder - to be configured in settings
+          name: validated.data.tenantName,
+          callbackUrl: 'https://example.com/callback',
+          returnUrl: 'https://example.com/thanks',
+          subscriptionPlan: 'trial',
+          subscriptionStatus: 'active',
+          trialMonths,
+          trialEndsAt,
         },
       })
       
       const user = await tx.user.create({
         data: {
-          email,
+          email: validated.data.email,
           password: hashedPassword,
           tenantId: tenant.id,
         },

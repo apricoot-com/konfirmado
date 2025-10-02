@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/tenant'
 import { prisma } from '@/lib/prisma'
 import { logAudit } from '@/lib/audit'
+import { canAddService, isSubscriptionActive } from '@/lib/subscriptions'
 import { z } from 'zod'
 
 const serviceSchema = z.object({
@@ -44,8 +45,34 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const { user, tenant } = await requireAuth()
-    const body = await req.json()
     
+    // Check subscription status
+    if (!isSubscriptionActive(tenant)) {
+      return NextResponse.json(
+        { error: 'Subscription expired. Please renew to continue.' },
+        { status: 403 }
+      )
+    }
+    
+    // Check service limit
+    const currentCount = await prisma.service.count({
+      where: { tenantId: tenant.id, isActive: true },
+    })
+    
+    const { allowed, limit } = canAddService(currentCount, tenant.subscriptionPlan)
+    
+    if (!allowed) {
+      return NextResponse.json(
+        { 
+          error: `Service limit reached. Your ${tenant.subscriptionPlan} plan allows ${limit} service(s). Upgrade to add more.`,
+          limit,
+          current: currentCount,
+        },
+        { status: 403 }
+      )
+    }
+    
+    const body = await req.json()
     const validated = serviceSchema.safeParse(body)
     
     if (!validated.success) {

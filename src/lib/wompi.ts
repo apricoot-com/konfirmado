@@ -158,3 +158,98 @@ export async function getTransactionStatus(
 
   return response.json()
 }
+
+/**
+ * Create acceptance token (required for tokenization)
+ */
+export async function createAcceptanceToken(publicKey: string): Promise<string> {
+  const response = await fetch('https://production.wompi.co/v1/merchants/' + publicKey, {
+    method: 'GET',
+  })
+
+  if (!response.ok) {
+    throw new Error(`Failed to get merchant info: ${response.status}`)
+  }
+
+  const data = await response.json()
+  return data.data.presigned_acceptance.acceptance_token
+}
+
+/**
+ * Tokenize payment method (card)
+ */
+export async function tokenizeCard(params: {
+  number: string
+  cvc: string
+  exp_month: string
+  exp_year: string
+  card_holder: string
+  publicKey: string
+}): Promise<{ id: string; type: string; mask: string }> {
+  const response = await fetch('https://production.wompi.co/v1/tokens/cards', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${params.publicKey}`,
+    },
+    body: JSON.stringify({
+      number: params.number,
+      cvc: params.cvc,
+      exp_month: params.exp_month,
+      exp_year: params.exp_year,
+      card_holder: params.card_holder,
+    }),
+  })
+
+  if (!response.ok) {
+    const error = await response.json()
+    throw new Error(error.error?.reason || 'Failed to tokenize card')
+  }
+
+  const data = await response.json()
+  return {
+    id: data.data.id,
+    type: data.data.type,
+    mask: data.data.mask,
+  }
+}
+
+/**
+ * Create transaction with token (for recurring charges)
+ */
+export async function createTokenTransaction(params: {
+  token: string
+  acceptanceToken: string
+  amountInCents: number
+  currency: 'COP'
+  customerEmail: string
+  reference: string
+  privateKey: string
+}): Promise<any> {
+  const response = await fetch('https://production.wompi.co/v1/transactions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${params.privateKey}`,
+    },
+    body: JSON.stringify({
+      acceptance_token: params.acceptanceToken,
+      amount_in_cents: params.amountInCents,
+      currency: params.currency,
+      customer_email: params.customerEmail,
+      payment_method: {
+        type: 'CARD',
+        token: params.token,
+        installments: 1,
+      },
+      reference: params.reference,
+    }),
+  })
+
+  if (!response.ok) {
+    const error = await response.json()
+    throw new Error(error.error?.reason || 'Failed to create transaction')
+  }
+
+  return response.json()
+}
