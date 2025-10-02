@@ -33,6 +33,7 @@ export async function POST(req: NextRequest) {
     // Get PLATFORM Wompi config (not tenant's - subscriptions go to platform account)
     const platformWompiConfig = getPlatformWompiConfig()
     
+    
     if (!platformWompiConfig) {
       return NextResponse.json(
         { error: 'Platform payment system not configured. Please contact support.' },
@@ -41,6 +42,7 @@ export async function POST(req: NextRequest) {
     }
     
     // Tokenize card with PLATFORM Wompi credentials
+    console.log('Tokenizing card with platform credentials...')
     const tokenData = await tokenizeCard({
       number: cardNumber,
       cvc,
@@ -50,14 +52,27 @@ export async function POST(req: NextRequest) {
       publicKey: platformWompiConfig.publicKey,
     })
     
+    console.log('Card tokenized successfully:', { mask: tokenData.mask, type: tokenData.type })
+    
     // Save encrypted token
-    await prisma.tenant.update({
+    console.log('Saving payment method to database for tenant:', tenant.id)
+    console.log('Token to encrypt:', tokenData.id)
+    
+    const encryptedToken = encrypt(tokenData.id)
+    console.log('Encrypted token length:', encryptedToken.length)
+    
+    const updatedTenant = await prisma.tenant.update({
       where: { id: tenant.id },
       data: {
-        paymentMethodToken: encrypt(tokenData.id),
+        paymentMethodToken: encryptedToken,
         paymentMethodType: tokenData.type,
         paymentMethodMask: tokenData.mask,
       },
+    })
+    
+    console.log('Payment method saved successfully:', {
+      mask: updatedTenant.paymentMethodMask,
+      type: updatedTenant.paymentMethodType,
     })
     
     // Audit log

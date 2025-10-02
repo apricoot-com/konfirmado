@@ -242,10 +242,12 @@ export async function tokenizeCard(params: {
   }
 
   const data = await response.json()
+  console.log('Wompi tokenize response:', JSON.stringify(data, null, 2))
+  
   return {
     id: data.data.id,
-    type: data.data.type,
-    mask: data.data.mask,
+    type: data.data.brand || 'CARD', // Wompi returns "brand" (VISA, MASTERCARD, etc.)
+    mask: data.data.last_four, // Wompi returns "last_four" not "mask"
   }
 }
 

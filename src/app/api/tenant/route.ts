@@ -5,15 +5,23 @@ export async function GET(req: NextRequest) {
   try {
     const { tenant } = await requireAuth()
     
+    console.log('Tenant data being returned:', {
+      id: tenant.id,
+      paymentMethodMask: tenant.paymentMethodMask,
+      paymentMethodType: tenant.paymentMethodType,
+    })
+    
     // Return safe tenant data (no sensitive keys)
-    return NextResponse.json({
+    const response = {
       id: tenant.id,
       name: tenant.name,
       subscriptionPlan: tenant.subscriptionPlan,
       subscriptionStatus: tenant.subscriptionStatus,
       paymentMethodMask: tenant.paymentMethodMask,
       paymentMethodType: tenant.paymentMethodType,
-    })
+    }
+    
+    return NextResponse.json(response)
   } catch (error) {
     console.error('Get tenant error:', error)
     return NextResponse.json(

@@ -144,9 +144,15 @@ export default function CheckoutPage() {
               </div>
             ) : (
               <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <p className="text-sm text-yellow-800">
+                <p className="text-sm text-yellow-800 mb-2">
                   Necesitas agregar un método de pago para continuar
                 </p>
+                <button
+                  onClick={() => router.push('/dashboard/payment-methods')}
+                  className="text-sm font-medium text-yellow-900 hover:text-yellow-700 underline"
+                >
+                  Agregar método de pago →
+                </button>
               </div>
             )}
           </div>
