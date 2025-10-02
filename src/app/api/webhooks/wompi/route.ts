@@ -12,31 +12,70 @@ export async function POST(req: NextRequest) {
     if (!checksum) {
       return NextResponse.json({ error: 'Missing checksum' }, { status: 400 })
     }
-    
+    // only in dev env
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Wompi webhook received:', body)
+    }
     // Extract event data
     const { event, data, sent_at } = body
     const timestamp = Math.floor(new Date(sent_at).getTime() / 1000)
     
     if (event !== 'transaction.updated') {
       // Acknowledge other events but don't process
-      return NextResponse.json({ received: true })
     }
     
     const transaction = data.transaction
     const reference = transaction.reference
     
-    // Find payment by reference
+    // Check if this is a subscription payment (reference starts with SUB-)
+    if (reference.startsWith('SUB-')) {
+      // Handle subscription payment
+      const subscription = await prisma.subscription.findFirst({
+        where: { paymentReference: reference },
+        include: { tenant: true },
+      })
+      
+      if (!subscription) {
+        console.log('Subscription not found for reference:', reference)
+        return NextResponse.json({ received: true }) // Acknowledge anyway
+      }
+      
+      // Update subscription payment status
+      await prisma.subscription.update({
+        where: { id: subscription.id },
+        data: {
+          paymentStatus: transaction.status,
+          status: transaction.status === 'APPROVED' ? 'active' : 'failed',
+        },
+      })
+      
+      // If approved, update tenant subscription
+      if (transaction.status === 'APPROVED') {
+        await prisma.tenant.update({
+          where: { id: subscription.tenantId },
+          data: {
+            subscriptionPlan: subscription.plan,
+            subscriptionStatus: 'active',
+            subscriptionEndsAt: subscription.currentPeriodEnd,
+            trialEndsAt: null, // Clear trial
+          },
+        })
+        
+        console.log(`✓ Subscription activated for tenant ${subscription.tenantId}: ${subscription.plan}`)
+      }
+      
+      return NextResponse.json({ received: true })
+    }
+    
+    // Handle regular booking payment
     const payment = await prisma.payment.findFirst({
       where: { reference },
       include: {
         booking: {
           include: {
-            service: true,
-            professional: true,
             tenant: true,
           },
         },
-        tenant: true,
       },
     })
     
