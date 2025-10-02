@@ -74,6 +74,7 @@ export async function POST(req: NextRequest) {
       customerEmail: user.email,
       reference,
       privateKey: platformWompiConfig.privateKey,
+      integritySecret: platformWompiConfig.integritySecret,
     })
     
     // Calculate subscription period (1 month from now)

@@ -262,8 +262,14 @@ export async function createTokenTransaction(params: {
   customerEmail: string
   reference: string
   privateKey: string
+  integritySecret: string
 }): Promise<any> {
   const baseUrl = getWompiBaseUrl()
+  
+  // Generate integrity signature
+  const signatureString = `${params.reference}${params.amountInCents}${params.currency}${params.integritySecret}`
+  const signature = crypto.createHash('sha256').update(signatureString).digest('hex')
+  
   const response = await fetch(`${baseUrl}/transactions`, {
     method: 'POST',
     headers: {
@@ -281,11 +287,13 @@ export async function createTokenTransaction(params: {
         installments: 1,
       },
       reference: params.reference,
+      signature, // Add integrity signature
     }),
   })
 
   if (!response.ok) {
     const error = await response.json()
+    console.log('Wompi create transaction error:', JSON.stringify(error, null, 2))
     throw new Error(error.error?.reason || 'Failed to create transaction')
   }
 

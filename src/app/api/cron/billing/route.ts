@@ -88,6 +88,7 @@ export async function POST(req: NextRequest) {
           customerEmail: user.email,
           reference,
           privateKey: platformWompiConfig.privateKey,
+          integritySecret: platformWompiConfig.integritySecret,
         })
         
         // Calculate new period
