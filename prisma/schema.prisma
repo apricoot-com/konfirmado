@@ -1,0 +1,333 @@
+// Konfirmado - Database Schema
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// TENANTS & USERS
+// ============================================================================
+
+model Tenant {
+  id                String    @id @default(cuid())
+  name              String
+  subdomain         String?   @unique
+  
+  // Branding
+  logoUrl           String?
+  primaryColor      String    @default("#3B82F6")
+  secondaryColor    String    @default("#10B981")
+  
+  // URLs
+  callbackUrl       String
+  returnUrl         String
+  
+  // Wompi config (encrypted)
+  wompiPublicKey    String?
+  wompiPrivateKey   String?   @db.Text
+  wompiMode         String    @default("test") // test | production
+  
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  // Relations
+  users             User[]
+  services          Service[]
+  professionals     Professional[]
+  bookingLinks      BookingLink[]
+  bookings          Booking[]
+  payments          Payment[]
+  auditLogs         AuditLog[]
+  metrics           Metric[]
+}
+
+model User {
+  id                String    @id @default(cuid())
+  email             String    @unique
+  emailVerified     DateTime?
+  password          String    // bcrypt hashed
+  tenantId          String
+  tenant            Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  @@index([tenantId])
+  @@index([email])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+  
+  @@unique([identifier, token])
+}
+
+// ============================================================================
+// SERVICES & PROFESSIONALS
+// ============================================================================
+
+model Service {
+  id              String    @id @default(cuid())
+  tenantId        String
+  tenant          Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  name            String
+  description     String    @db.Text
+  imageUrl        String?
+  durationMinutes Int
+  price           Int       // COP cents (e.g., 120000 = $120.000 COP)
+  chargeType      String    // "partial" | "total"
+  
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // Relations
+  professionals   ServiceProfessional[]
+  bookings        Booking[]
+  
+  @@index([tenantId])
+  @@index([isActive])
+}
+
+model Professional {
+  id                String    @id @default(cuid())
+  tenantId          String
+  tenant            Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  name              String
+  description       String?   @db.Text
+  photoUrl          String?
+  
+  // Calendar integration
+  calendarStatus    String    @default("pending") // pending | connected | error
+  calendarProvider  String    @default("google")
+  calendarId        String?
+  refreshToken      String?   @db.Text // Encrypted
+  connectionToken   String?   @unique
+  tokenExpiresAt    DateTime?
+  
+  isActive          Boolean   @default(true)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  // Relations
+  services          ServiceProfessional[]
+  bookings          Booking[]
+  
+  @@index([tenantId])
+  @@index([connectionToken])
+  @@index([calendarStatus])
+}
+
+model ServiceProfessional {
+  serviceId       String
+  professionalId  String
+  service         Service      @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  professional    Professional @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime     @default(now())
+  
+  @@id([serviceId, professionalId])
+  @@index([serviceId])
+  @@index([professionalId])
+}
+
+// ============================================================================
+// BOOKING LINKS & BOOKINGS
+// ============================================================================
+
+model BookingLink {
+  id              String    @id @default(cuid())
+  tenantId        String
+  tenant          Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  publicId        String    @unique @default(cuid())
+  name            String    // Internal reference name
+  
+  // Optional preselection
+  serviceId       String?
+  professionalId  String?
+  
+  expiresAt       DateTime?
+  isActive        Boolean   @default(true)
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // Relations
+  bookings        Booking[]
+  
+  @@index([tenantId])
+  @@index([publicId])
+  @@index([isActive])
+}
+
+model Booking {
+  id              String    @id @default(cuid())
+  tenantId        String
+  tenant          Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  linkId          String
+  link            BookingLink @relation(fields: [linkId], references: [id])
+  
+  serviceId       String
+  service         Service   @relation(fields: [serviceId], references: [id])
+  
+  professionalId  String
+  professional    Professional @relation(fields: [professionalId], references: [id])
+  
+  // Appointment time (stored in UTC)
+  startTime       DateTime
+  endTime         DateTime
+  
+  // Status: pending, paid, confirmed, failed, cancelled
+  status          String    @default("pending")
+  holdExpiresAt   DateTime?
+  
+  // User information
+  userName        String
+  userEmail       String
+  userPhone       String
+  acceptedTerms   Boolean   @default(false)
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // Relations
+  payment         Payment?
+  callbackLogs    CallbackLog[]
+  
+  @@index([tenantId])
+  @@index([professionalId, startTime])
+  @@index([status])
+  @@index([holdExpiresAt])
+}
+
+// ============================================================================
+// PAYMENTS
+// ============================================================================
+
+model Payment {
+  id          String   @id @default(cuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  bookingId   String   @unique
+  booking     Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  
+  provider    String   // "wompi"
+  reference   String   @unique
+  amount      Int      // Amount in cents
+  currency    String   @default("COP")
+  status      String   @default("pending") // pending, approved, declined, error
+  rawWebhook  Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([tenantId])
+  @@index([reference])
+  @@index([status])
+}
+
+// ============================================================================
+// SLOT HOLDS (prevent double-booking)
+// ============================================================================
+
+model SlotHold {
+  id              String    @id @default(cuid())
+  professionalId  String
+  serviceId       String
+  
+  startTime       DateTime
+  endTime         DateTime
+  
+  expiresAt       DateTime
+  sessionId       String    // Browser session or temp user ID
+  
+  createdAt       DateTime  @default(now())
+  
+  @@index([professionalId, startTime])
+  @@index([expiresAt])
+  @@index([sessionId])
+}
+
+// ============================================================================
+// WEBHOOKS & CALLBACKS
+// ============================================================================
+
+model WebhookEvent {
+  id          String    @id @default(cuid())
+  externalId  String    @unique
+  provider    String    // "wompi"
+  type        String
+  payload     Json
+  processedAt DateTime?
+  createdAt   DateTime  @default(now())
+  
+  @@index([externalId])
+  @@index([provider, processedAt])
+}
+
+model CallbackLog {
+  id         String   @id @default(cuid())
+  bookingId  String
+  booking    Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  
+  url        String
+  payload    Json
+  statusCode Int?
+  attempts   Int      @default(1)
+  success    Boolean  @default(false)
+  error      String?  @db.Text
+  
+  createdAt  DateTime @default(now())
+  
+  @@index([bookingId])
+  @@index([success])
+}
+
+// ============================================================================
+// AUDIT & METRICS
+// ============================================================================
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  userId    String?
+  
+  action    String   // link_created, calendar_connected, payment_attempted, callback_sent
+  entityType String  // booking_link, professional, booking, payment
+  entityId  String
+  
+  metadata  Json?
+  ipAddress String?
+  userAgent String?  @db.Text
+  
+  createdAt DateTime @default(now())
+  
+  @@index([tenantId, action])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
+
+model Metric {
+  id        String   @id @default(cuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  name      String   // conversion_funnel, webhook_latency, oauth_failure
+  value     Float
+  metadata  Json?
+  
+  timestamp DateTime @default(now())
+  
+  @@index([tenantId, name, timestamp])
+}
