@@ -25,6 +25,8 @@ model Tenant {
   // URLs
   callbackUrl       String
   returnUrl         String
+  privacyPolicyUrl  String?
+  termsUrl          String?
   
   // Wompi config
   wompiPublicKey      String?

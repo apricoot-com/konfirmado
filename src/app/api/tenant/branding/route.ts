@@ -10,6 +10,8 @@ const brandingSchema = z.object({
   primaryColor: z.string().regex(/^#[0-9A-F]{6}$/i),
   secondaryColor: z.string().regex(/^#[0-9A-F]{6}$/i),
   subdomain: z.string().regex(/^[a-z0-9-]*$/).optional().or(z.literal('')),
+  privacyPolicyUrl: z.string().url().optional().or(z.literal('')),
+  termsUrl: z.string().url().optional().or(z.literal('')),
 })
 
 export async function PATCH(req: NextRequest) {

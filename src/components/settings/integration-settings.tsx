@@ -17,6 +17,8 @@ export function IntegrationSettings({ tenant }: IntegrationSettingsProps) {
   const [formData, setFormData] = useState({
     callbackUrl: tenant.callbackUrl,
     returnUrl: tenant.returnUrl,
+    privacyPolicyUrl: tenant.privacyPolicyUrl || '',
+    termsUrl: tenant.termsUrl || '',
   })
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
@@ -159,6 +161,38 @@ export function IntegrationSettings({ tenant }: IntegrationSettingsProps) {
               />
               <p className="text-xs text-gray-500">
                 Tus clientes serán redirigidos aquí después de completar el pago
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="privacyPolicyUrl">URL de Política de Privacidad (Opcional)</Label>
+              <Input
+                id="privacyPolicyUrl"
+                name="privacyPolicyUrl"
+                type="url"
+                placeholder="https://tuempresa.com/privacidad"
+                value={formData.privacyPolicyUrl}
+                onChange={handleChange}
+                disabled={isLoading}
+              />
+              <p className="text-xs text-gray-500">
+                Si se proporciona, se mostrará un enlace en el formulario de reserva
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="termsUrl">URL de Términos y Condiciones (Opcional)</Label>
+              <Input
+                id="termsUrl"
+                name="termsUrl"
+                type="url"
+                placeholder="https://tuempresa.com/terminos"
+                value={formData.termsUrl}
+                onChange={handleChange}
+                disabled={isLoading}
+              />
+              <p className="text-xs text-gray-500">
+                Si se proporciona, se mostrará un enlace en el formulario de reserva
               </p>
             </div>
 

@@ -7,6 +7,8 @@ import { z } from 'zod'
 const integrationSchema = z.object({
   callbackUrl: z.string().url().startsWith('https://'),
   returnUrl: z.string().url().startsWith('https://'),
+  privacyPolicyUrl: z.string().url().optional().or(z.literal('')),
+  termsUrl: z.string().url().optional().or(z.literal('')),
 })
 
 export async function PATCH(req: NextRequest) {

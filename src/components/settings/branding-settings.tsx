@@ -19,6 +19,8 @@ export function BrandingSettings({ tenant }: BrandingSettingsProps) {
     primaryColor: tenant.primaryColor,
     secondaryColor: tenant.secondaryColor,
     subdomain: tenant.subdomain || '',
+    privacyPolicyUrl: tenant.privacyPolicyUrl || '',
+    termsUrl: tenant.termsUrl || '',
   })
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
@@ -193,6 +195,44 @@ export function BrandingSettings({ tenant }: BrandingSettingsProps) {
             <p className="text-xs text-gray-500">
               Solo letras minúsculas, números y guiones
             </p>
+          </div>
+
+          <div className="border-t border-gray-200 pt-6 mt-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Políticas y Términos</h3>
+            
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="privacyPolicyUrl">URL de Política de Privacidad (Opcional)</Label>
+                <Input
+                  id="privacyPolicyUrl"
+                  name="privacyPolicyUrl"
+                  type="url"
+                  placeholder="https://tuempresa.com/privacidad"
+                  value={formData.privacyPolicyUrl}
+                  onChange={handleChange}
+                  disabled={isLoading}
+                />
+                <p className="text-xs text-gray-500">
+                  Se mostrará en el formulario de reserva si se proporciona
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="termsUrl">URL de Términos y Condiciones (Opcional)</Label>
+                <Input
+                  id="termsUrl"
+                  name="termsUrl"
+                  type="url"
+                  placeholder="https://tuempresa.com/terminos"
+                  value={formData.termsUrl}
+                  onChange={handleChange}
+                  disabled={isLoading}
+                />
+                <p className="text-xs text-gray-500">
+                  Se mostrará en el formulario de reserva si se proporciona
+                </p>
+              </div>
+            </div>
           </div>
 
           <div className="flex justify-end">

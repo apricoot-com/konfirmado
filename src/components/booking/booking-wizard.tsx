@@ -12,6 +12,8 @@ interface Tenant {
   logoUrl: string | null
   primaryColor: string
   secondaryColor: string
+  privacyPolicyUrl: string | null
+  termsUrl: string | null
 }
 
 interface Service {
@@ -168,6 +170,7 @@ export function BookingWizard({
             onNext={goToNextStep}
             onBack={goToPreviousStep}
             primaryColor={tenant.primaryColor}
+            tenant={tenant}
           />
         )}
 

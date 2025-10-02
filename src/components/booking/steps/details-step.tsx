@@ -8,12 +8,18 @@ import { Card } from '@/components/ui/card'
 import { ChevronLeft, ChevronRight, AlertCircle } from 'lucide-react'
 import type { BookingState } from '../booking-wizard'
 
+interface Tenant {
+  privacyPolicyUrl: string | null
+  termsUrl: string | null
+}
+
 interface DetailsStepProps {
   bookingState: BookingState
   updateBookingState: (updates: Partial<BookingState>) => void
   onNext: () => void
   onBack: () => void
   primaryColor: string
+  tenant: Tenant
 }
 
 export function DetailsStep({
@@ -22,6 +28,7 @@ export function DetailsStep({
   onNext,
   onBack,
   primaryColor,
+  tenant,
 }: DetailsStepProps) {
   const [formData, setFormData] = useState({
     name: bookingState.userDetails?.name || '',
@@ -63,7 +70,7 @@ export function DetailsStep({
       newErrors.phone = 'Formato: +573001234567 o 3001234567'
     }
 
-    if (!formData.acceptedTerms) {
+    if ((tenant.termsUrl || tenant.privacyPolicyUrl) && !formData.acceptedTerms) {
       newErrors.acceptedTerms = 'Debes aceptar los términos y condiciones'
     }
 
@@ -154,36 +161,58 @@ export function DetailsStep({
             </p>
           </div>
 
-          <div className="space-y-2">
-            <label className="flex items-start gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                name="acceptedTerms"
-                checked={formData.acceptedTerms}
-                onChange={handleChange}
-                className="mt-1 w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-              />
-              <span className="text-sm text-gray-700">
-                Acepto los{' '}
-                <a
-                  href="/terms"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline hover:text-gray-900"
-                  style={{ color: primaryColor }}
-                >
-                  términos y condiciones
-                </a>
-                {' '}y la política de privacidad *
-              </span>
-            </label>
-            {errors.acceptedTerms && (
-              <p className="text-sm text-red-600 flex items-center gap-1">
-                <AlertCircle className="w-4 h-4" />
-                {errors.acceptedTerms}
-              </p>
-            )}
-          </div>
+          {(tenant.termsUrl || tenant.privacyPolicyUrl) && (
+            <div className="space-y-2">
+              <label className="flex items-start gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="acceptedTerms"
+                  checked={formData.acceptedTerms}
+                  onChange={handleChange}
+                  className="mt-1 w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span className="text-sm text-gray-700">
+                  Acepto{' '}
+                  {tenant.termsUrl && (
+                    <>
+                      los{' '}
+                      <a
+                        href={tenant.termsUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline hover:text-gray-900"
+                        style={{ color: primaryColor }}
+                      >
+                        términos y condiciones
+                      </a>
+                    </>
+                  )}
+                  {tenant.termsUrl && tenant.privacyPolicyUrl && ' y '}
+                  {tenant.privacyPolicyUrl && (
+                    <>
+                      la{' '}
+                      <a
+                        href={tenant.privacyPolicyUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline hover:text-gray-900"
+                        style={{ color: primaryColor }}
+                      >
+                        política de privacidad
+                      </a>
+                    </>
+                  )}
+                  {' *'}
+                </span>
+              </label>
+              {errors.acceptedTerms && (
+                <p className="text-sm text-red-600 flex items-center gap-1">
+                  <AlertCircle className="w-4 h-4" />
+                  {errors.acceptedTerms}
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </Card>
 

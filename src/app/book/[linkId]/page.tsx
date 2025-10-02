@@ -6,12 +6,15 @@ export default async function BookingPage({
   params,
   searchParams,
 }: {
-  params: { linkId: string }
-  searchParams: { service?: string; professional?: string }
+  params: Promise<{ linkId: string }>
+  searchParams: Promise<{ service?: string; professional?: string }>
 }) {
+  const resolvedParams = await params
+  const resolvedSearchParams = await searchParams
+  
   // Get booking link
   const link = await prisma.bookingLink.findUnique({
-    where: { publicId: params.linkId },
+    where: { publicId: resolvedParams.linkId },
     include: {
       tenant: true,
     },
@@ -56,9 +59,7 @@ export default async function BookingPage({
       include: {
         professionals: {
           include: {
-            professional: {
-              where: { isActive: true, calendarStatus: 'connected' },
-            },
+            professional: true,
           },
         },
       },
@@ -68,21 +69,31 @@ export default async function BookingPage({
       where: {
         tenantId: link.tenantId,
         isActive: true,
-        calendarStatus: 'connected',
+        // For now, show all professionals (calendar integration pending)
+        // calendarStatus: 'connected',
       },
       orderBy: { name: 'asc' },
     }),
   ])
+  
+  // Filter to only show active professionals
+  // TODO: In Phase 1, filter by calendarStatus: 'connected'
+  const servicesWithProfessionals = services.map(service => ({
+    ...service,
+    professionals: service.professionals.filter(
+      sp => sp.professional.isActive
+    ),
+  })).filter(service => service.professionals.length > 0)
 
   // Determine preselected service and professional
-  const preselectedServiceId = searchParams.service || link.serviceId || undefined
-  const preselectedProfessionalId = searchParams.professional || link.professionalId || undefined
+  const preselectedServiceId = resolvedSearchParams.service || link.serviceId || undefined
+  const preselectedProfessionalId = resolvedSearchParams.professional || link.professionalId || undefined
 
   return (
     <BookingWizard
-      linkId={params.linkId}
+      linkId={resolvedParams.linkId}
       tenant={link.tenant}
-      services={services}
+      services={servicesWithProfessionals}
       professionals={professionals}
       preselectedServiceId={preselectedServiceId}
       preselectedProfessionalId={preselectedProfessionalId}

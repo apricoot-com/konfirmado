@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation'
 import { auth } from '@/lib/auth'
-import { DashboardNav } from '@/components/dashboard/nav'
-import { DashboardHeader } from '@/components/dashboard/header'
+import { DashboardLayoutClient } from '@/components/dashboard/layout-client'
 
 export default async function DashboardLayout({
   children,
@@ -14,17 +13,5 @@ export default async function DashboardLayout({
     redirect('/auth/login')
   }
   
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <DashboardHeader user={session.user} />
-      
-      <div className="flex">
-        <DashboardNav />
-        
-        <main className="flex-1 p-8">
-          {children}
-        </main>
-      </div>
-    </div>
-  )
+  return <DashboardLayoutClient user={session.user}>{children}</DashboardLayoutClient>
 }
