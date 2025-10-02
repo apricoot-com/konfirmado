@@ -87,7 +87,6 @@ export default async function ServicesPage() {
                     <span className="text-gray-600">Duración:</span>
                     <span className="font-medium text-gray-900">{service.durationMinutes} min</span>
                   </div>
-                  
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-600">Precio:</span>
                     <span className="font-medium text-gray-900">{formatPrice(service.price)}</span>
@@ -96,9 +95,18 @@ export default async function ServicesPage() {
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-600">Tipo de cobro:</span>
                     <span className="font-medium text-gray-900">
-                      {service.chargeType === 'partial' ? 'Parcial' : 'Total'}
+                      {service.chargeType === 'partial' ? `Parcial (${service.partialPercentage}%)` : 'Total'}
                     </span>
                   </div>
+                  
+                  {service.chargeType === 'partial' && (
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600">Anticipo:</span>
+                      <span className="font-medium text-gray-900">
+                        {formatPrice(Math.floor(service.price * (service.partialPercentage / 100)))}
+                      </span>
+                    </div>
+                  )}
                   
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-600">Profesionales:</span>

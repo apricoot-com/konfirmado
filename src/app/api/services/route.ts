@@ -7,17 +7,17 @@ import { z } from 'zod'
 const serviceSchema = z.object({
   name: z.string().min(3).max(100),
   description: z.string().min(10).max(2000),
-  imageUrl: z.string().url().optional(),
+  imageUrl: z.string().url().optional().or(z.literal('')),
   durationMinutes: z.number().int().min(15).max(480),
   price: z.number().int().min(0),
   chargeType: z.enum(['partial', 'total']),
+  partialPercentage: z.number().int().min(1).max(100).default(25),
   professionalIds: z.array(z.string().cuid()).optional(),
 })
 
 export async function GET(req: NextRequest) {
   try {
     const { tenant } = await requireAuth()
-    
     const services = await prisma.service.findMany({
       where: { tenantId: tenant.id },
       include: {

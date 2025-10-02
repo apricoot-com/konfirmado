@@ -105,7 +105,7 @@ export function ServiceForm({ service, professionals }: ServiceFormProps) {
   }
 
   const chargeAmount = formData.chargeType === 'partial' 
-    ? Math.floor(formData.price * 0.25)
+    ? Math.floor(formData.price * (formData.partialPercentage / 100))
     : formData.price
 
   return (
@@ -226,17 +226,60 @@ export function ServiceForm({ service, professionals }: ServiceFormProps) {
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 disabled={isLoading}
               >
-                <option value="partial">Parcial (25% anticipo)</option>
+                <option value="partial">Parcial (anticipo)</option>
                 <option value="total">Total (100% por adelantado)</option>
               </select>
+            </div>
+          </div>
+
+          {formData.chargeType === 'partial' && (
+            <div className="space-y-2">
+              <Label htmlFor="partialPercentage">Porcentaje de anticipo *</Label>
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <Input
+                    id="partialPercentage"
+                    name="partialPercentage"
+                    type="number"
+                    min="1"
+                    max="100"
+                    step="1"
+                    value={formData.partialPercentage}
+                    onChange={handleChange}
+                    required
+                    disabled={isLoading}
+                  />
+                </div>
+                <div className="flex gap-2">
+                  {[25, 30, 50, 100].map((percentage) => (
+                    <Button
+                      key={percentage}
+                      type="button"
+                      variant={formData.partialPercentage === percentage ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setFormData(prev => ({ ...prev, partialPercentage: percentage }))}
+                      disabled={isLoading}
+                    >
+                      {percentage}%
+                    </Button>
+                  ))}
+                </div>
+              </div>
               {formData.price > 0 && (
                 <p className="text-sm text-gray-600">
-                  Se cobrará: {formatPrice(chargeAmount)}
-                  {formData.chargeType === 'partial' && ' (anticipo)'}
+                  Se cobrará: {formatPrice(chargeAmount)} ({formData.partialPercentage}% de anticipo)
                 </p>
               )}
             </div>
-          </div>
+          )}
+
+          {formData.chargeType === 'total' && formData.price > 0 && (
+            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-blue-800">
+                Se cobrará el monto total: {formatPrice(chargeAmount)}
+              </p>
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label>Profesionales que ofrecen este servicio</Label>
