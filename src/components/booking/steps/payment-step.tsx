@@ -32,29 +32,41 @@ export function PaymentStep({
     setError('')
 
     try {
-      // TODO: Implement Wompi payment in Phase 2
-      // For now, show placeholder
-      
-      // This will:
-      // 1. Create booking in database
-      // 2. Generate Wompi payment link
-      // 3. Redirect to Wompi checkout
-      
-      console.log('Creating booking with:', {
-        linkId,
-        serviceId: bookingState.serviceId,
-        professionalId: bookingState.professionalId,
-        slot: bookingState.selectedSlot,
-        userDetails: bookingState.userDetails,
+      if (!bookingState.serviceId || !bookingState.professionalId || !bookingState.selectedSlot || !bookingState.userDetails) {
+        setError('Información incompleta. Por favor completa todos los pasos.')
+        setIsLoading(false)
+        return
+      }
+
+      // Create booking and get Wompi checkout URL
+      const response = await fetch('/api/bookings/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          linkId,
+          serviceId: bookingState.serviceId,
+          professionalId: bookingState.professionalId,
+          startTime: bookingState.selectedSlot.start,
+          endTime: bookingState.selectedSlot.end,
+          userName: bookingState.userDetails.name,
+          userEmail: bookingState.userDetails.email,
+          userPhone: bookingState.userDetails.phone,
+          acceptedTerms: bookingState.userDetails.acceptedTerms,
+        }),
       })
 
-      // Mock delay
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
-      alert('Integración de pagos se implementará en la Fase 2')
+      const data = await response.json()
+
+      if (!response.ok) {
+        setError(data.error || 'Error al crear la reserva')
+        setIsLoading(false)
+        return
+      }
+
+      // Redirect to Wompi checkout
+      window.location.href = data.checkoutUrl
     } catch (err) {
       setError('Error al procesar el pago. Por favor intenta nuevamente.')
-    } finally {
       setIsLoading(false)
     }
   }
