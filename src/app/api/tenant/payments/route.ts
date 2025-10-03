@@ -10,7 +10,7 @@ const paymentsSchema = z.object({
   wompiPrivateKey: z.string().optional().or(z.literal('')),
   wompiIntegritySecret: z.string().optional().or(z.literal('')),
   wompiEventsSecret: z.string().optional().or(z.literal('')),
-  wompiMode: z.enum(['test', 'production']),
+  wompiMode: z.enum(['test', 'production']).optional(),
 })
 
 export async function PATCH(req: NextRequest) {
@@ -27,32 +27,32 @@ export async function PATCH(req: NextRequest) {
       )
     }
     
-    const data: any = {
-      wompiMode: validated.data.wompiMode,
+    // Get existing payment config or create new one
+    const existingConfig = (tenant.paymentConfig as any) || {}
+    
+    // Build new payment config (merge with existing)
+    const paymentConfig: any = {
+      provider: 'wompi',
+      publicKey: validated.data.wompiPublicKey || existingConfig.publicKey,
+      privateKey: validated.data.wompiPrivateKey 
+        ? encrypt(validated.data.wompiPrivateKey)
+        : existingConfig.privateKey,
+      integritySecret: validated.data.wompiIntegritySecret
+        ? encrypt(validated.data.wompiIntegritySecret)
+        : existingConfig.integritySecret,
+      eventsSecret: validated.data.wompiEventsSecret
+        ? encrypt(validated.data.wompiEventsSecret)
+        : existingConfig.eventsSecret,
+      mode: validated.data.wompiMode || existingConfig.mode || 'test',
     }
     
-    // Only update public key if provided
-    if (validated.data.wompiPublicKey) {
-      data.wompiPublicKey = validated.data.wompiPublicKey
-    }
-    
-    // Encrypt and update secret fields only if provided
-    if (validated.data.wompiPrivateKey) {
-      data.wompiPrivateKey = encrypt(validated.data.wompiPrivateKey)
-    }
-    
-    if (validated.data.wompiIntegritySecret) {
-      data.wompiIntegritySecret = encrypt(validated.data.wompiIntegritySecret)
-    }
-    
-    if (validated.data.wompiEventsSecret) {
-      data.wompiEventsSecret = encrypt(validated.data.wompiEventsSecret)
-    }
-    
-    // Update tenant
+    // Update tenant with new JSON structure
     const updatedTenant = await prisma.tenant.update({
       where: { id: tenant.id },
-      data,
+      data: {
+        paymentProvider: 'wompi',
+        paymentConfig,
+      },
     })
     
     // Audit log

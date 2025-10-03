@@ -13,12 +13,15 @@ interface PaymentSettingsProps {
 }
 
 export function PaymentSettings({ tenant }: PaymentSettingsProps) {
+  // Extract Wompi config from JSON
+  const paymentConfig = (tenant.paymentConfig as any) || {}
+  
   const [formData, setFormData] = useState({
-    wompiPublicKey: tenant.wompiPublicKey || '',
+    wompiPublicKey: paymentConfig.publicKey || '',
     wompiPrivateKey: '',
     wompiIntegritySecret: '',
     wompiEventsSecret: '',
-    wompiMode: tenant.wompiMode,
+    wompiMode: paymentConfig.mode || 'test',
   })
 
   const [showSecrets, setShowSecrets] = useState({
@@ -80,9 +83,9 @@ export function PaymentSettings({ tenant }: PaymentSettingsProps) {
     }
   }
 
-  const hasPrivateKey = tenant.wompiPrivateKey && tenant.wompiPrivateKey.length > 0
-  const hasIntegritySecret = tenant.wompiIntegritySecret && tenant.wompiIntegritySecret.length > 0
-  const hasEventsSecret = tenant.wompiEventsSecret && tenant.wompiEventsSecret.length > 0
+  const hasPrivateKey = paymentConfig.privateKey && paymentConfig.privateKey.length > 0
+  const hasIntegritySecret = paymentConfig.integritySecret && paymentConfig.integritySecret.length > 0
+  const hasEventsSecret = paymentConfig.eventsSecret && paymentConfig.eventsSecret.length > 0
 
   return (
     <div className="space-y-6">
