@@ -13,6 +13,7 @@ const serviceSchema = z.object({
   price: z.number().int().min(0),
   chargeType: z.enum(['partial', 'total']),
   partialPercentage: z.number().int().min(1).max(100).default(25),
+  confirmationMessage: z.string().max(1000).optional().or(z.literal('')),
   professionalIds: z.array(z.string().cuid()).optional(),
 })
 

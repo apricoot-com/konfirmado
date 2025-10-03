@@ -25,6 +25,7 @@ interface Service {
   price: number
   chargeType: string
   partialPercentage: number
+  confirmationMessage: string | null
   professionals: Array<{
     professional: Professional
   }>
@@ -47,6 +48,7 @@ export function ServiceForm({ service, professionals }: ServiceFormProps) {
     price: service?.price || 0,
     chargeType: service?.chargeType || 'partial',
     partialPercentage: service?.partialPercentage || 25,
+    confirmationMessage: service?.confirmationMessage || '',
     professionalIds: service?.professionals.map(p => p.professional.id) || [],
   })
   
@@ -167,6 +169,22 @@ export function ServiceForm({ service, professionals }: ServiceFormProps) {
               disabled={isLoading}
               rows={4}
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="confirmationMessage">Mensaje de confirmación</Label>
+            <Textarea
+              id="confirmationMessage"
+              name="confirmationMessage"
+              placeholder="Mensaje opcional que se mostrará al cliente después de confirmar el pago..."
+              value={formData.confirmationMessage}
+              onChange={handleChange}
+              disabled={isLoading}
+              rows={3}
+            />
+            <p className="text-xs text-gray-500">
+              Este mensaje se mostrará al cliente después de completar el pago exitosamente
+            </p>
           </div>
 
           <div className="space-y-2">

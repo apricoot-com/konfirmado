@@ -19,6 +19,7 @@ export default async function ConfirmationPage({
       professional: true,
       payment: true,
       tenant: true,
+      link: true,
     },
   })
   
@@ -162,6 +163,16 @@ export default async function ConfirmationPage({
               </div>
             </div>
             
+            {/* Custom Confirmation Message */}
+            {isPaid && booking.service.confirmationMessage && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <h3 className="font-semibold text-green-900 mb-2">Mensaje importante</h3>
+                <p className="text-sm text-green-800 whitespace-pre-wrap">
+                  {booking.service.confirmationMessage}
+                </p>
+              </div>
+            )}
+            
             {/* Next Steps */}
             {isPaid && (
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -171,6 +182,26 @@ export default async function ConfirmationPage({
                   <li>• Te contactaremos si necesitamos información adicional</li>
                   <li>• Recuerda llegar 5 minutos antes de tu cita</li>
                 </ul>
+              </div>
+            )}
+            
+            {/* Retry Payment Button */}
+            {!isPaid && !isPending && booking.payment && (
+              <div className="border-t border-gray-200 pt-6">
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <a
+                    href={`/book/${booking.link.publicId}?retry=${booking.id}`}
+                    className="flex-1 inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  >
+                    Reintentar Pago
+                  </a>
+                  <a
+                    href={redirectUrl || '/'}
+                    className="flex-1 inline-flex items-center justify-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  >
+                    Volver al inicio
+                  </a>
+                </div>
               </div>
             )}
           </div>

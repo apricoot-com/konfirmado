@@ -7,10 +7,22 @@ export default async function BookingPage({
   searchParams,
 }: {
   params: Promise<{ linkId: string }>
-  searchParams: Promise<{ service?: string; professional?: string }>
+  searchParams: Promise<{ service?: string; professional?: string; retry?: string }>
 }) {
   const resolvedParams = await params
   const resolvedSearchParams = await searchParams
+  
+  // Check if this is a retry (failed payment)
+  let retryBooking = null
+  if (resolvedSearchParams.retry) {
+    retryBooking = await prisma.booking.findUnique({
+      where: { id: resolvedSearchParams.retry },
+      include: {
+        service: true,
+        professional: true,
+      },
+    })
+  }
   
   // Get booking link
   const link = await prisma.bookingLink.findUnique({
@@ -86,8 +98,8 @@ export default async function BookingPage({
   })).filter(service => service.professionals.length > 0)
 
   // Determine preselected service and professional
-  const preselectedServiceId = resolvedSearchParams.service || link.serviceId || undefined
-  const preselectedProfessionalId = resolvedSearchParams.professional || link.professionalId || undefined
+  const preselectedServiceId = retryBooking?.serviceId || resolvedSearchParams.service || link.serviceId || undefined
+  const preselectedProfessionalId = retryBooking?.professionalId || resolvedSearchParams.professional || link.professionalId || undefined
 
   return (
     <BookingWizard
@@ -97,6 +109,7 @@ export default async function BookingPage({
       professionals={professionals}
       preselectedServiceId={preselectedServiceId}
       preselectedProfessionalId={preselectedProfessionalId}
+      retryBooking={retryBooking}
     />
   )
 }

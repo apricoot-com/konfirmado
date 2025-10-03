@@ -36,6 +36,18 @@ interface Professional {
   photoUrl: string | null
 }
 
+interface RetryBooking {
+  id: string
+  serviceId: string
+  professionalId: string
+  startTime: Date
+  endTime: Date
+  userName: string
+  userEmail: string
+  userPhone: string
+  acceptedTerms: boolean
+}
+
 interface BookingWizardProps {
   linkId: string
   tenant: Tenant
@@ -43,6 +55,7 @@ interface BookingWizardProps {
   professionals: Professional[]
   preselectedServiceId?: string
   preselectedProfessionalId?: string
+  retryBooking?: RetryBooking | null
 }
 
 export interface BookingState {
@@ -68,14 +81,23 @@ export function BookingWizard({
   professionals,
   preselectedServiceId,
   preselectedProfessionalId,
+  retryBooking,
 }: BookingWizardProps) {
-  const [currentStep, setCurrentStep] = useState(1)
+  const [currentStep, setCurrentStep] = useState(retryBooking ? 4 : 1)
   const [bookingState, setBookingState] = useState<BookingState>({
     serviceId: preselectedServiceId || null,
     professionalId: preselectedProfessionalId || null,
-    selectedSlot: null,
+    selectedSlot: retryBooking ? {
+      start: new Date(retryBooking.startTime).toISOString(),
+      end: new Date(retryBooking.endTime).toISOString(),
+    } : null,
     holdId: null,
-    userDetails: null,
+    userDetails: retryBooking ? {
+      name: retryBooking.userName,
+      email: retryBooking.userEmail,
+      phone: retryBooking.userPhone,
+      acceptedTerms: retryBooking.acceptedTerms,
+    } : null,
   })
 
   const updateBookingState = (updates: Partial<BookingState>) => {

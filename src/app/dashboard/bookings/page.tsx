@@ -60,6 +60,50 @@ export default async function BookingsPage() {
           </div>
         </div>
       </div>
+
+      {bookings.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <div className="flex items-center gap-2 text-yellow-600 mb-2">
+              <AlertCircle className="w-5 h-5" />
+              <span className="font-medium">Pendientes</span>
+            </div>
+            <div className="text-2xl font-bold text-gray-900">
+              {bookings.filter(b => b.status === 'pending').length}
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <div className="flex items-center gap-2 text-blue-600 mb-2">
+              <CheckCircle className="w-5 h-5" />
+              <span className="font-medium">Pagadas</span>
+            </div>
+            <div className="text-2xl font-bold text-gray-900">
+              {bookings.filter(b => b.status === 'paid').length}
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <div className="flex items-center gap-2 text-green-600 mb-2">
+              <CheckCircle className="w-5 h-5" />
+              <span className="font-medium">Confirmadas</span>
+            </div>
+            <div className="text-2xl font-bold text-gray-900">
+              {bookings.filter(b => b.status === 'confirmed').length}
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <div className="flex items-center gap-2 text-red-600 mb-2">
+              <XCircle className="w-5 h-5" />
+              <span className="font-medium">Canceladas</span>
+            </div>
+            <div className="text-2xl font-bold text-gray-900">
+              {bookings.filter(b => b.status === 'cancelled').length}
+            </div>
+          </div>
+        </div>
+      )}
       
       {bookings.length === 0 ? (
         <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
@@ -164,50 +208,6 @@ export default async function BookingsPage() {
                 })}
               </tbody>
             </table>
-          </div>
-        </div>
-      )}
-      
-      {bookings.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <div className="flex items-center gap-2 text-yellow-600 mb-2">
-              <AlertCircle className="w-5 h-5" />
-              <span className="font-medium">Pendientes</span>
-            </div>
-            <div className="text-2xl font-bold text-gray-900">
-              {bookings.filter(b => b.status === 'pending').length}
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <div className="flex items-center gap-2 text-blue-600 mb-2">
-              <CheckCircle className="w-5 h-5" />
-              <span className="font-medium">Pagadas</span>
-            </div>
-            <div className="text-2xl font-bold text-gray-900">
-              {bookings.filter(b => b.status === 'paid').length}
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <div className="flex items-center gap-2 text-green-600 mb-2">
-              <CheckCircle className="w-5 h-5" />
-              <span className="font-medium">Confirmadas</span>
-            </div>
-            <div className="text-2xl font-bold text-gray-900">
-              {bookings.filter(b => b.status === 'confirmed').length}
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <div className="flex items-center gap-2 text-red-600 mb-2">
-              <XCircle className="w-5 h-5" />
-              <span className="font-medium">Canceladas</span>
-            </div>
-            <div className="text-2xl font-bold text-gray-900">
-              {bookings.filter(b => b.status === 'cancelled').length}
-            </div>
           </div>
         </div>
       )}

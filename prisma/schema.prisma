@@ -92,31 +92,31 @@ model Subscription {
   @@index([tenantId])
   @@index([status])
 }
-
 // ============================================================================
 // SERVICES & PROFESSIONALS
 // ============================================================================
 
 model Service {
-  id              String    @id @default(cuid())
-  tenantId        String
-  tenant          Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id                String    @id @default(cuid())
+  tenantId          String
+  tenant            Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   
-  name            String
-  description     String    @db.Text
-  imageUrl        String?
-  durationMinutes Int
-  price           Int       // COP cents (e.g., 120000 = $120.000 COP)
-  chargeType      String    // "partial" | "total"
-  partialPercentage Int     @default(25) // Percentage for partial payment (1-100)
+  name              String
+  description       String?   @db.Text
+  imageUrl          String?
+  durationMinutes   Int
+  price             Int       // Price in COP
+  chargeType        String    @default("total") // total | partial
+  partialPercentage Int?      // If partial, what % to charge
+  confirmationMessage String? @db.Text // Optional message shown after payment confirmation
+  isActive          Boolean   @default(true)
   
-  isActive        Boolean   @default(true)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
   
   // Relations
-  professionals   ServiceProfessional[]
-  bookings        Booking[]
+  professionals     ServiceProfessional[]
+  bookings          Booking[]
   
   @@index([tenantId])
   @@index([isActive])
