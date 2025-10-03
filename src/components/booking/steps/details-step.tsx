@@ -6,6 +6,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card } from '@/components/ui/card'
 import { ChevronLeft, ChevronRight, AlertCircle } from 'lucide-react'
+import PhoneInput from 'react-phone-number-input'
+import 'react-phone-number-input/style.css'
 import type { BookingState } from '../booking-wizard'
 
 interface Tenant {
@@ -51,6 +53,17 @@ export function DetailsStep({
     }
   }
 
+  const handlePhoneChange = (value: string | undefined) => {
+    setFormData(prev => ({
+      ...prev,
+      phone: value || '',
+    }))
+    // Clear error when user types
+    if (errors.phone) {
+      setErrors(prev => ({ ...prev, phone: '' }))
+    }
+  }
+
   const validate = () => {
     const newErrors: Record<string, string> = {}
 
@@ -66,8 +79,8 @@ export function DetailsStep({
 
     if (!formData.phone.trim()) {
       newErrors.phone = 'El teléfono es requerido'
-    } else if (!/^\+?57[0-9]{10}$/.test(formData.phone.replace(/\s/g, ''))) {
-      newErrors.phone = 'Formato: +573001234567 o 3001234567'
+    } else if (formData.phone.length < 10) {
+      newErrors.phone = 'Número de teléfono inválido'
     }
 
     if ((tenant.termsUrl || tenant.privacyPolicyUrl) && !formData.acceptedTerms) {
@@ -81,12 +94,7 @@ export function DetailsStep({
   const handleContinue = () => {
     if (validate()) {
       updateBookingState({
-        userDetails: {
-          ...formData,
-          phone: formData.phone.startsWith('+57') 
-            ? formData.phone 
-            : `+57${formData.phone}`,
-        },
+        userDetails: formData,
       })
       onNext()
     }
@@ -141,14 +149,14 @@ export function DetailsStep({
 
           <div className="space-y-2">
             <Label htmlFor="phone">Teléfono *</Label>
-            <Input
-              id="phone"
-              name="phone"
-              type="tel"
-              placeholder="+573001234567"
+            <PhoneInput
+              international
+              defaultCountry="CO"
               value={formData.phone}
-              onChange={handleChange}
-              className={errors.phone ? 'border-red-500' : ''}
+              onChange={handlePhoneChange}
+              className={`flex h-10 w-full rounded-md border ${
+                errors.phone ? 'border-red-500' : 'border-input'
+              } bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50`}
             />
             {errors.phone && (
               <p className="text-sm text-red-600 flex items-center gap-1">
@@ -157,7 +165,7 @@ export function DetailsStep({
               </p>
             )}
             <p className="text-xs text-gray-500">
-              Formato: +573001234567 o 3001234567
+              Selecciona tu país e ingresa tu número
             </p>
           </div>
 

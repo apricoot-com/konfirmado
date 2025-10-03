@@ -84,6 +84,8 @@ export async function POST(req: NextRequest) {
         booking: {
           include: {
             tenant: true,
+            service: true,
+            professional: true,
           },
         },
       },
@@ -95,7 +97,7 @@ export async function POST(req: NextRequest) {
     }
     
     // Get Wompi config to verify signature
-    const wompiConfig = getWompiConfig(payment.tenant)
+    const wompiConfig = getWompiConfig(payment.booking.tenant)
     
     if (!wompiConfig) {
       console.error('Wompi config not found for tenant:', payment.tenantId)
@@ -145,7 +147,6 @@ export async function POST(req: NextRequest) {
         where: { id: payment.id },
         data: {
           status: paymentStatus,
-          externalId: transaction.id,
           rawWebhook: body,
         },
       })
