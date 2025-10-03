@@ -19,14 +19,15 @@ const serviceSchema = z.object({
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { tenant } = await requireAuth()
+    const { id } = await params
     
     const service = await prisma.service.findFirst({
       where: {
-        id: params.id,
+        id,
         tenantId: tenant.id,
       },
       include: {
@@ -55,10 +56,11 @@ export async function GET(
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { user, tenant } = await requireAuth()
+    const { id } = await params
     const body = await req.json()
     
     const validated = serviceSchema.safeParse(body)
@@ -75,7 +77,7 @@ export async function PATCH(
     // Update service
     const service = await prisma.service.update({
       where: {
-        id: params.id,
+        id,
         tenantId: tenant.id,
       },
       data: {
@@ -122,15 +124,16 @@ export async function PATCH(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { user, tenant } = await requireAuth()
+    const { id } = await params
     
     // Soft delete by setting isActive to false
     const service = await prisma.service.update({
       where: {
-        id: params.id,
+        id,
         tenantId: tenant.id,
       },
       data: {

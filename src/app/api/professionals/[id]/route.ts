@@ -14,14 +14,15 @@ const professionalSchema = z.object({
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { tenant } = await requireAuth()
+    const { id } = await params
     
     const professional = await prisma.professional.findFirst({
       where: {
-        id: params.id,
+        id,
         tenantId: tenant.id,
       },
       include: {
@@ -50,10 +51,11 @@ export async function GET(
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { user, tenant } = await requireAuth()
+    const { id } = await params
     const body = await req.json()
     
     const validated = professionalSchema.safeParse(body)
@@ -70,7 +72,7 @@ export async function PATCH(
     // Update professional
     const professional = await prisma.professional.update({
       where: {
-        id: params.id,
+        id,
         tenantId: tenant.id,
       },
       data: {
@@ -117,15 +119,16 @@ export async function PATCH(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { user, tenant } = await requireAuth()
+    const { id } = await params
     
     // Soft delete by setting isActive to false
     const professional = await prisma.professional.update({
       where: {
-        id: params.id,
+        id,
         tenantId: tenant.id,
       },
       data: {

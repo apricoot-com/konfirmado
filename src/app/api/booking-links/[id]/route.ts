@@ -14,14 +14,15 @@ const bookingLinkSchema = z.object({
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { tenant } = await requireAuth()
+    const { id } = await params
     
     const link = await prisma.bookingLink.findFirst({
       where: {
-        id: params.id,
+        id,
         tenantId: tenant.id,
       },
       include: {
@@ -48,10 +49,11 @@ export async function GET(
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { user, tenant } = await requireAuth()
+    const { id } = await params
     const body = await req.json()
     
     const validated = bookingLinkSchema.safeParse(body)
@@ -68,7 +70,7 @@ export async function PATCH(
     // Update booking link
     const link = await prisma.bookingLink.update({
       where: {
-        id: params.id,
+        id,
         tenantId: tenant.id,
       },
       data: {
@@ -103,15 +105,16 @@ export async function PATCH(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { user, tenant } = await requireAuth()
+    const { id } = await params
     
     // Soft delete by setting isActive to false
     const link = await prisma.bookingLink.update({
       where: {
-        id: params.id,
+        id,
         tenantId: tenant.id,
       },
       data: {
