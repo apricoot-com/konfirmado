@@ -1,9 +1,13 @@
 import { google } from 'googleapis'
 import { decrypt, encrypt } from './encryption'
 
-const SCOPES = [
+/**
+ * Google Calendar OAuth scopes
+ */
+export const GOOGLE_CALENDAR_SCOPES = [
   'https://www.googleapis.com/auth/calendar.readonly',
   'https://www.googleapis.com/auth/calendar.freebusy',
+  'https://www.googleapis.com/auth/calendar.events', // Write access for creating events
 ]
 
 /**
@@ -25,7 +29,7 @@ export function getAuthUrl(connectionToken: string): string {
   
   return oauth2Client.generateAuthUrl({
     access_type: 'offline',
-    scope: SCOPES,
+    scope: GOOGLE_CALENDAR_SCOPES,
     state: connectionToken,
     prompt: 'consent', // Force to get refresh token
   })
@@ -141,4 +145,105 @@ export function generateAvailableSlots(
   }
   
   return slots
+}
+
+/**
+ * Create a calendar event
+ */
+export async function createCalendarEvent(
+  refreshToken: string,
+  calendarId: string,
+  event: {
+    summary: string
+    description?: string
+    location?: string
+    start: Date
+    end: Date
+    attendees?: Array<{ email: string; displayName?: string }>
+  }
+) {
+  const calendar = getCalendarClient(refreshToken)
+  
+  const response = await calendar.events.insert({
+    calendarId,
+    requestBody: {
+      summary: event.summary,
+      description: event.description,
+      location: event.location,
+      start: {
+        dateTime: event.start.toISOString(),
+        timeZone: 'America/Bogota',
+      },
+      end: {
+        dateTime: event.end.toISOString(),
+        timeZone: 'America/Bogota',
+      },
+      attendees: event.attendees,
+      reminders: {
+        useDefault: false,
+        overrides: [
+          { method: 'email', minutes: 24 * 60 }, // 1 day before
+          { method: 'popup', minutes: 30 }, // 30 min before
+        ],
+      },
+    },
+  })
+  
+  return response.data
+}
+
+/**
+ * Update a calendar event
+ */
+export async function updateCalendarEvent(
+  refreshToken: string,
+  calendarId: string,
+  eventId: string,
+  event: {
+    summary?: string
+    description?: string
+    location?: string
+    start?: Date
+    end?: Date
+    attendees?: Array<{ email: string; displayName?: string }>
+  }
+) {
+  const calendar = getCalendarClient(refreshToken)
+  
+  const response = await calendar.events.patch({
+    calendarId,
+    eventId,
+    requestBody: {
+      summary: event.summary,
+      description: event.description,
+      location: event.location,
+      start: event.start ? {
+        dateTime: event.start.toISOString(),
+        timeZone: 'America/Bogota',
+      } : undefined,
+      end: event.end ? {
+        dateTime: event.end.toISOString(),
+        timeZone: 'America/Bogota',
+      } : undefined,
+      attendees: event.attendees,
+    },
+  })
+  
+  return response.data
+}
+
+/**
+ * Delete a calendar event
+ */
+export async function deleteCalendarEvent(
+  refreshToken: string,
+  calendarId: string,
+  eventId: string
+) {
+  const calendar = getCalendarClient(refreshToken)
+  
+  await calendar.events.delete({
+    calendarId,
+    eventId,
+  })
 }

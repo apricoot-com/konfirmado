@@ -20,13 +20,13 @@ export function PaymentSettings({ tenant }: PaymentSettingsProps) {
     wompiEventsSecret: '',
     wompiMode: tenant.wompiMode,
   })
-  
+
   const [showSecrets, setShowSecrets] = useState({
     privateKey: false,
     integritySecret: false,
     eventsSecret: false,
   })
-  
+
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -181,6 +181,39 @@ export function PaymentSettings({ tenant }: PaymentSettingsProps) {
               </p>
             </div>
 
+            {/* Events Secret */}
+            <div className="space-y-2">
+              <Label htmlFor="wompiEventsSecret">
+                Events Secret
+                <span className="ml-1 text-red-600">(Secreta)</span>
+              </Label>
+              <div className="relative">
+                <Input
+                  id="wompiEventsSecret"
+                  name="wompiEventsSecret"
+                  type={showSecrets.eventsSecret ? 'text' : 'password'}
+                  placeholder={hasEventsSecret ? '••••••••••••••••' : 'test_events_...'}
+                  value={formData.wompiEventsSecret}
+                  onChange={handleChange}
+                  disabled={isLoading}
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => toggleSecret('eventsSecret')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                >
+                  {showSecrets.eventsSecret ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+              {hasEventsSecret && !formData.wompiEventsSecret && (
+                <p className="text-xs text-green-600">✓ Configurada (deja vacío para mantener)</p>
+              )}
+              <p className="text-xs text-gray-500">
+                Usada para verificar la autenticidad de los webhooks.
+              </p>
+            </div>
+
             {/* Integrity Secret */}
             <div className="space-y-2">
               <Label htmlFor="wompiIntegritySecret">
@@ -214,38 +247,6 @@ export function PaymentSettings({ tenant }: PaymentSettingsProps) {
               </p>
             </div>
 
-            {/* Events Secret */}
-            <div className="space-y-2">
-              <Label htmlFor="wompiEventsSecret">
-                Events Secret
-                <span className="ml-1 text-red-600">(Secreta)</span>
-              </Label>
-              <div className="relative">
-                <Input
-                  id="wompiEventsSecret"
-                  name="wompiEventsSecret"
-                  type={showSecrets.eventsSecret ? 'text' : 'password'}
-                  placeholder={hasEventsSecret ? '••••••••••••••••' : 'test_events_...'}
-                  value={formData.wompiEventsSecret}
-                  onChange={handleChange}
-                  disabled={isLoading}
-                  className="pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => toggleSecret('eventsSecret')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                >
-                  {showSecrets.eventsSecret ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-              {hasEventsSecret && !formData.wompiEventsSecret && (
-                <p className="text-xs text-green-600">✓ Configurada (deja vacío para mantener)</p>
-              )}
-              <p className="text-xs text-gray-500">
-                Usada para verificar la autenticidad de los webhooks.
-              </p>
-            </div>
 
             <div className="flex justify-end">
               <Button type="submit" disabled={isLoading}>

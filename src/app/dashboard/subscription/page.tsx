@@ -10,9 +10,10 @@ import Link from 'next/link'
 export default async function SubscriptionPage({
   searchParams,
 }: {
-  searchParams: { upgrade?: string }
+  searchParams: Promise<{ upgrade?: string }>
 }) {
   const { tenant } = await requireAuth()
+  const params = await searchParams
   
   const currentPlan = SUBSCRIPTION_PLANS[tenant.subscriptionPlan]
   const trialStatus = getTrialStatus(tenant)
@@ -31,7 +32,7 @@ export default async function SubscriptionPage({
       </div>
       
       {/* Success/Pending Messages */}
-      {searchParams.upgrade === 'success' && (
+      {params.upgrade === 'success' && (
         <div className="bg-green-50 border border-green-200 rounded-lg p-4">
           <div className="flex items-center gap-3">
             <CheckCircle className="w-5 h-5 text-green-600" />
@@ -45,7 +46,7 @@ export default async function SubscriptionPage({
         </div>
       )}
       
-      {searchParams.upgrade === 'pending' && (
+      {params.upgrade === 'pending' && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <div className="flex items-center gap-3">
             <AlertCircle className="w-5 h-5 text-blue-600" />

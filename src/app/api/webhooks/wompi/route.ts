@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyWebhookSignature, getWompiConfig } from '@/lib/wompi'
 import { logAudit } from '@/lib/audit'
+import { createCalendarEvent } from '@/lib/google-calendar'
 import crypto from 'crypto'
 
 export async function POST(req: NextRequest) {
@@ -155,9 +156,10 @@ export async function POST(req: NextRequest) {
       })
     })
     
-    // If approved, trigger callback to merchant
+    // If approved, trigger callback to merchant and create calendar event
     if (transactionStatus === 'APPROVED') {
       await sendMerchantCallback(payment.booking, payment)
+      await createBookingCalendarEvent(payment.booking)
     }
     
     // Audit log
@@ -305,4 +307,58 @@ function generateCallbackSignature(bookingId: string, tenantId: string): string 
   const secret = process.env.CALLBACK_SECRET || 'default-secret-change-me'
   const data = `${bookingId}:${tenantId}`
   return crypto.createHmac('sha256', secret).update(data).digest('hex')
+}
+
+/**
+ * Create calendar event for confirmed booking
+ */
+async function createBookingCalendarEvent(booking: any) {
+  try {
+    // Check if professional has calendar connected
+    if (!booking.professional.calendarRefreshToken || !booking.professional.calendarId) {
+      console.log('Professional calendar not connected, skipping event creation')
+      return
+    }
+    
+    // Create event description
+    const description = `
+Servicio: ${booking.service.name}
+Cliente: ${booking.userName}
+Email: ${booking.userEmail}
+Teléfono: ${booking.userPhone}
+
+${booking.service.description || ''}
+    `.trim()
+    
+    // Create calendar event
+    const event = await createCalendarEvent(
+      booking.professional.calendarRefreshToken,
+      booking.professional.calendarId,
+      {
+        summary: `${booking.service.name} - ${booking.userName}`,
+        description,
+        start: new Date(booking.startTime),
+        end: new Date(booking.endTime),
+        attendees: [
+          {
+            email: booking.userEmail,
+            displayName: booking.userName,
+          },
+        ],
+      }
+    )
+    
+    // Save event ID to booking
+    if (event.id) {
+      await prisma.booking.update({
+        where: { id: booking.id },
+        data: { calendarEventId: event.id },
+      })
+      
+      console.log(`✓ Calendar event created: ${event.id} for booking ${booking.id}`)
+    }
+  } catch (error) {
+    console.error('Failed to create calendar event:', error)
+    // Don't fail the webhook if calendar creation fails
+  }
 }

@@ -223,6 +223,9 @@ model Booking {
   userPhone       String
   acceptedTerms   Boolean   @default(false)
   
+  // Google Calendar integration
+  calendarEventId String?   // Google Calendar event ID
+  
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   
