@@ -5,10 +5,12 @@ export async function GET(req: NextRequest) {
   try {
     const { tenant } = await requireAuth()
     
+    const paymentMethodInfo = tenant.paymentMethodInfo as any
+    
     console.log('Tenant data being returned:', {
       id: tenant.id,
-      paymentMethodMask: tenant.paymentMethodMask,
-      paymentMethodType: tenant.paymentMethodType,
+      paymentMethodMask: paymentMethodInfo?.mask,
+      paymentMethodType: paymentMethodInfo?.type,
     })
     
     // Return safe tenant data (no sensitive keys)
@@ -17,8 +19,8 @@ export async function GET(req: NextRequest) {
       name: tenant.name,
       subscriptionPlan: tenant.subscriptionPlan,
       subscriptionStatus: tenant.subscriptionStatus,
-      paymentMethodMask: tenant.paymentMethodMask,
-      paymentMethodType: tenant.paymentMethodType,
+      paymentMethodMask: paymentMethodInfo?.mask,
+      paymentMethodType: paymentMethodInfo?.type,
     }
     
     return NextResponse.json(response)

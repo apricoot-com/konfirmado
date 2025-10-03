@@ -31,7 +31,12 @@ export async function POST(req: NextRequest) {
     if (reference.startsWith('SUB-')) {
       // Handle subscription payment
       const subscription = await prisma.subscription.findFirst({
-        where: { paymentReference: reference },
+        where: {
+          paymentInfo: {
+            path: ['reference'],
+            equals: reference,
+          },
+        },
         include: { tenant: true },
       })
       
@@ -41,10 +46,14 @@ export async function POST(req: NextRequest) {
       }
       
       // Update subscription payment status
+      const currentPaymentInfo = subscription.paymentInfo as any
       await prisma.subscription.update({
         where: { id: subscription.id },
         data: {
-          paymentStatus: transaction.status,
+          paymentInfo: {
+            ...currentPaymentInfo,
+            status: transaction.status,
+          },
           status: transaction.status === 'APPROVED' ? 'active' : 'failed',
         },
       })

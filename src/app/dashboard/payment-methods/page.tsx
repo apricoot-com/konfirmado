@@ -6,7 +6,8 @@ import { CreditCard, Plus } from 'lucide-react'
 export default async function PaymentMethodsPage() {
   const { tenant } = await requireAuth()
   
-  const hasPaymentMethod = !!tenant.paymentMethodToken
+  const paymentMethodInfo = tenant.paymentMethodInfo as any
+  const hasPaymentMethod = !!paymentMethodInfo?.token
   
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -27,10 +28,10 @@ export default async function PaymentMethodsPage() {
               </div>
               <div>
                 <div className="font-medium text-gray-900">
-                  {tenant.paymentMethodType || 'Tarjeta'}
+                  {paymentMethodInfo.type || 'Tarjeta'}
                 </div>
                 <div className="text-sm text-gray-600">
-                  •••• •••• •••• {tenant.paymentMethodMask}
+                  •••• •••• •••• {paymentMethodInfo.mask}
                 </div>
               </div>
             </div>

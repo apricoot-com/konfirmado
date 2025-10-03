@@ -60,7 +60,8 @@ export async function POST(req: NextRequest) {
           continue
         }
         
-        if (!tenant.paymentMethodToken) {
+        const paymentMethodInfo = tenant.paymentMethodInfo as any
+        if (!paymentMethodInfo || !paymentMethodInfo.token) {
           console.log(`Skipping ${tenant.id} - no payment method`)
           results.failed++
           results.errors.push(`${tenant.name}: No payment method`)
@@ -81,7 +82,7 @@ export async function POST(req: NextRequest) {
         
         // Create transaction using PLATFORM credentials (money goes to platform)
         const transaction = await createTokenTransaction({
-          token: decrypt(tenant.paymentMethodToken),
+          token: decrypt(paymentMethodInfo.token),
           acceptanceToken,
           amountInCents: planDetails.price * 100,
           currency: 'COP',
@@ -105,8 +106,12 @@ export async function POST(req: NextRequest) {
             status: transaction.data.status === 'APPROVED' ? 'active' : 'failed',
             currentPeriodStart: periodStart,
             currentPeriodEnd: periodEnd,
-            paymentReference: reference,
-            paymentStatus: transaction.data.status,
+            paymentInfo: {
+              provider: 'wompi',
+              reference,
+              status: transaction.data.status,
+              transactionId: transaction.data.id,
+            },
           },
         })
         

@@ -54,25 +54,30 @@ export async function POST(req: NextRequest) {
     
     console.log('Card tokenized successfully:', { mask: tokenData.mask, type: tokenData.type })
     
-    // Save encrypted token
+    // Save encrypted token in JSON structure
     console.log('Saving payment method to database for tenant:', tenant.id)
     console.log('Token to encrypt:', tokenData.id)
     
     const encryptedToken = encrypt(tokenData.id)
     console.log('Encrypted token length:', encryptedToken.length)
     
+    const paymentMethodInfo = {
+      provider: 'wompi',
+      token: encryptedToken,
+      type: tokenData.type,
+      mask: tokenData.mask,
+    }
+    
     const updatedTenant = await prisma.tenant.update({
       where: { id: tenant.id },
       data: {
-        paymentMethodToken: encryptedToken,
-        paymentMethodType: tokenData.type,
-        paymentMethodMask: tokenData.mask,
+        paymentMethodInfo,
       },
     })
     
     console.log('Payment method saved successfully:', {
-      mask: updatedTenant.paymentMethodMask,
-      type: updatedTenant.paymentMethodType,
+      mask: tokenData.mask,
+      type: tokenData.type,
     })
     
     // Audit log
@@ -110,9 +115,7 @@ export async function DELETE(req: NextRequest) {
     await prisma.tenant.update({
       where: { id: tenant.id },
       data: {
-        paymentMethodToken: null,
-        paymentMethodType: null,
-        paymentMethodMask: null,
+        paymentMethodInfo: null,
       },
     })
     

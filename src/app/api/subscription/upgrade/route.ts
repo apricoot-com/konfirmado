@@ -42,7 +42,8 @@ export async function POST(req: NextRequest) {
     }
     
     // Check if payment method exists
-    if (!tenant.paymentMethodToken) {
+    const paymentMethodInfo = tenant.paymentMethodInfo as any
+    if (!paymentMethodInfo || !paymentMethodInfo.token) {
       return NextResponse.json(
         { error: 'Payment method required. Please add a card first.' },
         { status: 400 }
@@ -67,7 +68,7 @@ export async function POST(req: NextRequest) {
     
     // Create transaction with stored token using PLATFORM credentials
     const transaction = await createTokenTransaction({
-      token: decrypt(tenant.paymentMethodToken),
+      token: decrypt(paymentMethodInfo.token),
       acceptanceToken,
       amountInCents: planDetails.price * 100, // Convert to cents
       currency: 'COP',
@@ -92,8 +93,12 @@ export async function POST(req: NextRequest) {
         status: transaction.data.status === 'APPROVED' ? 'active' : 'pending',
         currentPeriodStart: periodStart,
         currentPeriodEnd: periodEnd,
-        paymentReference: reference,
-        paymentStatus: transaction.data.status,
+        paymentInfo: {
+          provider: 'wompi',
+          reference,
+          status: transaction.data.status,
+          transactionId: transaction.data.id,
+        },
       },
     })
     

@@ -28,12 +28,9 @@ model Tenant {
   privacyPolicyUrl  String?
   termsUrl          String?
   
-  // Wompi config
-  wompiPublicKey      String?
-  wompiPrivateKey     String?   @db.Text // Encrypted
-  wompiIntegritySecret String?  @db.Text // Encrypted
-  wompiEventsSecret   String?   @db.Text // Encrypted
-  wompiMode           String    @default("test") // test | production
+  // Payment provider config (provider-agnostic)
+  paymentProvider     String?   @default("wompi") // wompi | mercadopago | stripe
+  paymentConfig       Json?     // Provider-specific config (encrypted keys, etc.)
   
   // Subscription
   subscriptionPlan    String    @default("trial") // trial | basic | pro | enterprise
@@ -42,10 +39,8 @@ model Tenant {
   subscriptionEndsAt  DateTime?
   trialMonths         Int       @default(1) // 1, 2, or 3 months
   
-  // Payment method (Wompi tokenization)
-  paymentMethodToken  String?   @db.Text // Encrypted Wompi token
-  paymentMethodType   String?   // CARD, NEQUI, etc.
-  paymentMethodMask   String?   // Last 4 digits for display
+  // Payment method (provider-agnostic)
+  paymentMethodInfo   Json?     // { provider: 'wompi', token: '...', type: 'CARD', mask: '4242' }
   
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
@@ -88,9 +83,8 @@ model Subscription {
   currentPeriodStart DateTime
   currentPeriodEnd   DateTime
   
-  // Payment
-  paymentReference   String?  // Wompi transaction reference
-  paymentStatus      String?  // approved | declined | pending
+  // Payment (provider-agnostic)
+  paymentInfo        Json?    // { provider: 'wompi', reference: 'SUB-123', status: 'approved', ... }
   
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt

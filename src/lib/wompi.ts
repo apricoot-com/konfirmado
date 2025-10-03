@@ -141,30 +141,30 @@ export function verifyWebhookSignature(
 }
 
 /**
- * Get Wompi config for tenant (decrypts secrets)
+ * Get Wompi configuration for a tenant
  */
-export function getWompiConfig(tenant: {
-  wompiPublicKey: string | null
-  wompiPrivateKey: string | null
-  wompiIntegritySecret: string | null
-  wompiEventsSecret: string | null
-  wompiMode: string
-}): WompiConfig | null {
+export function getWompiConfig(tenant: any): WompiConfig | null {
+  if (!tenant.paymentConfig || tenant.paymentProvider !== 'wompi') {
+    return null
+  }
+
+  const config = tenant.paymentConfig as any
+
   if (
-    !tenant.wompiPublicKey ||
-    !tenant.wompiPrivateKey ||
-    !tenant.wompiIntegritySecret ||
-    !tenant.wompiEventsSecret
+    !config.publicKey ||
+    !config.privateKey ||
+    !config.integritySecret ||
+    !config.eventsSecret
   ) {
     return null
   }
 
   return {
-    publicKey: tenant.wompiPublicKey,
-    privateKey: decrypt(tenant.wompiPrivateKey),
-    integritySecret: decrypt(tenant.wompiIntegritySecret),
-    eventsSecret: decrypt(tenant.wompiEventsSecret),
-    mode: tenant.wompiMode as 'test' | 'production',
+    publicKey: config.publicKey,
+    privateKey: decrypt(config.privateKey),
+    integritySecret: decrypt(config.integritySecret),
+    eventsSecret: decrypt(config.eventsSecret),
+    mode: config.mode as 'test' | 'production',
   }
 }
 
