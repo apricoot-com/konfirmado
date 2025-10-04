@@ -6,7 +6,7 @@ import { generateToken } from '@/lib/utils'
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
     const { user, tenant } = await requireAuth()
