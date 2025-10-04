@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { generateToken } from '@/lib/utils'
+import { sendVerificationEmail } from '@/lib/email'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 
@@ -78,8 +79,18 @@ export async function POST(req: NextRequest) {
       return { user, tenant, token }
     })
     
-    // TODO: Send verification email
-    // await sendVerificationEmail(email, result.token)
+    // Send verification email
+    if (process.env.RESEND_API_KEY) {
+      try {
+        await sendVerificationEmail(email, result.token)
+        console.log(`✓ Verification email sent to ${email}`)
+      } catch (error) {
+        console.error('Failed to send verification email:', error)
+        // Don't fail registration if email fails
+      }
+    } else {
+      console.warn('⚠️ RESEND_API_KEY not set - verification email not sent')
+    }
     
     return NextResponse.json({
       success: true,
