@@ -418,3 +418,62 @@ export async function sendPaymentReminderEmail(params: {
     html,
   })
 }
+
+/**
+ * Send email verification
+ */
+export async function sendVerificationEmail(email: string, token: string) {
+  const verifyUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/verify-email?token=${token}`
+  
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background-color: #0070f3; color: white; padding: 20px; text-align: center; }
+          .content { padding: 20px; background-color: #f9f9f9; }
+          .button { 
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #0070f3;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 20px 0;
+          }
+          .footer { margin-top: 30px; font-size: 12px; color: #666; text-align: center; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>Verifica tu correo electrónico</h1>
+          </div>
+          <div class="content">
+            <p>Hola,</p>
+            <p>Gracias por registrarte en Konfirmado. Para completar tu registro, por favor verifica tu correo electrónico haciendo clic en el siguiente botón:</p>
+            <div style="text-align: center;">
+              <a href="${verifyUrl}" class="button">Verificar correo electrónico</a>
+            </div>
+            <p>O copia y pega este enlace en tu navegador:</p>
+            <p style="word-break: break-all; color: #0070f3;">${verifyUrl}</p>
+            <p><strong>Este enlace expirará en 24 horas.</strong></p>
+            <p>Si no creaste una cuenta en Konfirmado, puedes ignorar este correo.</p>
+          </div>
+          <div class="footer">
+            <p>© ${new Date().getFullYear()} Konfirmado. Todos los derechos reservados.</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `
+
+  return sendEmail({
+    to: email,
+    subject: 'Verifica tu correo electrónico - Konfirmado',
+    html,
+  })
+}

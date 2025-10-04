@@ -16,10 +16,15 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [showResendVerification, setShowResendVerification] = useState(false)
+  const [resendSuccess, setResendSuccess] = useState(false)
+  const [resendLoading, setResendLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    setShowResendVerification(false)
+    setResendSuccess(false)
     setIsLoading(true)
 
     try {
@@ -31,7 +36,8 @@ export default function LoginPage() {
 
       if (result?.error) {
         if (result.error === 'EMAIL_NOT_VERIFIED') {
-          setError('Por favor verifica tu correo electrónico antes de iniciar sesión.')
+          setError('Tu correo electrónico aún no ha sido verificado.')
+          setShowResendVerification(true)
         } else {
           setError('Credenciales inválidas. Por favor intenta nuevamente.')
         }
@@ -43,6 +49,31 @@ export default function LoginPage() {
       setError('Ocurrió un error. Por favor intenta nuevamente.')
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const handleResendVerification = async () => {
+    setResendLoading(true)
+    setResendSuccess(false)
+    
+    try {
+      const response = await fetch('/api/auth/resend-verification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      })
+      
+      if (response.ok) {
+        setResendSuccess(true)
+        setError('')
+      } else {
+        const data = await response.json()
+        setError(data.error || 'Error al reenviar el correo de verificación')
+      }
+    } catch (error) {
+      setError('Error al reenviar el correo de verificación')
+    } finally {
+      setResendLoading(false)
     }
   }
 
@@ -58,9 +89,49 @@ export default function LoginPage() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="flex items-center gap-2 p-3 text-sm text-red-800 bg-red-50 border border-red-200 rounded-lg">
-                <AlertCircle className="w-4 h-4" />
-                <span>{error}</span>
+              <div className="p-3 text-sm text-red-800 bg-red-50 border border-red-200 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <AlertCircle className="w-4 h-4" />
+                  <span className="font-medium">{error}</span>
+                </div>
+                {showResendVerification && (
+                  <div className="mt-3 pt-3 border-t border-red-200">
+                    <p className="text-xs text-red-700 mb-2">
+                      Revisa tu bandeja de entrada o spam. Si no recibiste el correo:
+                    </p>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleResendVerification}
+                      disabled={resendLoading}
+                      className="w-full text-red-700 border-red-300 hover:bg-red-100"
+                    >
+                      {resendLoading ? (
+                        <>
+                          <Loader2 className="w-3 h-3 mr-2 animate-spin" />
+                          Reenviando...
+                        </>
+                      ) : (
+                        'Reenviar correo de verificación'
+                      )}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
+            
+            {resendSuccess && (
+              <div className="p-3 text-sm text-green-800 bg-green-50 border border-green-200 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span className="font-medium">¡Correo enviado!</span>
+                </div>
+                <p className="mt-1 text-xs text-green-700">
+                  Revisa tu bandeja de entrada y haz clic en el enlace de verificación.
+                </p>
               </div>
             )}
 
