@@ -14,6 +14,7 @@ const createBookingSchema = z.object({
   userEmail: z.string().email(),
   userPhone: z.string(),
   acceptedTerms: z.boolean(),
+  holdId: z.string().optional(), // Optional hold ID for verification
 })
 
 export async function POST(req: NextRequest) {
@@ -86,6 +87,38 @@ export async function POST(req: NextRequest) {
       ? Math.floor(service.price * ((service.partialPercentage || 25) / 100))
       : service.price
     
+    // Verify hold if provided (optional but recommended)
+    if (data.holdId) {
+      const hold = await prisma.slotHold.findUnique({
+        where: { id: data.holdId },
+      })
+      
+      if (!hold) {
+        return NextResponse.json(
+          { error: 'Hold not found or expired' },
+          { status: 400 }
+        )
+      }
+      
+      if (hold.expiresAt < new Date()) {
+        return NextResponse.json(
+          { error: 'Hold has expired. Please select a new time slot.' },
+          { status: 400 }
+        )
+      }
+      
+      // Verify hold matches the booking details
+      if (
+        hold.professionalId !== professional.id ||
+        hold.startTime.toISOString() !== new Date(data.startTime).toISOString()
+      ) {
+        return NextResponse.json(
+          { error: 'Hold does not match booking details' },
+          { status: 400 }
+        )
+      }
+    }
+    
     // Generate unique reference and tokens
     const reference = `BK-${Date.now()}-${generateToken(8)}`
     const cancellationToken = generateToken(32)
@@ -93,6 +126,15 @@ export async function POST(req: NextRequest) {
     
     // Create booking and payment in transaction
     const result = await prisma.$transaction(async (tx: any) => {
+      // Delete the hold if it exists (it's now being converted to a booking)
+      if (data.holdId) {
+        await tx.slotHold.delete({
+          where: { id: data.holdId },
+        }).catch(() => {
+          // Hold might have been deleted already, that's ok
+        })
+      }
+      
       // Create booking
       const booking = await tx.booking.create({
         data: {

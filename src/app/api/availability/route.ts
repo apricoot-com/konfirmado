@@ -76,12 +76,35 @@ export async function POST(req: NextRequest) {
       throw error
     }
     
-    // Generate available slots with business hours filter
-    const availableSlots = generateAvailableSlots(
-      busyPeriods.map(period => ({
+    // Get active holds (not expired) for this professional
+    const activeHolds = await prisma.slotHold.findMany({
+      where: {
+        professionalId,
+        expiresAt: {
+          gte: new Date(),
+        },
+        startTime: {
+          gte: new Date(startDate),
+          lt: new Date(endDate),
+        },
+      },
+    })
+    
+    // Combine busy periods from calendar and holds
+    const allBusyPeriods = [
+      ...busyPeriods.map(period => ({
         start: period.start || '',
         end: period.end || '',
       })),
+      ...activeHolds.map(hold => ({
+        start: hold.startTime.toISOString(),
+        end: hold.endTime.toISOString(),
+      })),
+    ]
+    
+    // Generate available slots with business hours filter
+    const availableSlots = generateAvailableSlots(
+      allBusyPeriods,
       new Date(startDate),
       new Date(endDate),
       service.durationMinutes,

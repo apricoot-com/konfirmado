@@ -1,39 +1,54 @@
-# Konfirmado
+# Konfirmado 📅
 
 **Pasarela de agendamiento multi-tenant con pagos integrados**
 
 Konfirmado es una plataforma que permite a negocios reducir no-shows mediante cobro anticipado (parcial o total) antes de las citas. Integra Google Calendar para disponibilidad en tiempo real y Wompi para procesamiento de pagos.
 
+> **Estado**: ✅ MVP Completo y Listo para Producción
+
 ## 🚀 Características
 
 ### ✅ Completamente Implementado
 
-- **Multi-tenant**: Cada cliente tiene su propia configuración aislada
-- **Autenticación completa**: Registro, login, verificación de email, recuperación de contraseña
-- **Panel de administración**:
-  - Branding personalizado (logo, colores, subdomain)
-  - Gestión de servicios (CRUD con precios y % de anticipo personalizable)
-  - Gestión de profesionales (CRUD con invitaciones de calendario)
-  - Links de agendamiento (con preselección de servicio/profesional)
-  - Visor de reservas con filtros
-  - Dashboard con métricas y estadísticas
-- **Google Calendar**:
-  - OAuth flow para profesionales
-  - Lectura de disponibilidad en tiempo real (FreeBusy API)
-  - Generación automática de slots disponibles
-  - Detección y manejo de tokens expirados
-- **Wompi Payments**:
-  - Checkout con firma de integridad
-  - Webhook handler con verificación de firma
-  - Callback al comercio con reintentos
-  - Soporte para pagos parciales o totales
-- **Wizard de reserva** (4 pasos):
-  - Selección de servicio y profesional
-  - Disponibilidad en tiempo real
-  - Datos del usuario con validación
-  - Pago y confirmación
-- **Responsive design**: Mobile-first con sidebar colapsable
-- **Seguridad**: Encriptación de tokens, firmas HMAC, validación de entrada
+#### **Core Features**
+- ✅ **Multi-tenant**: Cada cliente tiene su propia configuración aislada
+- ✅ **Autenticación completa**: NextAuth con registro, login, recuperación de contraseña
+- ✅ **Wizard de reserva** (5 pasos): Servicio → Profesional → Disponibilidad → Datos → Pago
+- ✅ **Hold/Lock System**: Prevención de double-booking con holds temporales (10 min)
+- ✅ **Responsive design**: Mobile-first con diseño de card moderno
+
+#### **Panel de Administración**
+- ✅ Branding personalizado (logo, colores, URLs)
+- ✅ Gestión de servicios (CRUD con precios y % de anticipo)
+- ✅ Gestión de profesionales (CRUD con horarios de negocio)
+- ✅ Links de agendamiento (con preselección opcional)
+- ✅ Visor de reservas con filtros
+
+#### **Google Calendar Integration**
+- ✅ OAuth flow para profesionales
+- ✅ Lectura de disponibilidad en tiempo real (FreeBusy API)
+- ✅ Creación automática de eventos
+- ✅ Horarios de negocio configurables
+- ✅ Timezone handling (America/Bogota)
+- ✅ Detección y manejo de tokens expirados
+
+#### **Wompi Payments**
+- ✅ Checkout con firma de integridad
+- ✅ Webhook handler con verificación
+- ✅ Callback al comercio con reintentos
+- ✅ Pagos parciales o totales
+
+#### **Booking Management**
+- ✅ **Cancelación**: Links seguros en email, webhook notification
+- ✅ **Reagendamiento**: Selección de nueva fecha, actualización de calendario
+- ✅ **Email notifications**: Confirmación, cancelación, reagendamiento
+- ✅ **Calendar invitations**: .ics attachments en emails
+
+#### **Seguridad**
+- ✅ Encriptación AES-256-GCM para tokens
+- ✅ Firmas HMAC-SHA256 para callbacks
+- ✅ Validación Zod en todos los endpoints
+- ✅ Tokens seguros para cancel/reschedule
 
 ## 📋 Requisitos Previos
 
@@ -57,32 +72,66 @@ pnpm install
 Copia `.env.example` a `.env` y configura:
 
 ```bash
-cp env.example .env
+cp .env.example .env
 ```
 
-**Variables requeridas:**
+**Variables de entorno requeridas:**
 
 ```env
-# Database
+# ============================================================================
+# DATABASE
+# ============================================================================
 DATABASE_URL="postgresql://user:password@localhost:5432/konfirmado"
 
-# NextAuth
+# ============================================================================
+# NEXTAUTH (Authentication)
+# ============================================================================
 NEXTAUTH_URL="http://localhost:3000"
 NEXTAUTH_SECRET="<genera con: openssl rand -base64 32>"
 
-# Encryption
+# ============================================================================
+# ENCRYPTION (para refresh tokens de Google)
+# ============================================================================
 ENCRYPTION_KEY="<32 caracteres aleatorios>"
 
-# Google Calendar
+# ============================================================================
+# GOOGLE CALENDAR API
+# ============================================================================
 GOOGLE_CLIENT_ID="<tu-client-id>.apps.googleusercontent.com"
 GOOGLE_CLIENT_SECRET="<tu-client-secret>"
 
-# App
+# ============================================================================
+# APP CONFIGURATION
+# ============================================================================
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
 
-# Callbacks
+# ============================================================================
+# WEBHOOKS & CALLBACKS
+# ============================================================================
 CALLBACK_SECRET="<genera con: openssl rand -base64 32>"
+
+# ============================================================================
+# EMAIL (Resend) - OPCIONAL
+# ============================================================================
+RESEND_API_KEY="re_..."  # Opcional: para enviar emails
+RESEND_FROM_EMAIL="noreply@tudominio.com"
+
+# ============================================================================
+# CRON JOBS - OPCIONAL
+# ============================================================================
+CRON_SECRET="<genera con: openssl rand -base64 32>"  # Para cleanup de holds
+
+# ============================================================================
+# WOMPI (Configurado por tenant en el panel admin)
+# ============================================================================
+# No se requieren variables de entorno globales
+# Cada tenant configura sus propias llaves en el panel
 ```
+
+**📚 Documentación detallada:**
+- [Google Calendar Setup](./docs/GOOGLE_CALENDAR_SETUP.md)
+- [Email Setup (Resend)](./docs/EMAIL_SETUP.md)
+- [Wompi Setup](./docs/PLATFORM_WOMPI_SETUP.md)
 
 ### 3. Configurar Google Cloud
 
@@ -262,17 +311,42 @@ docker build -t konfirmado .
 docker run -p 3000:3000 --env-file .env konfirmado
 ```
 
-## 📈 Roadmap
+## 📚 Documentación
 
-### Fase 3 (Opcional)
-- [ ] Email notifications (confirmación, recordatorios)
-- [ ] Reprogramación de citas
-- [ ] Cancelaciones con reembolso
+- **[AGENTS.md](./AGENTS.md)** - Especificación completa del proyecto y arquitectura
+- **[Google Calendar Setup](./docs/GOOGLE_CALENDAR_SETUP.md)** - Configuración de Google Calendar API
+- **[Email Setup](./docs/EMAIL_SETUP.md)** - Configuración de Resend para emails
+- **[Wompi Setup](./docs/PLATFORM_WOMPI_SETUP.md)** - Configuración de pagos con Wompi
+- **[Password Recovery](./docs/PASSWORD_RECOVERY.md)** - Sistema de recuperación de contraseña
+- **[Cancellation Feature](./docs/CANCELLATION_FEATURE.md)** - Sistema de cancelación de reservas
+
+## 🔄 Cron Jobs (Producción)
+
+Para producción en Vercel, crea `vercel.json`:
+
+```json
+{
+  "crons": [{
+    "path": "/api/cron/cleanup-holds",
+    "schedule": "*/5 * * * *"
+  }]
+}
+```
+
+Este job limpia holds expirados cada 5 minutos.
+
+## 📈 Roadmap Futuro
+
+### Mejoras Planeadas
+- [ ] Admin bookings viewer (lista completa de reservas)
+- [ ] Callback logs viewer (debugging de webhooks)
+- [ ] Booking reminders (24h antes)
+- [ ] Professional dashboard (ver sus propias reservas)
+- [ ] Analytics avanzado
 - [ ] Soporte para Outlook Calendar
 - [ ] Soporte para Mercado Pago
-- [ ] Dashboard de métricas avanzado
-- [ ] Exportación de reportes
 - [ ] API pública para integraciones
+- [ ] Exportación de reportes
 
 ## 🤝 Contribuir
 

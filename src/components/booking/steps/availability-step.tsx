@@ -36,6 +36,18 @@ export function AvailabilityStep({
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(
     bookingState.selectedSlot
   )
+  const [sessionId] = useState(() => {
+    // Generate or retrieve session ID
+    if (typeof window !== 'undefined') {
+      let sid = sessionStorage.getItem('booking-session-id')
+      if (!sid) {
+        sid = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+        sessionStorage.setItem('booking-session-id', sid)
+      }
+      return sid
+    }
+    return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+  })
 
   useEffect(() => {
     loadAvailability()
@@ -90,8 +102,45 @@ export function AvailabilityStep({
     setCurrentDate(prev => addDays(prev, 7))
   }
 
-  const handleSlotSelect = (slot: TimeSlot) => {
+  const handleSlotSelect = async (slot: TimeSlot) => {
     setSelectedSlot(slot)
+    
+    // Create hold for this slot
+    if (bookingState.serviceId && bookingState.professionalId) {
+      try {
+        const response = await fetch('/api/holds/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            professionalId: bookingState.professionalId,
+            serviceId: bookingState.serviceId,
+            startTime: slot.start,
+            endTime: slot.end,
+            sessionId,
+          }),
+        })
+        
+        const data = await response.json()
+        
+        if (response.ok) {
+          console.log('✓ Slot held:', data.holdId, 'expires in', data.expiresInSeconds, 'seconds')
+          
+          // Update booking state with hold ID
+          updateBookingState({
+            holdId: data.holdId,
+          })
+        } else {
+          // Slot is already held or booked
+          setError(data.error || 'Este horario ya no está disponible')
+          setSelectedSlot(null)
+          // Reload availability to get updated slots
+          loadAvailability()
+        }
+      } catch (error) {
+        console.error('Failed to create hold:', error)
+        // Don't block the user, they can still try to book
+      }
+    }
   }
 
   const handleContinue = () => {
