@@ -225,7 +225,7 @@ export function DetailsStep({
       </div>
 
       {/* Footer - Sticky */}
-      <div className="flex-shrink-0 flex justify-between pt-6 border-t bg-white sticky bottom-0 z-20 -mx-4 px-4 pb-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
+      <div className="flex-shrink-0 flex justify-between pt-6 border-t bg-white sticky bottom-0 z-20 -mx-4 px-4 pb-4">
         <Button variant="outline" onClick={onBack}>
           <ChevronLeft className="w-5 h-5 mr-2" />
           Atrás

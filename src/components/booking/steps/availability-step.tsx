@@ -181,7 +181,7 @@ export function AvailabilityStep({
             </p>
           </Card>
         ) : (
-          <div className="space-y-6 pb-20">
+          <div className="space-y-6 max-h-96 overflow-y-auto">
             {Object.entries(slotsByDate).map(([date, dateSlots]) => (
               <div key={date}>
                 <h3 className="font-semibold text-gray-900 mb-3 sticky top-0 bg-white py-2 z-10 border-b">
