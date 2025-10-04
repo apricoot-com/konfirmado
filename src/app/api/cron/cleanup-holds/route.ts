@@ -5,14 +5,16 @@ import { prisma } from '@/lib/prisma'
  * Cleanup expired holds
  * This endpoint should be called periodically (e.g., every 5 minutes) by a cron job
  * 
- * In production, configure Vercel Cron or similar:
- * vercel.json:
+ * In production, configure Vercel Cron or similar in vercel.json:
+ * @example
+ * ```json
  * {
  *   "crons": [{
  *     "path": "/api/cron/cleanup-holds",
- *     "schedule": "*/5 * * * *"
+ *     "schedule": "* /5 * * * *"
  *   }]
  * }
+ * ```
  */
 export async function GET(req: NextRequest) {
   try {

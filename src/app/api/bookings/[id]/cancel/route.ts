@@ -197,7 +197,6 @@ async function sendCancellationWebhook(booking: any) {
               url: callbackUrl,
               payload: payload as any,
               statusCode: response.status,
-              response: await response.text(),
               success: true,
             },
           })
@@ -218,7 +217,7 @@ async function sendCancellationWebhook(booking: any) {
               url: callbackUrl,
               payload: payload as any,
               statusCode: 0,
-              response: error.message,
+              error: error.message,
               success: false,
             },
           })

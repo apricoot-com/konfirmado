@@ -341,6 +341,7 @@ async function sendRescheduleWebhook(
               url: callbackUrl,
               payload: payload as any,
               statusCode: 0,
+              error: error.message,
               success: false,
             },
           })
