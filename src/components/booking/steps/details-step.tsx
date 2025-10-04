@@ -114,7 +114,6 @@ export function DetailsStep({
 
       {/* Content - Scrollable */}
       <div className="flex-1 overflow-y-auto min-h-0 -mx-2 px-2 mb-4">
-        <Card className="p-6 mb-20">
         <div className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="name">Nombre completo *</Label>
@@ -229,7 +228,6 @@ export function DetailsStep({
             </div>
           )}
         </div>
-      </Card>
       </div>
 
       {/* Footer - Sticky */}

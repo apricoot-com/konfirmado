@@ -121,29 +121,32 @@ export function BookingWizard({
   } as React.CSSProperties
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col" style={brandingStyles}>
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 flex-shrink-0">
-        <div className="max-w-4xl mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
-            {tenant.logoUrl ? (
-              <img
-                src={tenant.logoUrl}
-                alt={tenant.name}
-                className="h-10 object-contain"
-              />
-            ) : (
-              <h1 className="text-2xl font-bold" style={{ color: tenant.primaryColor }}>
-                {tenant.name}
-              </h1>
-            )}
+    <div className="min-h-screen bg-gray-50 flex flex-col py-4 md:py-8" style={brandingStyles}>
+      {/* Main content - Card wrapper */}
+      <main className="w-full max-w-full md:max-w-3xl lg:max-w-4xl mx-auto px-2 md:px-4 flex-1 flex flex-col min-h-0">
+        <div className="bg-white rounded-lg md:rounded-xl shadow-lg flex flex-col h-full overflow-hidden">
+          {/* Card Header */}
+          <div className="flex-shrink-0 border-b border-gray-200 px-4 md:px-6 py-4 md:py-6">
+            <div className="flex items-center justify-between mb-4">
+              {tenant.logoUrl ? (
+                <img
+                  src={tenant.logoUrl}
+                  alt={tenant.name}
+                  className="h-8 md:h-10 object-contain"
+                />
+              ) : (
+                <h1 className="text-xl md:text-2xl font-bold" style={{ color: tenant.primaryColor }}>
+                  {tenant.name}
+                </h1>
+              )}
+            </div>
             
             {/* Progress indicator */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center justify-center gap-2">
               {[1, 2, 3, 4, 5].map((step) => (
                 <div
                   key={step}
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                  className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center text-xs md:text-sm font-medium ${
                     step === currentStep
                       ? 'text-white'
                       : step < currentStep
@@ -161,11 +164,9 @@ export function BookingWizard({
               ))}
             </div>
           </div>
-        </div>
-      </header>
 
-      {/* Main content */}
-      <main className="max-w-4xl mx-auto px-4 py-8 flex-1 flex flex-col min-h-0">
+          {/* Card Content */}
+          <div className="flex-1 flex flex-col min-h-0 px-4 md:px-6 py-4 md:py-6">
         {currentStep === 1 && (
           <ServiceSelectionStep
             services={services}
@@ -222,14 +223,16 @@ export function BookingWizard({
             onBack={goToPreviousStep}
           />
         )}
-      </main>
+          </div>
 
-      {/* Footer */}
-      <footer className="bg-white border-t border-gray-200 mt-12">
-        <div className="max-w-4xl mx-auto px-4 py-6 text-center text-sm text-gray-600">
-          Powered by Konfirmado
+          {/* Card Footer */}
+          <div className="flex-shrink-0 border-t border-gray-200 px-4 md:px-6 py-3 md:py-4 bg-gray-50">
+            <p className="text-center text-xs md:text-sm text-gray-600">
+              Powered by Konfirmado
+            </p>
+          </div>
         </div>
-      </footer>
+      </main>
     </div>
   )
 }
