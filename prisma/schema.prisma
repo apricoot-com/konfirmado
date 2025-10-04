@@ -128,6 +128,7 @@ model Professional {
   tenant            Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   
   name              String
+  email             String?   // Optional email for notifications
   description       String?   @db.Text
   photoUrl          String?
   
@@ -138,6 +139,10 @@ model Professional {
   refreshToken      String?   @db.Text // Encrypted
   connectionToken   String?   @unique
   tokenExpiresAt    DateTime?
+  
+  // Business hours (JSON format: { monday: { start: "09:00", end: "18:00" }, ... })
+  businessHours     Json?     @default("{\"monday\":{\"start\":\"09:00\",\"end\":\"18:00\"},\"tuesday\":{\"start\":\"09:00\",\"end\":\"18:00\"},\"wednesday\":{\"start\":\"09:00\",\"end\":\"18:00\"},\"thursday\":{\"start\":\"09:00\",\"end\":\"18:00\"},\"friday\":{\"start\":\"09:00\",\"end\":\"18:00\"},\"saturday\":null,\"sunday\":null}")
+  timezone          String    @default("America/Bogota")
   
   isActive          Boolean   @default(true)
   createdAt         DateTime  @default(now())

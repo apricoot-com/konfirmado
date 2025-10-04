@@ -67,7 +67,7 @@ export async function PATCH(
       )
     }
     
-    const { serviceIds, ...professionalData } = validated.data
+    const { serviceIds, name, email, description, photoUrl, businessHours, timezone } = validated.data as any
     
     // Update professional
     const professional = await prisma.professional.update({
@@ -76,7 +76,12 @@ export async function PATCH(
         tenantId: tenant.id,
       },
       data: {
-        ...professionalData,
+        name,
+        email,
+        description,
+        photoUrl,
+        businessHours,
+        timezone,
         services: serviceIds
           ? {
               deleteMany: {},

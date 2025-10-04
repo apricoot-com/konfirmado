@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
       throw error
     }
     
-    // Generate available slots
+    // Generate available slots with business hours filter
     const availableSlots = generateAvailableSlots(
       busyPeriods.map(period => ({
         start: period.start || '',
@@ -84,7 +84,9 @@ export async function POST(req: NextRequest) {
       })),
       new Date(startDate),
       new Date(endDate),
-      service.durationMinutes
+      service.durationMinutes,
+      professional.businessHours as any,
+      professional.timezone
     )
     
     return NextResponse.json({

@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AlertCircle, Loader2, ArrowLeft } from 'lucide-react'
+import { BusinessHoursConfig } from './business-hours-config'
 import Link from 'next/link'
 
 interface Service {
@@ -20,6 +21,8 @@ interface Professional {
   name: string
   description: string | null
   photoUrl: string | null
+  businessHours?: any
+  timezone?: string
   services: Array<{
     service: Service
   }>
@@ -34,11 +37,24 @@ export function ProfessionalForm({ professional, services }: ProfessionalFormPro
   const router = useRouter()
   const isEditing = !!professional
   
+  const defaultBusinessHours = {
+    monday: { start: '09:00', end: '18:00' },
+    tuesday: { start: '09:00', end: '18:00' },
+    wednesday: { start: '09:00', end: '18:00' },
+    thursday: { start: '09:00', end: '18:00' },
+    friday: { start: '09:00', end: '18:00' },
+    saturday: null,
+    sunday: null,
+  }
+
   const [formData, setFormData] = useState({
     name: professional?.name || '',
+    email: (professional as any)?.email || '',
     description: professional?.description || '',
     photoUrl: professional?.photoUrl || '',
     serviceIds: professional?.services.map(s => s.service.id) || [],
+    businessHours: professional?.businessHours || defaultBusinessHours,
+    timezone: professional?.timezone || 'America/Bogota',
   })
   
   const [error, setError] = useState('')
@@ -122,6 +138,22 @@ export function ProfessionalForm({ professional, services }: ProfessionalFormPro
           </div>
 
           <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              placeholder="doctor@ejemplo.com"
+              value={formData.email}
+              onChange={handleChange}
+              disabled={isLoading}
+            />
+            <p className="text-xs text-gray-500">
+              Se enviará un correo con el link de conexión de calendario
+            </p>
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="description">Descripción</Label>
             <Textarea
               id="description"
@@ -190,6 +222,12 @@ export function ProfessionalForm({ professional, services }: ProfessionalFormPro
               </div>
             )}
           </div>
+
+          {/* Business Hours Configuration */}
+          <BusinessHoursConfig
+            businessHours={formData.businessHours}
+            onChange={(hours) => setFormData(prev => ({ ...prev, businessHours: hours }))}
+          />
 
           <div className="flex items-center gap-3">
             <Link href="/dashboard/professionals">

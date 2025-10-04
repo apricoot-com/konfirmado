@@ -3,6 +3,9 @@ import { prisma } from '@/lib/prisma'
 import { verifyWebhookSignature, getWompiConfig } from '@/lib/wompi'
 import { logAudit } from '@/lib/audit'
 import { createCalendarEvent } from '@/lib/google-calendar'
+import { sendBookingConfirmationEmail } from '@/lib/email'
+import { format } from 'date-fns'
+import { es } from 'date-fns/locale'
 import crypto from 'crypto'
 
 export async function POST(req: NextRequest) {
@@ -179,6 +182,23 @@ export async function POST(req: NextRequest) {
       req,
     })
     
+    // Send confirmation email if payment was approved
+    if (paymentStatus === 'approved' && bookingStatus === 'paid') {
+      await sendBookingConfirmationEmail({
+        email: payment.booking.userEmail,
+        name: payment.booking.userName,
+        serviceName: payment.booking.service.name,
+        professionalName: payment.booking.professional.name,
+        date: format(new Date(payment.booking.startTime), "EEEE, dd 'de' MMMM 'de' yyyy", { locale: es }),
+        time: format(new Date(payment.booking.startTime), 'HH:mm', { locale: es }),
+        amount: payment.amount,
+        confirmationMessage: payment.booking.service.confirmationMessage,
+      }).catch(error => {
+        console.error('Failed to send confirmation email:', error)
+        // Don't fail the webhook if email fails
+      })
+    }
+    
     return NextResponse.json({ received: true })
   } catch (error) {
     console.error('Wompi webhook error:', error)
@@ -316,12 +336,21 @@ function generateCallbackSignature(bookingId: string, tenantId: string): string 
 async function createBookingCalendarEvent(booking: any) {
   try {
     // Check if professional has calendar connected
-    if (!booking.professional.calendarRefreshToken || !booking.professional.calendarId) {
+    if (!booking.professional.refreshToken || !booking.professional.calendarId) {
       console.log('Professional calendar not connected, skipping event creation')
+      console.log('Professional data:', {
+        id: booking.professional.id,
+        name: booking.professional.name,
+        hasRefreshToken: !!booking.professional.refreshToken,
+        hasCalendarId: !!booking.professional.calendarId,
+        calendarStatus: booking.professional.calendarStatus,
+      })
       return
     }
     
-    // Create event description
+    console.log(`Creating calendar event for professional ${booking.professional.name}`)
+    
+    // Build event description
     const description = `
 Servicio: ${booking.service.name}
 Cliente: ${booking.userName}
@@ -333,7 +362,7 @@ ${booking.service.description || ''}
     
     // Create calendar event
     const event = await createCalendarEvent(
-      booking.professional.calendarRefreshToken,
+      booking.professional.refreshToken,
       booking.professional.calendarId,
       {
         summary: `${booking.service.name} - ${booking.userName}`,

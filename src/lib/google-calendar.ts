@@ -97,20 +97,39 @@ export function generateAvailableSlots(
   startDate: Date,
   endDate: Date,
   durationMinutes: number,
-  workingHours = { start: 8, end: 18 } // 8 AM to 6 PM
+  businessHours?: any,
+  timezone = 'America/Bogota'
 ): Array<{ start: Date; end: Date }> {
   const slots: Array<{ start: Date; end: Date }> = []
   const slotDuration = durationMinutes * 60 * 1000 // Convert to milliseconds
+  
+  // Default business hours if not provided
+  const defaultHours = { start: '09:00', end: '18:00' }
   
   // Generate all possible slots within working hours
   const currentDate = new Date(startDate)
   
   while (currentDate < endDate) {
+    const dayName = currentDate.toLocaleDateString('en-US', { weekday: 'long', timeZone: timezone }).toLowerCase()
+    
+    // Get business hours for this day
+    const dayHours = businessHours?.[dayName] || defaultHours
+    
+    // Skip if day is closed (null hours)
+    if (!dayHours) {
+      currentDate.setDate(currentDate.getDate() + 1)
+      continue
+    }
+    
+    // Parse start and end times
+    const [startHour, startMin] = dayHours.start.split(':').map(Number)
+    const [endHour, endMin] = dayHours.end.split(':').map(Number)
+    
     const dayStart = new Date(currentDate)
-    dayStart.setHours(workingHours.start, 0, 0, 0)
+    dayStart.setHours(startHour, startMin, 0, 0)
     
     const dayEnd = new Date(currentDate)
-    dayEnd.setHours(workingHours.end, 0, 0, 0)
+    dayEnd.setHours(endHour, endMin, 0, 0)
     
     let slotStart = new Date(dayStart)
     

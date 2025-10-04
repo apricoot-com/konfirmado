@@ -3,6 +3,7 @@ import { requireAuth } from '@/lib/tenant'
 import { prisma } from '@/lib/prisma'
 import { logAudit } from '@/lib/audit'
 import { generateToken } from '@/lib/utils'
+import { sendCalendarInvitationEmail } from '@/lib/email'
 
 export async function POST(
   req: NextRequest,
@@ -40,6 +41,24 @@ export async function POST(
     // Generate connection URL
     const connectionUrl = `${process.env.NEXT_PUBLIC_APP_URL}/connect-calendar/${connectionToken}`
     
+    // Send email if professional has email configured
+    let emailSent = false
+    if (professional.email && process.env.RESEND_API_KEY) {
+      try {
+        await sendCalendarInvitationEmail({
+          email: professional.email,
+          name: professional.name,
+          connectionUrl,
+          expiresAt: tokenExpiresAt,
+        })
+        emailSent = true
+        console.log(`✓ Calendar invitation email sent to ${professional.email}`)
+      } catch (error) {
+        console.error('Failed to send invitation email:', error)
+        // Don't fail the request if email fails
+      }
+    }
+    
     // Audit log
     await logAudit({
       tenantId: tenant.id,
@@ -47,17 +66,19 @@ export async function POST(
       action: 'calendar_connected',
       entityType: 'professional',
       entityId: professional.id,
-      metadata: { name: professional.name, action: 'invitation_sent' },
+      metadata: { 
+        name: professional.name, 
+        action: 'invitation_sent',
+        emailSent,
+      },
       req,
     })
-    
-    // TODO: Send email with connection link
-    // await sendCalendarInvitationEmail(professional.email, connectionUrl)
     
     return NextResponse.json({
       success: true,
       connectionUrl,
       expiresAt: tokenExpiresAt,
+      emailSent,
     })
   } catch (error) {
     if (error instanceof Error && error.message === 'UNAUTHORIZED') {
