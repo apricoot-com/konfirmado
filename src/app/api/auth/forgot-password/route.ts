@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-// import { prisma } from '@/lib/prisma'
-// import { generateToken } from '@/lib/utils'
-
-// TODO: Implement password reset functionality
-// This requires adding a VerificationToken model to the Prisma schema
-// and implementing email sending functionality
+import { prisma } from '@/lib/prisma'
+import { generateToken } from '@/lib/utils'
+import { sendPasswordResetEmail } from '@/lib/email'
 
 export async function POST(req: NextRequest) {
   try {
@@ -17,18 +14,6 @@ export async function POST(req: NextRequest) {
       )
     }
     
-    // TODO: Implement password reset
-    // 1. Add VerificationToken model to schema
-    // 2. Generate reset token
-    // 3. Send email with reset link
-    // 4. Create reset password page
-    
-    // For now, return not implemented
-    return NextResponse.json({
-      error: 'Password reset not yet implemented. Please contact support.',
-    }, { status: 501 })
-    
-    /*
     // Find user
     const user = await prisma.user.findUnique({
       where: { email },
@@ -59,15 +44,22 @@ export async function POST(req: NextRequest) {
       },
     })
     
-    // TODO: Send reset email
-    // await sendPasswordResetEmail(email, token)
+    // Send reset email (only if RESEND_API_KEY is configured)
+    if (process.env.RESEND_API_KEY) {
+      try {
+        await sendPasswordResetEmail(email, token)
+        console.log(`✓ Password reset email sent to ${email}`)
+      } catch (error) {
+        console.error('Failed to send reset email:', error)
+        // Don't fail the request if email fails
+      }
+    }
     
     return NextResponse.json({
       success: true,
       message: 'If an account exists with this email, a password reset link has been sent.',
       resetToken: process.env.NODE_ENV === 'development' ? token : undefined,
     })
-    */
   } catch (error) {
     console.error('Forgot password error:', error)
     return NextResponse.json(

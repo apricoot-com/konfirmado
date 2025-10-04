@@ -37,7 +37,7 @@ export async function sendEmail({ to, subject, html, from }: SendEmailParams) {
  * Send password reset email
  */
 export async function sendPasswordResetEmail(email: string, token: string) {
-  const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${token}`
+  const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/reset-password?token=${token}`
   
   const html = `
     <!DOCTYPE html>
