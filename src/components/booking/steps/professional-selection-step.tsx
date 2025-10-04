@@ -63,16 +63,12 @@ export function ProfessionalSelectionStep({
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header - Fixed */}
-      <div className="flex-shrink-0 mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Selecciona un profesional</h2>
-        <p className="text-gray-600">Elige quién te atenderá</p>
-        {selectedService && (
-          <div className="mt-3 text-sm text-gray-500">
-            Servicio: <span className="font-medium text-gray-700">{selectedService.name}</span>
-          </div>
-        )}
-      </div>
+      {/* Service context */}
+      {selectedService && (
+        <div className="flex-shrink-0 mb-4 text-sm text-gray-500 text-center">
+          Servicio: <span className="font-medium text-gray-700">{selectedService.name}</span>
+        </div>
+      )}
 
       {/* Content - Scrollable */}
       <div className="flex-1 overflow-y-auto min-h-0 -mx-2 px-2 mb-4">

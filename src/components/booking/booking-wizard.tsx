@@ -114,6 +114,15 @@ export function BookingWizard({
     setCurrentStep(prev => Math.max(prev - 1, 1))
   }
 
+  // Step titles and descriptions
+  const stepInfo = {
+    1: { title: 'Selecciona un servicio', description: 'Elige el servicio que necesitas' },
+    2: { title: 'Selecciona un profesional', description: 'Elige quién te atenderá' },
+    3: { title: 'Selecciona fecha y hora', description: 'Elige el horario que mejor te convenga' },
+    4: { title: 'Tus datos', description: 'Completa tu información de contacto' },
+    5: { title: 'Confirmar y pagar', description: 'Revisa tu reserva antes de continuar' },
+  }
+
   // Apply tenant branding
   const brandingStyles = {
     '--primary-color': tenant.primaryColor,
@@ -142,7 +151,7 @@ export function BookingWizard({
             </div>
             
             {/* Progress indicator */}
-            <div className="flex items-center justify-center gap-2">
+            <div className="flex items-center justify-center gap-2 mb-6">
               {[1, 2, 3, 4, 5].map((step) => (
                 <div
                   key={step}
@@ -162,6 +171,16 @@ export function BookingWizard({
                   {step < currentStep ? '✓' : step}
                 </div>
               ))}
+            </div>
+            
+            {/* Step title and description */}
+            <div className="text-center">
+              <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">
+                {stepInfo[currentStep as keyof typeof stepInfo].title}
+              </h2>
+              <p className="text-sm md:text-base text-gray-600">
+                {stepInfo[currentStep as keyof typeof stepInfo].description}
+              </p>
             </div>
           </div>
 

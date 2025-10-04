@@ -106,12 +106,6 @@ export function DetailsStep({
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header - Fixed */}
-      <div className="flex-shrink-0 mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Tus datos</h2>
-        <p className="text-gray-600">Necesitamos tu información para confirmar la reserva</p>
-      </div>
-
       {/* Content - Scrollable */}
       <div className="flex-1 overflow-y-auto min-h-0 -mx-2 px-2 mb-4">
         <div className="space-y-6">

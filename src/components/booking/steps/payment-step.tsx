@@ -72,12 +72,7 @@ export function PaymentStep({
   }
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Confirmar y pagar</h2>
-        <p className="text-gray-600">Revisa tu reserva antes de continuar</p>
-      </div>
-
+    <div className="space-y-6">
       {/* Booking Summary */}
       <Card className="p-6">
         <h3 className="font-semibold text-gray-900 mb-4">Resumen de tu reserva</h3>
