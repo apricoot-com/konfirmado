@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
       )
     }
     
-    const { serviceIds, ...professionalData } = validated.data
+    const { serviceIds, name, description, photoUrl } = validated.data
     
     // Generate connection token for calendar OAuth
     const connectionToken = generateToken(32)
@@ -89,7 +89,9 @@ export async function POST(req: NextRequest) {
     // Create professional with service associations
     const professional = await prisma.professional.create({
       data: {
-        ...professionalData,
+        name,
+        description: description || null,
+        photoUrl: photoUrl || null,
         tenantId: tenant.id,
         connectionToken,
         tokenExpiresAt,

@@ -50,12 +50,12 @@ export async function POST(req: NextRequest) {
       )
     }
     
-    const { serviceId, professionalId, expiresAt, ...linkData } = validated.data
+    const { serviceId, professionalId, expiresAt, name } = validated.data
     
     // Create booking link
     const link = await prisma.bookingLink.create({
       data: {
-        ...linkData,
+        name: name || 'Link de agendamiento',
         tenantId: tenant.id,
         serviceId: serviceId || null,
         professionalId: professionalId || null,

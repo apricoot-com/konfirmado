@@ -83,12 +83,19 @@ export async function POST(req: NextRequest) {
       )
     }
     
-    const { professionalIds, ...serviceData } = validated.data
+    const { professionalIds, name, description, imageUrl, durationMinutes, price, chargeType, partialPercentage, confirmationMessage } = validated.data
     
     // Create service with professional associations
     const service = await prisma.service.create({
       data: {
-        ...serviceData,
+        name,
+        description,
+        imageUrl: imageUrl || null,
+        durationMinutes,
+        price,
+        chargeType,
+        partialPercentage: partialPercentage || 25,
+        confirmationMessage: confirmationMessage || null,
         tenantId: tenant.id,
         professionals: professionalIds
           ? {
