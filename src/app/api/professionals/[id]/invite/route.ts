@@ -10,7 +10,7 @@ export async function POST(
 ) {
   try {
     const { user, tenant } = await requireAuth()
-    const { id } = await params
+    const { id } = params
     
     // Get professional
     const professional = await prisma.professional.findFirst({
