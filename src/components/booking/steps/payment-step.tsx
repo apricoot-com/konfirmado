@@ -132,30 +132,11 @@ export function PaymentStep({
               Anticipo del 25% - El resto se paga en la cita
             </p>
           </div>
-        </div>
-      </Card>
-
-      {/* Payment placeholder */}
-      <Card className="p-12 text-center">
-        <CreditCard className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">
-          Pasarela de Pago (Wompi)
-        </h3>
-        <p className="text-gray-600 mb-6">
-          La integración con Wompi se implementará en la Fase 2
-        </p>
-        
-        {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-800">
-            {error}
-          </div>
-        )}
-        
-        <Button
+          <Button
           onClick={handlePayment}
           disabled={isLoading}
           size="lg"
-          className="bg-blue-600 hover:bg-blue-700"
+          className="bg-blue-600 hover:bg-blue-700 w-full"
         >
           {isLoading ? (
             <>
@@ -169,7 +150,9 @@ export function PaymentStep({
             </>
           )}
         </Button>
+        </div>
       </Card>
+
 
       <div className="flex justify-between pt-4">
         <Button variant="outline" onClick={onBack} disabled={isLoading}>

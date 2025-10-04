@@ -92,22 +92,29 @@ export function DetailsStep({
   }
 
   const handleContinue = () => {
+    console.log('Continue button clicked', formData)
     if (validate()) {
+      console.log('Validation passed')
       updateBookingState({
         userDetails: formData,
       })
       onNext()
+    } else {
+      console.log('Validation failed', errors)
     }
   }
 
   return (
-    <div className="space-y-8">
-      <div>
+    <div className="flex flex-col h-full">
+      {/* Header - Fixed */}
+      <div className="flex-shrink-0 mb-6">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Tus datos</h2>
         <p className="text-gray-600">Necesitamos tu información para confirmar la reserva</p>
       </div>
 
-      <Card className="p-6">
+      {/* Content - Scrollable */}
+      <div className="flex-1 overflow-y-auto min-h-0 -mx-2 px-2 mb-4">
+        <Card className="p-6 mb-20">
         <div className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="name">Nombre completo *</Label>
@@ -223,17 +230,20 @@ export function DetailsStep({
           )}
         </div>
       </Card>
+      </div>
 
-      <div className="flex justify-between pt-4">
+      {/* Footer - Sticky */}
+      <div className="flex-shrink-0 flex justify-between pt-6 border-t bg-white sticky bottom-0 z-20 -mx-4 px-4 pb-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
         <Button variant="outline" onClick={onBack}>
           <ChevronLeft className="w-5 h-5 mr-2" />
           Atrás
         </Button>
 
         <Button
+          type="button"
           onClick={handleContinue}
           style={{ backgroundColor: primaryColor }}
-          className="hover:opacity-90"
+          className="hover:opacity-90 cursor-pointer"
         >
           Continuar al pago
           <ChevronRight className="w-5 h-5 ml-2" />

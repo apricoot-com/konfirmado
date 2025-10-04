@@ -102,90 +102,104 @@ export function AvailabilityStep({
   }, {} as Record<string, TimeSlot[]>)
 
   return (
-    <div className="space-y-8">
-      <div>
+    <div className="flex flex-col h-full">
+      {/* Header - Fixed */}
+      <div className="flex-shrink-0 mb-6">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Selecciona fecha y hora</h2>
         <p className="text-gray-600">Elige el horario que mejor te convenga</p>
+        
+        {/* Selected slot indicator */}
+        {selectedSlot && (
+          <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+            <p className="text-sm text-green-800">
+              <span className="font-semibold">Seleccionado:</span>{' '}
+              {format(new Date(selectedSlot.start), "EEEE, dd 'de' MMMM 'a las' HH:mm", { locale: es })}
+            </p>
+          </div>
+        )}
       </div>
 
-      {isLoading ? (
-        <Card className="p-12 text-center">
-          <Loader2 className="w-16 h-16 text-gray-400 mx-auto mb-4 animate-spin" />
-          <p className="text-gray-600">Cargando disponibilidad...</p>
-        </Card>
-      ) : error ? (
-        <Card className="p-12 text-center">
-          <Calendar className="w-16 h-16 text-red-400 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Error</h3>
-          <p className="text-gray-600 mb-4">{error}</p>
-          <Button onClick={loadAvailability} variant="outline">
-            Reintentar
-          </Button>
-        </Card>
-      ) : Object.keys(slotsByDate).length === 0 ? (
-        <Card className="p-12 text-center">
-          <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            No hay disponibilidad
-          </h3>
-          <p className="text-gray-600">
-            No hay horarios disponibles en los próximos 14 días. Por favor intenta más tarde.
-          </p>
-        </Card>
-      ) : (
-        <div className="space-y-6">
-          {Object.entries(slotsByDate).map(([date, dateSlots]) => (
-            <div key={date}>
-              <h3 className="font-semibold text-gray-900 mb-3">
-                {format(new Date(date), "EEEE, dd 'de' MMMM", { locale: es })}
-              </h3>
-              <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
-                {dateSlots.map((slot, idx) => {
-                  const isSelected =
-                    selectedSlot?.start === slot.start &&
-                    selectedSlot?.end === slot.end
+      {/* Content - Scrollable */}
+      <div className="flex-1 overflow-y-auto min-h-0 -mx-2 px-2 mb-4">
+        {isLoading ? (
+          <Card className="p-12 text-center">
+            <Loader2 className="w-16 h-16 text-gray-400 mx-auto mb-4 animate-spin" />
+            <p className="text-gray-600">Cargando disponibilidad...</p>
+          </Card>
+        ) : error ? (
+          <Card className="p-12 text-center">
+            <Calendar className="w-16 h-16 text-red-400 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Error</h3>
+            <p className="text-gray-600 mb-4">{error}</p>
+            <Button onClick={loadAvailability} variant="outline">
+              Reintentar
+            </Button>
+          </Card>
+        ) : Object.keys(slotsByDate).length === 0 ? (
+          <Card className="p-12 text-center">
+            <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              No hay disponibilidad
+            </h3>
+            <p className="text-gray-600">
+              No hay horarios disponibles en los próximos 14 días. Por favor intenta más tarde.
+            </p>
+          </Card>
+        ) : (
+          <div className="space-y-6 pb-20">
+            {Object.entries(slotsByDate).map(([date, dateSlots]) => (
+              <div key={date}>
+                <h3 className="font-semibold text-gray-900 mb-3 sticky top-0 bg-white py-2 z-10 border-b">
+                  {format(new Date(date), "EEEE, dd 'de' MMMM", { locale: es })}
+                </h3>
+                <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+                  {dateSlots.map((slot, idx) => {
+                    const isSelected =
+                      selectedSlot?.start === slot.start &&
+                      selectedSlot?.end === slot.end
 
-                  return (
-                    <button
-                      key={idx}
-                      onClick={() => handleSlotSelect(slot)}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                        isSelected
-                          ? 'ring-2 ring-offset-2 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
-                      style={
-                        isSelected
-                          ? { backgroundColor: primaryColor }
-                          : {}
-                      }
-                    >
-                      {format(new Date(slot.start), 'HH:mm', { locale: es })}
-                    </button>
-                  )
-                })}
+                    return (
+                      <button
+                        key={idx}
+                        onClick={() => handleSlotSelect(slot)}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                          isSelected
+                            ? 'ring-2 ring-offset-2 text-white'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                        style={
+                          isSelected
+                            ? { backgroundColor: primaryColor }
+                            : {}
+                        }
+                      >
+                        {format(new Date(slot.start), 'HH:mm', { locale: es })}
+                      </button>
+                    )
+                  })}
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+      </div>
 
-      <div className="flex justify-between pt-4">
+      {/* Footer - Sticky */}
+      <div className="flex-shrink-0 flex justify-between pt-6 border-t bg-white sticky bottom-0 z-20 -mx-4 px-4 pb-4">
         <Button variant="outline" onClick={onBack}>
           <ChevronLeft className="w-5 h-5 mr-2" />
           Atrás
         </Button>
 
-        {selectedSlot && (
-          <Button
-            onClick={handleContinue}
-            style={{ backgroundColor: primaryColor }}
-            className="hover:opacity-90"
-          >
-            Continuar
-            <ChevronRight className="w-5 h-5 ml-2" />
-          </Button>
-        )}
+        <Button
+          onClick={handleContinue}
+          disabled={!selectedSlot}
+          style={selectedSlot ? { backgroundColor: primaryColor } : {}}
+          className="hover:opacity-90 disabled:opacity-50"
+        >
+          Continuar
+          <ChevronRight className="w-5 h-5 ml-2" />
+        </Button>
       </div>
     </div>
   )

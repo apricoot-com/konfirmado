@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { SelectionStep } from './steps/selection-step'
+import { ServiceSelectionStep } from './steps/service-selection-step'
+import { ProfessionalSelectionStep } from './steps/professional-selection-step'
 import { AvailabilityStep } from './steps/availability-step'
 import { DetailsStep } from './steps/details-step'
 import { PaymentStep } from './steps/payment-step'
@@ -84,7 +85,7 @@ export function BookingWizard({
   preselectedProfessionalId,
   retryBooking,
 }: BookingWizardProps) {
-  const [currentStep, setCurrentStep] = useState(retryBooking ? 4 : 1)
+  const [currentStep, setCurrentStep] = useState(retryBooking ? 5 : 1)
   const [bookingState, setBookingState] = useState<BookingState>({
     serviceId: preselectedServiceId || null,
     professionalId: preselectedProfessionalId || null,
@@ -106,7 +107,7 @@ export function BookingWizard({
   }
 
   const goToNextStep = () => {
-    setCurrentStep(prev => Math.min(prev + 1, 4))
+    setCurrentStep(prev => Math.min(prev + 1, 5))
   }
 
   const goToPreviousStep = () => {
@@ -120,9 +121,9 @@ export function BookingWizard({
   } as React.CSSProperties
 
   return (
-    <div className="min-h-screen bg-gray-50" style={brandingStyles}>
+    <div className="min-h-screen bg-gray-50 flex flex-col" style={brandingStyles}>
       {/* Header */}
-      <header className="bg-white border-b border-gray-200">
+      <header className="bg-white border-b border-gray-200 flex-shrink-0">
         <div className="max-w-4xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             {tenant.logoUrl ? (
@@ -139,7 +140,7 @@ export function BookingWizard({
             
             {/* Progress indicator */}
             <div className="flex items-center gap-2">
-              {[1, 2, 3, 4].map((step) => (
+              {[1, 2, 3, 4, 5].map((step) => (
                 <div
                   key={step}
                   className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
@@ -164,11 +165,10 @@ export function BookingWizard({
       </header>
 
       {/* Main content */}
-      <main className="max-w-4xl mx-auto px-4 py-8">
+      <main className="max-w-4xl mx-auto px-4 py-8 flex-1 flex flex-col min-h-0">
         {currentStep === 1 && (
-          <SelectionStep
+          <ServiceSelectionStep
             services={services}
-            professionals={professionals}
             bookingState={bookingState}
             updateBookingState={updateBookingState}
             onNext={goToNextStep}
@@ -177,17 +177,33 @@ export function BookingWizard({
         )}
 
         {currentStep === 2 && (
-          <AvailabilityStep
-            bookingState={bookingState}
-            updateBookingState={updateBookingState}
-            onNext={goToNextStep}
-            onBack={goToPreviousStep}
-            primaryColor={tenant.primaryColor}
-          />
+          <div className="flex-1 flex flex-col min-h-0">
+            <ProfessionalSelectionStep
+              services={services}
+              bookingState={bookingState}
+              updateBookingState={updateBookingState}
+              onNext={goToNextStep}
+              onBack={goToPreviousStep}
+              primaryColor={tenant.primaryColor}
+            />
+          </div>
         )}
 
         {currentStep === 3 && (
-          <DetailsStep
+          <div className="flex-1 flex flex-col min-h-0">
+            <AvailabilityStep
+              bookingState={bookingState}
+              updateBookingState={updateBookingState}
+              onNext={goToNextStep}
+              onBack={goToPreviousStep}
+              primaryColor={tenant.primaryColor}
+            />
+          </div>
+        )}
+
+        {currentStep === 4 && (
+          <div className="flex-1 flex flex-col min-h-0">
+            <DetailsStep
             bookingState={bookingState}
             updateBookingState={updateBookingState}
             onNext={goToNextStep}
@@ -195,9 +211,10 @@ export function BookingWizard({
             primaryColor={tenant.primaryColor}
             tenant={tenant}
           />
+          </div>
         )}
 
-        {currentStep === 4 && (
+        {currentStep === 5 && (
           <PaymentStep
             linkId={linkId}
             bookingState={bookingState}
