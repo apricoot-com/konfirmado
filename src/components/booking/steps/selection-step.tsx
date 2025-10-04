@@ -157,7 +157,7 @@ export function SelectionStep({
                 }`}
                 style={
                   selectedProfessional === professional.id
-                    ? { borderColor: primaryColor, ringColor: primaryColor }
+                    ? { borderColor: primaryColor, '--tw-ring-color': primaryColor } as React.CSSProperties
                     : {}
                 }
                 onClick={() => setSelectedProfessional(professional.id)}
