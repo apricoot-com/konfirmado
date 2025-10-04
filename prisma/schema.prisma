@@ -234,6 +234,9 @@ model Booking {
   // Cancellation token for secure cancel links
   cancellationToken String? @unique
   
+  // Reschedule token for secure reschedule links
+  rescheduleToken String? @unique
+  
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   

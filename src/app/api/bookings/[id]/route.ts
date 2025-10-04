@@ -17,21 +17,26 @@ export async function GET(
       )
     }
     
-    // Find booking with token
+    // Find booking with token (check both cancellation and reschedule tokens)
     const booking = await prisma.booking.findFirst({
       where: {
         id,
-        cancellationToken: token,
+        OR: [
+          { cancellationToken: token },
+          { rescheduleToken: token },
+        ],
       },
       include: {
         service: {
           select: {
+            id: true,
             name: true,
             durationMinutes: true,
           },
         },
         professional: {
           select: {
+            id: true,
             name: true,
           },
         },

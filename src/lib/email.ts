@@ -99,12 +99,17 @@ export async function sendBookingConfirmationEmail(params: {
   confirmationMessage?: string
   bookingId?: string
   cancellationToken?: string
+  rescheduleToken?: string
 }) {
-  const { email, name, serviceName, professionalName, date, time, amount, confirmationMessage, bookingId, cancellationToken } = params
+  const { email, name, serviceName, professionalName, date, time, amount, confirmationMessage, bookingId, cancellationToken, rescheduleToken } = params
   
-  // Generate cancel link if token provided
+  // Generate cancel and reschedule links if tokens provided
   const cancelUrl = bookingId && cancellationToken 
     ? `${process.env.NEXT_PUBLIC_APP_URL}/booking/cancel/${bookingId}?token=${cancellationToken}`
+    : null
+  
+  const rescheduleUrl = bookingId && rescheduleToken
+    ? `${process.env.NEXT_PUBLIC_APP_URL}/booking/reschedule/${bookingId}?token=${rescheduleToken}`
     : null
   
   const html = `
@@ -167,19 +172,30 @@ export async function sendBookingConfirmationEmail(params: {
               <li>Recuerda llegar 5 minutos antes</li>
             </ul>
             
-            ${cancelUrl ? `
+            ${rescheduleUrl || cancelUrl ? `
               <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd;">
-                <p style="text-align: center; color: #666; font-size: 14px;">
-                  ¿Necesitas cancelar tu reserva?
+                <p style="text-align: center; color: #666; font-size: 14px; margin-bottom: 15px;">
+                  ¿Necesitas hacer cambios?
                 </p>
-                <p style="text-align: center; margin-top: 10px;">
-                  <a href="${cancelUrl}" style="color: #dc2626; text-decoration: underline;">
-                    Cancelar reserva
-                  </a>
-                </p>
-                <p style="text-align: center; color: #999; font-size: 12px; margin-top: 5px;">
-                  No se realizarán reembolsos
-                </p>
+                <div style="text-align: center;">
+                  ${rescheduleUrl ? `
+                    <a href="${rescheduleUrl}" 
+                       style="display: inline-block; margin: 0 10px 10px 10px; padding: 10px 20px; background-color: #0070f3; color: white; text-decoration: none; border-radius: 5px; font-size: 14px;">
+                      🔄 Reagendar cita
+                    </a>
+                  ` : ''}
+                  ${cancelUrl ? `
+                    <a href="${cancelUrl}" 
+                       style="display: inline-block; margin: 0 10px 10px 10px; padding: 10px 20px; background-color: #fff; color: #dc2626; text-decoration: none; border: 1px solid #dc2626; border-radius: 5px; font-size: 14px;">
+                      ✗ Cancelar reserva
+                    </a>
+                  ` : ''}
+                </div>
+                ${cancelUrl ? `
+                  <p style="text-align: center; color: #999; font-size: 12px; margin-top: 10px;">
+                    No se realizarán reembolsos
+                  </p>
+                ` : ''}
               </div>
             ` : ''}
           </div>

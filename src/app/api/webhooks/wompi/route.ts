@@ -195,6 +195,7 @@ export async function POST(req: NextRequest) {
         confirmationMessage: payment.booking.service.confirmationMessage,
         bookingId: payment.booking.id,
         cancellationToken: payment.booking.cancellationToken || undefined,
+        rescheduleToken: payment.booking.rescheduleToken || undefined,
       }).catch(error => {
         console.error('Failed to send confirmation email:', error)
         // Don't fail the webhook if email fails

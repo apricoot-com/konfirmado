@@ -86,9 +86,10 @@ export async function POST(req: NextRequest) {
       ? Math.floor(service.price * ((service.partialPercentage || 25) / 100))
       : service.price
     
-    // Generate unique reference and cancellation token
+    // Generate unique reference and tokens
     const reference = `BK-${Date.now()}-${generateToken(8)}`
     const cancellationToken = generateToken(32)
+    const rescheduleToken = generateToken(32)
     
     // Create booking and payment in transaction
     const result = await prisma.$transaction(async (tx: any) => {
@@ -115,6 +116,7 @@ export async function POST(req: NextRequest) {
           acceptedTerms: data.acceptedTerms,
           status: 'pending',
           cancellationToken,
+          rescheduleToken,
         },
       })
       

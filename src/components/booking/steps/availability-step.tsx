@@ -29,6 +29,7 @@ export function AvailabilityStep({
   onBack,
   primaryColor,
 }: AvailabilityStepProps) {
+  const [currentDate, setCurrentDate] = useState(startOfDay(new Date()))
   const [slots, setSlots] = useState<TimeSlot[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
@@ -38,7 +39,7 @@ export function AvailabilityStep({
 
   useEffect(() => {
     loadAvailability()
-  }, [])
+  }, [currentDate])
 
   const loadAvailability = async () => {
     if (!bookingState.serviceId || !bookingState.professionalId) {
@@ -51,8 +52,8 @@ export function AvailabilityStep({
       setIsLoading(true)
       setError('')
 
-      const startDate = startOfDay(new Date())
-      const endDate = addDays(startDate, 14) // Next 14 days
+      const startDate = currentDate
+      const endDate = addDays(startDate, 7) // One week at a time
 
       const response = await fetch('/api/availability', {
         method: 'POST',
@@ -79,6 +80,14 @@ export function AvailabilityStep({
     } finally {
       setIsLoading(false)
     }
+  }
+  
+  const goToPreviousWeek = () => {
+    setCurrentDate(prev => addDays(prev, -7))
+  }
+  
+  const goToNextWeek = () => {
+    setCurrentDate(prev => addDays(prev, 7))
   }
 
   const handleSlotSelect = (slot: TimeSlot) => {
@@ -119,6 +128,33 @@ export function AvailabilityStep({
             </p>
           </div>
         )}
+        
+        {/* Week navigation */}
+        <div className="flex items-center justify-between mt-4 gap-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={goToPreviousWeek}
+            disabled={isLoading || currentDate <= startOfDay(new Date())}
+          >
+            <ChevronLeft className="w-4 h-4 mr-1" />
+            Semana anterior
+          </Button>
+          
+          <span className="text-sm font-medium text-gray-700">
+            {format(currentDate, "dd 'de' MMMM", { locale: es })} - {format(addDays(currentDate, 6), "dd 'de' MMMM", { locale: es })}
+          </span>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={goToNextWeek}
+            disabled={isLoading}
+          >
+            Semana siguiente
+            <ChevronRight className="w-4 h-4 ml-1" />
+          </Button>
+        </div>
       </div>
 
       {/* Content - Scrollable */}
@@ -144,7 +180,7 @@ export function AvailabilityStep({
               No hay disponibilidad
             </h3>
             <p className="text-gray-600">
-              No hay horarios disponibles en los próximos 14 días. Por favor intenta más tarde.
+              No hay horarios disponibles en esta semana. Intenta con otra semana.
             </p>
           </Card>
         ) : (
