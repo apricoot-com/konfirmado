@@ -6,15 +6,16 @@ import { generateToken } from '@/lib/utils'
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { user, tenant } = await requireAuth()
+    const { id } = await params
     
     // Get professional
     const professional = await prisma.professional.findFirst({
       where: {
-        id: params.id,
+        id,
         tenantId: tenant.id,
       },
     })
@@ -29,7 +30,7 @@ export async function POST(
     
     // Update professional with new token
     await prisma.professional.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         connectionToken,
         tokenExpiresAt,
