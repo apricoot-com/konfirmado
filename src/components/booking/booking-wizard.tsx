@@ -19,11 +19,12 @@ interface Tenant {
 interface Service {
   id: string
   name: string
-  description: string
+  description: string | null
   imageUrl: string | null
   durationMinutes: number
   price: number
   chargeType: string
+  confirmationMessage?: string | null
   professionals: Array<{
     professional: Professional
   }>

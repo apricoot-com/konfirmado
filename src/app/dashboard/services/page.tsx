@@ -103,7 +103,7 @@ export default async function ServicesPage() {
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-gray-600">Anticipo:</span>
                       <span className="font-medium text-gray-900">
-                        {formatPrice(Math.floor(service.price * (service.partialPercentage / 100)))}
+                        {formatPrice(Math.floor(service.price * ((service.partialPercentage || 25) / 100)))}
                       </span>
                     </div>
                   )}

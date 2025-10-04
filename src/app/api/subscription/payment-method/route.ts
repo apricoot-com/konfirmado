@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/tenant'
-import { prisma } from '@/lib/prisma'
+import { prisma, Prisma } from '@/lib/prisma'
 import { tokenizeCard, getPlatformWompiConfig } from '@/lib/wompi'
 import { encrypt } from '@/lib/encryption'
 import { logAudit } from '@/lib/audit'
@@ -115,7 +115,7 @@ export async function DELETE(req: NextRequest) {
     await prisma.tenant.update({
       where: { id: tenant.id },
       data: {
-        paymentMethodInfo: null,
+        paymentMethodInfo: Prisma.JsonNull,
       },
     })
     
@@ -123,7 +123,7 @@ export async function DELETE(req: NextRequest) {
     await logAudit({
       tenantId: tenant.id,
       userId: user.id,
-      action: 'payment_method_removed',
+      action: 'payment_method_updated',
       entityType: 'tenant',
       entityId: tenant.id,
       metadata: {},

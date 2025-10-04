@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
       acceptanceToken,
       amountInCents: planDetails.price * 100, // Convert to cents
       currency: 'COP',
-      customerEmail: user.email,
+      customerEmail: user.email || 'noemail@konfirmado.com',
       reference,
       privateKey: platformWompiConfig.privateKey,
       integritySecret: platformWompiConfig.integritySecret,

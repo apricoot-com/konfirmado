@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
     
     // Calculate charge amount
     const chargeAmount = service.chargeType === 'partial'
-      ? Math.floor(service.price * (service.partialPercentage / 100))
+      ? Math.floor(service.price * ((service.partialPercentage || 25) / 100))
       : service.price
     
     // Generate unique reference

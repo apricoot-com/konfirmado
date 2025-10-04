@@ -93,10 +93,10 @@ export default async function SubscriptionPage({
             )}
           </div>
           
-          {tenant.paymentMethodMask && (
+          {((tenant.paymentMethodInfo as any)?.mask) && (
             <div className="flex items-center gap-2 text-sm text-gray-600">
               <CreditCard className="w-4 h-4" />
-              <span>•••• {tenant.paymentMethodMask}</span>
+              <span>•••• {(tenant.paymentMethodInfo as any).mask}</span>
             </div>
           )}
         </div>
@@ -220,7 +220,7 @@ export default async function SubscriptionPage({
       </div>
       
       {/* Payment Method */}
-      {!tenant.paymentMethodToken && tenant.subscriptionPlan !== 'trial' && (
+      {!tenant.paymentMethodInfo && tenant.subscriptionPlan !== 'trial' && (
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
           <div className="flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5" />

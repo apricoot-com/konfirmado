@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { prisma, Prisma } from '@/lib/prisma'
 import { createAcceptanceToken, createTokenTransaction, getPlatformWompiConfig } from '@/lib/wompi'
 import { decrypt } from '@/lib/encryption'
 import { SUBSCRIPTION_PLANS } from '@/lib/subscriptions'
@@ -8,8 +8,20 @@ import { generateToken } from '@/lib/utils'
 /**
  * Cron job to charge monthly subscriptions
  * Should be called daily by a cron service (e.g., Vercel Cron, GitHub Actions)
+ * 
+ * TODO: This feature is not fully implemented yet
+ * - Needs email notification system
+ * - Needs proper error handling
+ * - Needs retry logic
  */
 export async function POST(req: NextRequest) {
+  // TODO: Implement subscription billing
+  return NextResponse.json({
+    error: 'Subscription billing not yet implemented',
+  }, { status: 501 })
+  
+  /* DISABLED UNTIL FULLY IMPLEMENTED
+export async function POST_DISABLED(req: NextRequest) {
   try {
     // Verify cron secret
     const authHeader = req.headers.get('authorization')
@@ -26,10 +38,7 @@ export async function POST(req: NextRequest) {
         subscriptionStatus: 'active',
         subscriptionPlan: { not: 'trial' },
         subscriptionEndsAt: { lte: now },
-        paymentMethodToken: { not: null },
-      },
-      include: {
-        users: { take: 1 }, // Get first user for email
+        paymentMethodInfo: { not: Prisma.JsonNull },
       },
     })
     
@@ -155,9 +164,8 @@ export async function POST(req: NextRequest) {
     })
   } catch (error) {
     console.error('Billing cron error:', error)
-    return NextResponse.json(
-      { error: 'Billing cron failed' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
+}
+*/
 }

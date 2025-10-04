@@ -18,7 +18,8 @@ export default async function DashboardPage() {
   const hasServices = servicesCount > 0
   const hasProfessionals = professionalsCount > 0
   const hasLinks = linksCount > 0
-  const hasWompi = !!tenant.wompiPublicKey && !!tenant.wompiPrivateKey
+  const paymentConfig = (tenant.paymentConfig as any) || {}
+  const hasWompi = !!paymentConfig.publicKey && !!paymentConfig.privateKey
   
   const setupComplete = hasServices && hasProfessionals && hasLinks && hasWompi
   
