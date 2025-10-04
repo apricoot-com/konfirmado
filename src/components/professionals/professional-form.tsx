@@ -1,13 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { AlertCircle, Loader2, ArrowLeft } from 'lucide-react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { ImageUpload } from '@/components/ui/image-upload'
+import { AlertCircle, CheckCircle, Loader2, ArrowLeft } from 'lucide-react'
 import { BusinessHoursConfig } from './business-hours-config'
 import Link from 'next/link'
 
@@ -166,30 +166,14 @@ export function ProfessionalForm({ professional, services }: ProfessionalFormPro
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="photoUrl">URL de la foto</Label>
-            <Input
-              id="photoUrl"
-              name="photoUrl"
-              type="url"
-              placeholder="https://ejemplo.com/foto.jpg"
-              value={formData.photoUrl}
-              onChange={handleChange}
-              disabled={isLoading}
-            />
-            {formData.photoUrl && (
-              <div className="mt-2 p-4 border border-gray-200 rounded-lg bg-gray-50">
-                <img
-                  src={formData.photoUrl}
-                  alt="Preview"
-                  className="w-24 h-24 rounded-full object-cover"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none'
-                  }}
-                />
-              </div>
-            )}
-          </div>
+          <ImageUpload
+            label="Foto del profesional"
+            value={formData.photoUrl}
+            onChange={(url) => setFormData(prev => ({ ...prev, photoUrl: url }))}
+            disabled={isLoading}
+            aspectRatio="square"
+            maxSizeMB={3}
+          />
 
           <div className="space-y-2">
             <Label>Servicios que ofrece</Label>

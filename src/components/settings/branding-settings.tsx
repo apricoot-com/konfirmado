@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { AlertCircle, CheckCircle, Loader2, Upload } from 'lucide-react'
+import { ImageUpload } from '@/components/ui/image-upload'
+import { AlertCircle, CheckCircle, Loader2 } from 'lucide-react'
 import type { Tenant } from '@prisma/client'
 
 interface BrandingSettingsProps {
@@ -98,39 +99,14 @@ export function BrandingSettings({ tenant }: BrandingSettingsProps) {
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="logoUrl">URL del logo</Label>
-            <div className="flex gap-2">
-              <Input
-                id="logoUrl"
-                name="logoUrl"
-                type="url"
-                placeholder="https://ejemplo.com/logo.png"
-                value={formData.logoUrl}
-                onChange={handleChange}
-                disabled={isLoading}
-              />
-              <Button type="button" variant="outline" disabled>
-                <Upload className="w-4 h-4 mr-2" />
-                Subir
-              </Button>
-            </div>
-            <p className="text-xs text-gray-500">
-              Formato recomendado: PNG o SVG, máximo 2MB
-            </p>
-            {formData.logoUrl && (
-              <div className="mt-2 p-4 border border-gray-200 rounded-lg bg-gray-50">
-                <img
-                  src={formData.logoUrl}
-                  alt="Logo preview"
-                  className="h-16 object-contain"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none'
-                  }}
-                />
-              </div>
-            )}
-          </div>
+          <ImageUpload
+            label="Logo"
+            value={formData.logoUrl}
+            onChange={(url) => setFormData(prev => ({ ...prev, logoUrl: url }))}
+            disabled={isLoading}
+            aspectRatio="auto"
+            maxSizeMB={2}
+          />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">

@@ -88,12 +88,11 @@ export default async function BookingPage({
     }),
   ])
   
-  // Filter to only show active professionals
-  // TODO: In Phase 1, filter by calendarStatus: 'connected'
+  // Filter to only show active professionals with connected calendars
   const servicesWithProfessionals = services.map((service: any) => ({
     ...service,
     professionals: service.professionals.filter(
-      (sp: any) => sp.professional.isActive
+      (sp: any) => sp.professional.isActive && sp.professional.calendarStatus === 'connected'
     ),
   })).filter((service: any) => service.professionals.length > 0)
 

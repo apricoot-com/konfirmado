@@ -1,13 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { AlertCircle, Loader2, ArrowLeft } from 'lucide-react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { ImageUpload } from '@/components/ui/image-upload'
+import { AlertCircle, CheckCircle, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { formatPrice } from '@/lib/utils'
 
@@ -187,30 +187,14 @@ export function ServiceForm({ service, professionals }: ServiceFormProps) {
             </p>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="imageUrl">URL de la imagen</Label>
-            <Input
-              id="imageUrl"
-              name="imageUrl"
-              type="url"
-              placeholder="https://ejemplo.com/imagen.jpg"
-              value={formData.imageUrl}
-              onChange={handleChange}
-              disabled={isLoading}
-            />
-            {formData.imageUrl && (
-              <div className="mt-2 p-4 border border-gray-200 rounded-lg bg-gray-50">
-                <img
-                  src={formData.imageUrl}
-                  alt="Preview"
-                  className="w-full h-48 object-cover rounded-lg"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none'
-                  }}
-                />
-              </div>
-            )}
-          </div>
+          <ImageUpload
+            label="Imagen del servicio"
+            value={formData.imageUrl}
+            onChange={(url) => setFormData(prev => ({ ...prev, imageUrl: url }))}
+            disabled={isLoading}
+            aspectRatio="video"
+            maxSizeMB={5}
+          />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">

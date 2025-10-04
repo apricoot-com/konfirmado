@@ -24,6 +24,12 @@ This directory contains detailed documentation for setting up and using Konfirma
   - Webhook setup
   - Test cards and sandbox mode
 
+- **[Vercel Blob Storage Setup](./VERCEL_BLOB_SETUP.md)**
+  - File upload configuration
+  - Image storage setup
+  - Usage and pricing
+  - API reference
+
 ### Features Documentation
 
 - **[Password Recovery](./PASSWORD_RECOVERY.md)**

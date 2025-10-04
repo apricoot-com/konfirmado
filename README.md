@@ -132,6 +132,7 @@ CRON_SECRET="<genera con: openssl rand -base64 32>"  # Para cleanup de holds
 - [Google Calendar Setup](./docs/GOOGLE_CALENDAR_SETUP.md)
 - [Email Setup (Resend)](./docs/EMAIL_SETUP.md)
 - [Wompi Setup](./docs/PLATFORM_WOMPI_SETUP.md)
+- [Vercel Blob Setup](./docs/VERCEL_BLOB_SETUP.md)
 
 ### 3. Configurar Google Cloud
 
@@ -317,6 +318,7 @@ docker run -p 3000:3000 --env-file .env konfirmado
 - **[Google Calendar Setup](./docs/GOOGLE_CALENDAR_SETUP.md)** - Configuración de Google Calendar API
 - **[Email Setup](./docs/EMAIL_SETUP.md)** - Configuración de Resend para emails
 - **[Wompi Setup](./docs/PLATFORM_WOMPI_SETUP.md)** - Configuración de pagos con Wompi
+- **[Vercel Blob Setup](./docs/VERCEL_BLOB_SETUP.md)** - Configuración de almacenamiento de imágenes
 - **[Password Recovery](./docs/PASSWORD_RECOVERY.md)** - Sistema de recuperación de contraseña
 - **[Cancellation Feature](./docs/CANCELLATION_FEATURE.md)** - Sistema de cancelación de reservas
 
