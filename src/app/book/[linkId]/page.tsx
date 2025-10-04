@@ -90,12 +90,12 @@ export default async function BookingPage({
   
   // Filter to only show active professionals
   // TODO: In Phase 1, filter by calendarStatus: 'connected'
-  const servicesWithProfessionals = services.map(service => ({
+  const servicesWithProfessionals = services.map((service: any) => ({
     ...service,
     professionals: service.professionals.filter(
-      sp => sp.professional.isActive
+      (sp: any) => sp.professional.isActive
     ),
-  })).filter(service => service.professionals.length > 0)
+  })).filter((service: any) => service.professionals.length > 0)
 
   // Determine preselected service and professional
   const preselectedServiceId = retryBooking?.serviceId || resolvedSearchParams.service || link.serviceId || undefined
