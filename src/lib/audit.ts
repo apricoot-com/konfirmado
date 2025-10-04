@@ -9,6 +9,8 @@ export type AuditAction =
   | 'payment_attempted'
   | 'payment_approved'
   | 'payment_declined'
+  | 'payment_method_added'
+  | 'payment_method_updated'
   | 'callback_sent'
   | 'callback_failed'
   | 'booking_created'
@@ -17,6 +19,8 @@ export type AuditAction =
   | 'service_updated'
   | 'professional_created'
   | 'professional_updated'
+  | 'subscription_upgraded'
+  | 'subscription_renewed'
 
 export type EntityType = 
   | 'booking_link'
