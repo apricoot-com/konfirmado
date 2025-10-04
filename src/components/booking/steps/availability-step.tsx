@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { ChevronLeft, ChevronRight, Calendar, Loader2 } from 'lucide-react'
 import { format, addDays, startOfDay } from 'date-fns'
+import { formatInTimeZone } from 'date-fns-tz'
 import { es } from 'date-fns/locale'
 import type { BookingState } from '../booking-wizard'
 
@@ -93,9 +94,10 @@ export function AvailabilityStep({
     }
   }
 
-  // Group slots by date
+  // Group slots by date (using Colombia timezone)
+  const timezone = 'America/Bogota'
   const slotsByDate = slots.reduce((acc, slot) => {
-    const date = format(new Date(slot.start), 'yyyy-MM-dd')
+    const date = formatInTimeZone(new Date(slot.start), timezone, 'yyyy-MM-dd')
     if (!acc[date]) acc[date] = []
     acc[date].push(slot)
     return acc
@@ -113,7 +115,7 @@ export function AvailabilityStep({
           <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
             <p className="text-sm text-green-800">
               <span className="font-semibold">Seleccionado:</span>{' '}
-              {format(new Date(selectedSlot.start), "EEEE, dd 'de' MMMM 'a las' HH:mm", { locale: es })}
+              {formatInTimeZone(new Date(selectedSlot.start), timezone, "EEEE, dd 'de' MMMM 'a las' HH:mm", { locale: es })}
             </p>
           </div>
         )}
@@ -150,7 +152,7 @@ export function AvailabilityStep({
             {Object.entries(slotsByDate).map(([date, dateSlots]) => (
               <div key={date}>
                 <h3 className="font-semibold text-gray-900 mb-3 sticky top-0 bg-white py-2 z-10 border-b">
-                  {format(new Date(date), "EEEE, dd 'de' MMMM", { locale: es })}
+                  {formatInTimeZone(new Date(date), timezone, "EEEE, dd 'de' MMMM", { locale: es })}
                 </h3>
                 <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
                   {dateSlots.map((slot, idx) => {
@@ -173,7 +175,7 @@ export function AvailabilityStep({
                             : {}
                         }
                       >
-                        {format(new Date(slot.start), 'HH:mm', { locale: es })}
+                        {formatInTimeZone(new Date(slot.start), timezone, 'HH:mm')}
                       </button>
                     )
                   })}

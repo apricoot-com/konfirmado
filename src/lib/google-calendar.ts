@@ -1,5 +1,7 @@
 import { google } from 'googleapis'
-import { decrypt, encrypt } from './encryption'
+import { OAuth2Client } from 'google-auth-library'
+import { toZonedTime, fromZonedTime } from 'date-fns-tz'
+import { decrypt } from './encryption'
 
 /**
  * Google Calendar OAuth scopes
@@ -106,11 +108,16 @@ export function generateAvailableSlots(
   // Default business hours if not provided
   const defaultHours = { start: '09:00', end: '18:00' }
   
-  // Generate all possible slots within working hours
-  const currentDate = new Date(startDate)
+  // Convert start/end dates to target timezone
+  const zonedStartDate = toZonedTime(startDate, timezone)
+  const zonedEndDate = toZonedTime(endDate, timezone)
   
-  while (currentDate < endDate) {
-    const dayName = currentDate.toLocaleDateString('en-US', { weekday: 'long', timeZone: timezone }).toLowerCase()
+  // Generate all possible slots within working hours
+  const currentDate = new Date(zonedStartDate)
+  
+  while (currentDate < zonedEndDate) {
+    // Get day name in the target timezone
+    const dayName = currentDate.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase()
     
     // Get business hours for this day
     const dayHours = businessHours?.[dayName] || defaultHours
@@ -125,6 +132,7 @@ export function generateAvailableSlots(
     const [startHour, startMin] = dayHours.start.split(':').map(Number)
     const [endHour, endMin] = dayHours.end.split(':').map(Number)
     
+    // Create day boundaries in the target timezone
     const dayStart = new Date(currentDate)
     dayStart.setHours(startHour, startMin, 0, 0)
     
