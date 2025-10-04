@@ -6,11 +6,11 @@ import { generateToken } from '@/lib/utils'
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { user, tenant } = await requireAuth()
-    const { id } = params
+    const { id } = await params
     
     // Get professional
     const professional = await prisma.professional.findFirst({
