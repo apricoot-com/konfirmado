@@ -64,7 +64,8 @@ export function IntegrationSettings({ tenant }: IntegrationSettingsProps) {
     }
   }
 
-  const examplePayload = {
+  const exampleBookingCreated = {
+    event: "booking.created",
     tenant_id: tenant.id,
     booking_id: "bk_789",
     servicio: {
@@ -100,6 +101,68 @@ export function IntegrationSettings({ tenant }: IntegrationSettingsProps) {
     seguridad: {
       timestamp: "2025-10-10T15:05:12Z",
       firma_hmac: "c7a9f..."
+    }
+  }
+
+  const exampleBookingCancelled = {
+    event: "booking.cancelled",
+    tenant_id: tenant.id,
+    booking_id: "bk_789",
+    servicio: {
+      id: "srv_001",
+      nombre: "Consulta general"
+    },
+    profesional: {
+      id: "pro_045",
+      nombre: "Dr. López"
+    },
+    cita: {
+      inicio: "2025-10-10T15:00:00Z",
+      fin: "2025-10-10T15:30:00Z",
+      timezone: "America/Bogota"
+    },
+    usuario: {
+      nombre: "Juan Pérez",
+      email: "juan@mail.com"
+    },
+    cancelacion: {
+      fecha: "2025-10-09T10:30:00Z",
+      razon: "Usuario canceló la cita"
+    },
+    seguridad: {
+      timestamp: "2025-10-09T10:30:15Z",
+      firma_hmac: "d8b0g..."
+    }
+  }
+
+  const exampleBookingRescheduled = {
+    event: "booking.rescheduled",
+    tenant_id: tenant.id,
+    booking_id: "bk_789",
+    servicio: {
+      id: "srv_001",
+      nombre: "Consulta general"
+    },
+    profesional: {
+      id: "pro_045",
+      nombre: "Dr. López"
+    },
+    cita_anterior: {
+      inicio: "2025-10-10T15:00:00Z",
+      fin: "2025-10-10T15:30:00Z"
+    },
+    cita_nueva: {
+      inicio: "2025-10-12T10:00:00Z",
+      fin: "2025-10-12T10:30:00Z",
+      timezone: "America/Bogota"
+    },
+    usuario: {
+      nombre: "Juan Pérez",
+      email: "juan@mail.com"
+    },
+    seguridad: {
+      timestamp: "2025-10-09T14:20:00Z",
+      firma_hmac: "e9c1h..."
     }
   }
 
@@ -180,22 +243,51 @@ export function IntegrationSettings({ tenant }: IntegrationSettingsProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Documentación del Callback</CardTitle>
+          <CardTitle>Documentación de Webhooks</CardTitle>
           <CardDescription>
-            Ejemplo del payload JSON que recibirás en tu callback URL
+            Tu callback URL recibirá notificaciones para los siguientes eventos
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6">
+          {/* Event Types */}
+          <div className="space-y-2">
+            <h4 className="font-medium text-sm">Eventos disponibles</h4>
+            <div className="grid gap-2">
+              <div className="flex items-start gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                <div className="w-2 h-2 bg-green-600 rounded-full mt-1.5"></div>
+                <div>
+                  <p className="font-medium text-sm text-green-900">booking.created</p>
+                  <p className="text-xs text-green-700">Se envía cuando un pago es confirmado y la reserva es creada</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <div className="w-2 h-2 bg-yellow-600 rounded-full mt-1.5"></div>
+                <div>
+                  <p className="font-medium text-sm text-yellow-900">booking.cancelled</p>
+                  <p className="text-xs text-yellow-700">Se envía cuando un usuario cancela su reserva</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="w-2 h-2 bg-blue-600 rounded-full mt-1.5"></div>
+                <div>
+                  <p className="font-medium text-sm text-blue-900">booking.rescheduled</p>
+                  <p className="text-xs text-blue-700">Se envía cuando un usuario reagenda su cita</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Booking Created Example */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <Label>Payload de ejemplo</Label>
+              <Label>1. Reserva Creada (booking.created)</Label>
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => handleCopy(JSON.stringify(examplePayload, null, 2), 'payload')}
+                onClick={() => handleCopy(JSON.stringify(exampleBookingCreated, null, 2), 'created')}
               >
-                {copiedField === 'payload' ? (
+                {copiedField === 'created' ? (
                   <>
                     <Check className="w-4 h-4 mr-2" />
                     Copiado
@@ -209,9 +301,69 @@ export function IntegrationSettings({ tenant }: IntegrationSettingsProps) {
               </Button>
             </div>
             <Textarea
-              value={JSON.stringify(examplePayload, null, 2)}
+              value={JSON.stringify(exampleBookingCreated, null, 2)}
               readOnly
-              className="font-mono text-xs h-96"
+              className="font-mono text-xs h-64"
+            />
+          </div>
+
+          {/* Booking Cancelled Example */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <Label>2. Reserva Cancelada (booking.cancelled)</Label>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => handleCopy(JSON.stringify(exampleBookingCancelled, null, 2), 'cancelled')}
+              >
+                {copiedField === 'cancelled' ? (
+                  <>
+                    <Check className="w-4 h-4 mr-2" />
+                    Copiado
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4 mr-2" />
+                    Copiar
+                  </>
+                )}
+              </Button>
+            </div>
+            <Textarea
+              value={JSON.stringify(exampleBookingCancelled, null, 2)}
+              readOnly
+              className="font-mono text-xs h-48"
+            />
+          </div>
+
+          {/* Booking Rescheduled Example */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <Label>3. Reserva Reagendada (booking.rescheduled)</Label>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => handleCopy(JSON.stringify(exampleBookingRescheduled, null, 2), 'rescheduled')}
+              >
+                {copiedField === 'rescheduled' ? (
+                  <>
+                    <Check className="w-4 h-4 mr-2" />
+                    Copiado
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4 mr-2" />
+                    Copiar
+                  </>
+                )}
+              </Button>
+            </div>
+            <Textarea
+              value={JSON.stringify(exampleBookingRescheduled, null, 2)}
+              readOnly
+              className="font-mono text-xs h-48"
             />
           </div>
 

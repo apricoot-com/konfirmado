@@ -185,25 +185,52 @@ export default async function ConfirmationPage({
               </div>
             )}
             
-            {/* Retry Payment Button */}
-            {!isPaid && !isPending && booking.payment && (
-              <div className="border-t border-gray-200 pt-6">
+            {/* Action Buttons */}
+            <div className="border-t border-gray-200 pt-6">
+              {isPaid ? (
+                // Success - Return to merchant button
+                <div className="flex flex-col gap-3">
+                  {redirectUrl && !redirectUrl.includes('example.com') && (
+                    <a
+                      href={`${redirectUrl}?status=ok&ref=${booking.id}`}
+                      className="w-full inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                    >
+                      Continuar
+                    </a>
+                  )}
+                  <div className="flex gap-3">
+                    <a
+                      href={`/booking/reschedule/${booking.id}?token=${booking.rescheduleToken}`}
+                      className="flex-1 inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                    >
+                      Reagendar
+                    </a>
+                    <a
+                      href={`/booking/cancel/${booking.id}?token=${booking.cancellationToken}`}
+                      className="flex-1 inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                    >
+                      Cancelar
+                    </a>
+                  </div>
+                </div>
+              ) : !isPending && booking.payment ? (
+                // Failed - Retry or return
                 <div className="flex flex-col sm:flex-row gap-3">
                   <a
                     href={`/book/${booking.link.publicId}?retry=${booking.id}`}
-                    className="flex-1 inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    className="flex-1 inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                   >
                     Reintentar Pago
                   </a>
                   <a
                     href={redirectUrl || '/'}
-                    className="flex-1 inline-flex items-center justify-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    className="flex-1 inline-flex items-center justify-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                   >
                     Volver al inicio
                   </a>
                 </div>
-              </div>
-            )}
+              ) : null}
+            </div>
           </div>
           
           {/* Redirect notice */}
