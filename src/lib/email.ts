@@ -143,7 +143,7 @@ export async function sendBookingConfirmationEmail(params: {
               <span class="label">Hora:</span> ${time}
             </div>
             <div class="detail">
-              <span class="label">Monto pagado:</span> $${(amount / 100).toLocaleString('es-CO')} COP
+              <span class="label">Monto pagado:</span> $${amount.toLocaleString('es-CO')} COP
             </div>
             
             ${confirmationMessage ? `
@@ -282,7 +282,7 @@ export async function sendPaymentReminderEmail(params: {
           <p>Te recordamos que tienes un pago pendiente:</p>
           <div class="alert">
             <p><strong>Servicio:</strong> ${serviceName}</p>
-            <p><strong>Monto:</strong> $${(amount / 100).toLocaleString('es-CO')} COP</p>
+            <p><strong>Monto:</strong> $${amount.toLocaleString('es-CO')} COP</p>
             <p><strong>Fecha límite:</strong> ${dueDate.toLocaleDateString('es-CO')}</p>
           </div>
           <p>Por favor, completa tu pago antes de la fecha límite para mantener tu reserva.</p>
