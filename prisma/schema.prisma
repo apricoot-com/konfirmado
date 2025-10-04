@@ -231,6 +231,9 @@ model Booking {
   // Google Calendar integration
   calendarEventId String?   // Google Calendar event ID
   
+  // Cancellation token for secure cancel links
+  cancellationToken String? @unique
+  
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   

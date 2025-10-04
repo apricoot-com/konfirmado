@@ -97,8 +97,15 @@ export async function sendBookingConfirmationEmail(params: {
   time: string
   amount: number
   confirmationMessage?: string
+  bookingId?: string
+  cancellationToken?: string
 }) {
-  const { email, name, serviceName, professionalName, date, time, amount, confirmationMessage } = params
+  const { email, name, serviceName, professionalName, date, time, amount, confirmationMessage, bookingId, cancellationToken } = params
+  
+  // Generate cancel link if token provided
+  const cancelUrl = bookingId && cancellationToken 
+    ? `${process.env.NEXT_PUBLIC_APP_URL}/booking/cancel/${bookingId}?token=${cancellationToken}`
+    : null
   
   const html = `
     <!DOCTYPE html>
@@ -159,6 +166,22 @@ export async function sendBookingConfirmationEmail(params: {
               <li>Te contactaremos si necesitamos información adicional</li>
               <li>Recuerda llegar 5 minutos antes</li>
             </ul>
+            
+            ${cancelUrl ? `
+              <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd;">
+                <p style="text-align: center; color: #666; font-size: 14px;">
+                  ¿Necesitas cancelar tu reserva?
+                </p>
+                <p style="text-align: center; margin-top: 10px;">
+                  <a href="${cancelUrl}" style="color: #dc2626; text-decoration: underline;">
+                    Cancelar reserva
+                  </a>
+                </p>
+                <p style="text-align: center; color: #999; font-size: 12px; margin-top: 5px;">
+                  No se realizarán reembolsos
+                </p>
+              </div>
+            ` : ''}
           </div>
           <div class="footer">
             <p>Gracias por usar Konfirmado</p>
@@ -243,6 +266,87 @@ export async function sendCalendarInvitationEmail(params: {
   return sendEmail({
     to: email,
     subject: 'Conecta tu calendario - Konfirmado',
+    html,
+  })
+}
+
+/**
+ * Send booking cancellation confirmation email
+ */
+export async function sendCancellationEmail(params: {
+  email: string
+  name: string
+  serviceName: string
+  professionalName: string
+  date: string
+  time: string
+}) {
+  const { email, name, serviceName, professionalName, date, time } = params
+  
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background-color: #dc2626; color: white; padding: 20px; text-align: center; }
+          .content { padding: 20px; background-color: #f9f9f9; }
+          .detail { margin: 10px 0; }
+          .label { font-weight: bold; color: #666; }
+          .info-box { 
+            background-color: #fef2f2; 
+            border-left: 4px solid #dc2626; 
+            padding: 15px; 
+            margin: 20px 0;
+          }
+          .footer { margin-top: 30px; font-size: 12px; color: #666; text-align: center; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>✗ Reserva Cancelada</h1>
+          </div>
+          <div class="content">
+            <p>Hola ${name},</p>
+            <p>Tu reserva ha sido cancelada exitosamente.</p>
+            
+            <div class="info-box">
+              <strong>Detalles de la reserva cancelada:</strong>
+            </div>
+            
+            <div class="detail">
+              <span class="label">Servicio:</span> ${serviceName}
+            </div>
+            <div class="detail">
+              <span class="label">Profesional:</span> ${professionalName}
+            </div>
+            <div class="detail">
+              <span class="label">Fecha:</span> ${date}
+            </div>
+            <div class="detail">
+              <span class="label">Hora:</span> ${time}
+            </div>
+            
+            <p style="margin-top: 20px;">Si cancelaste por error o necesitas reagendar, por favor contáctanos.</p>
+            
+            <p style="margin-top: 20px; color: #666; font-size: 14px;">
+              <strong>Nota:</strong> No se realizarán reembolsos según nuestra política de cancelación.
+            </p>
+          </div>
+          <div class="footer">
+            <p>Gracias por usar Konfirmado</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `
+
+  return sendEmail({
+    to: email,
+    subject: `Reserva cancelada - ${serviceName}`,
     html,
   })
 }
