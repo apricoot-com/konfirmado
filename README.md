@@ -59,6 +59,38 @@ Konfirmado es una plataforma que permite a negocios reducir no-shows mediante co
 
 ## 🛠️ Instalación
 
+### Opción A: Dev Container (Recomendado) 🐳
+
+**Todo incluido: PostgreSQL, Mailhog, MinIO**
+
+1. **Prerequisitos:**
+   - Docker Desktop instalado
+   - VS Code con extensión "Dev Containers"
+
+2. **Abrir en container:**
+   ```bash
+   code .
+   # VS Code preguntará: "Reopen in Container" → Click!
+   ```
+
+3. **Configurar:**
+   ```bash
+   cp .env.devcontainer.example .env.local
+   pnpm prisma db push
+   pnpm dev
+   ```
+
+**Servicios disponibles:**
+- App: http://localhost:3000
+- Mailhog (emails): http://localhost:8025
+- MinIO (storage): http://localhost:9001
+
+📚 [Ver guía completa](./.devcontainer/README.md)
+
+---
+
+### Opción B: Instalación Local
+
 ### 1. Clonar y configurar
 
 ```bash

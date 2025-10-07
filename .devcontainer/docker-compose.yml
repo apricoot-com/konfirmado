@@ -1,0 +1,105 @@
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+      args:
+        USER_UID: 1000
+        USER_GID: 1000
+    volumes:
+      - ..:/workspace:cached
+      - node_modules:/workspace/node_modules
+      - pnpm-store:/home/node/.local/share/pnpm/store
+    command: sleep infinity
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://konfirmado:dev_password@db:5432/konfirmado_dev
+      - NEXTAUTH_URL=http://localhost:3000
+      - NEXT_PUBLIC_APP_URL=http://localhost:3000
+    depends_on:
+      - db
+      - mailhog
+      - minio
+    networks:
+      - konfirmado-network
+    user: "1000:1000"
+
+  db:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: konfirmado
+      POSTGRES_PASSWORD: dev_password
+      POSTGRES_DB: konfirmado_dev
+    ports:
+      - "5432:5432"
+    networks:
+      - konfirmado-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U konfirmado"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    restart: unless-stopped
+    ports:
+      - "1025:1025"  # SMTP server
+      - "8025:8025"  # Web UI
+    environment:
+      MH_STORAGE: memory
+      MH_SMTP_BIND_ADDR: 0.0.0.0:1025
+      MH_UI_BIND_ADDR: 0.0.0.0:8025
+      MH_API_BIND_ADDR: 0.0.0.0:8025
+    networks:
+      - konfirmado-network
+
+  minio:
+    image: minio/minio:latest
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"  # API
+      - "9001:9001"  # Console
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - minio-data:/data
+    networks:
+      - konfirmado-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  # MinIO client to create bucket on startup
+  minio-init:
+    image: minio/mc:latest
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      sleep 5;
+      /usr/bin/mc alias set myminio http://minio:9000 minioadmin minioadmin;
+      /usr/bin/mc mb myminio/konfirmado-uploads --ignore-existing;
+      /usr/bin/mc anonymous set public myminio/konfirmado-uploads;
+      exit 0;
+      "
+    networks:
+      - konfirmado-network
+
+volumes:
+  postgres-data:
+  minio-data:
+  node_modules:
+  pnpm-store:
+
+networks:
+  konfirmado-network:
+    driver: bridge

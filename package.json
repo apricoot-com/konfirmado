@@ -6,6 +6,7 @@
     "dev": "next dev --turbopack",
     "build": "prisma generate && next build --turbopack",
     "start": "next start",
+    "prisma": "prisma db push --accept-data-loss",
     "postinstall": "prisma generate",
     "vercel-build": "prisma generate && prisma db push --accept-data-loss && next build --turbopack"
   },
