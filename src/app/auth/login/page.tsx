@@ -1,17 +1,18 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { signIn } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { AlertCircle, Loader2 } from 'lucide-react'
+import { AlertCircle, Loader2, CheckCircle } from 'lucide-react'
 
 export default function LoginPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -19,6 +20,13 @@ export default function LoginPage() {
   const [showResendVerification, setShowResendVerification] = useState(false)
   const [resendSuccess, setResendSuccess] = useState(false)
   const [resendLoading, setResendLoading] = useState(false)
+  const [accountDeleted, setAccountDeleted] = useState(false)
+
+  useEffect(() => {
+    if (searchParams.get('deleted') === 'true') {
+      setAccountDeleted(true)
+    }
+  }, [searchParams])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -88,6 +96,18 @@ export default function LoginPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+            {accountDeleted && (
+              <div className="p-3 text-sm text-green-800 bg-green-50 border border-green-200 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4" />
+                  <span className="font-medium">Cuenta eliminada exitosamente</span>
+                </div>
+                <p className="mt-1 text-xs text-green-700">
+                  Tu cuenta y todos los datos asociados han sido eliminados permanentemente.
+                </p>
+              </div>
+            )}
+
             {error && (
               <div className="p-3 text-sm text-red-800 bg-red-50 border border-red-200 rounded-lg">
                 <div className="flex items-center gap-2 mb-2">

@@ -3,6 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { BrandingSettings } from '@/components/settings/branding-settings'
 import { IntegrationSettings } from '@/components/settings/integration-settings'
 import { PaymentSettings } from '@/components/settings/payment-settings'
+import { DangerZoneSettings } from '@/components/settings/danger-zone-settings'
 
 export default async function SettingsPage() {
   const { tenant } = await requireAuth()
@@ -19,6 +20,7 @@ export default async function SettingsPage() {
           <TabsTrigger value="branding">Marca</TabsTrigger>
           <TabsTrigger value="integration">Integración</TabsTrigger>
           <TabsTrigger value="payments">Pagos</TabsTrigger>
+          <TabsTrigger value="danger" className="text-red-600">Zona de Peligro</TabsTrigger>
         </TabsList>
 
         <TabsContent value="branding">
@@ -31,6 +33,10 @@ export default async function SettingsPage() {
 
         <TabsContent value="payments">
           <PaymentSettings tenant={tenant} />
+        </TabsContent>
+
+        <TabsContent value="danger">
+          <DangerZoneSettings tenant={tenant} />
         </TabsContent>
       </Tabs>
     </div>
