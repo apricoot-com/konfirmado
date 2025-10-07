@@ -1,6 +1,17 @@
 import { Resend } from 'resend'
+import nodemailer from 'nodemailer'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
+
+// Check if we're in development mode
+const isDev = process.env.NODE_ENV === 'development'
+
+// Create Mailhog transporter for development
+const mailhogTransporter = isDev ? nodemailer.createTransport({
+  host: process.env.SMTP_HOST || 'mailhog',
+  port: parseInt(process.env.SMTP_PORT || '1025'),
+  ignoreTLS: true,
+}) : null
 
 interface SendEmailParams {
   to: string
@@ -10,12 +21,28 @@ interface SendEmailParams {
 }
 
 /**
- * Send an email using Resend
+ * Send an email using Resend (production) or Mailhog (development)
  */
 export async function sendEmail({ to, subject, html, from }: SendEmailParams) {
+  const fromAddress = from || 'Konfirmado <noreply@konfirmado.com>'
+  
   try {
+    // Use Mailhog in development
+    if (isDev && mailhogTransporter) {
+      console.log(`📧 [DEV] Sending email to ${to} via Mailhog`)
+      const info = await mailhogTransporter.sendMail({
+        from: fromAddress,
+        to,
+        subject,
+        html,
+      })
+      console.log(`✓ Email sent to Mailhog: http://localhost:8025`)
+      return { id: info.messageId }
+    }
+    
+    // Use Resend in production
     const { data, error } = await resend.emails.send({
-      from: from || 'Konfirmado <noreply@konfirmado.com>', // Use your verified domain
+      from: fromAddress,
       to,
       subject,
       html,
@@ -423,7 +450,7 @@ export async function sendPaymentReminderEmail(params: {
  * Send email verification
  */
 export async function sendVerificationEmail(email: string, token: string) {
-  const verifyUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/verify-email?token=${token}`
+  const verifyUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/verify?token=${token}`
   
   const html = `
     <!DOCTYPE html>

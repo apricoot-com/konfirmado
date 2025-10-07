@@ -32,7 +32,7 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
-!.env.devcontainer.example
+!.env.local.example
 
 # vercel
 .vercel
@@ -40,7 +40,4 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-
-# dev container
-.devcontainer/.env
 .pnpm-store/

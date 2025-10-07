@@ -79,17 +79,13 @@ export async function POST(req: NextRequest) {
       return { user, tenant, token }
     })
     
-    // Send verification email
-    if (process.env.RESEND_API_KEY) {
-      try {
-        await sendVerificationEmail(email, result.token)
-        console.log(`✓ Verification email sent to ${email}`)
-      } catch (error) {
-        console.error('Failed to send verification email:', error)
-        // Don't fail registration if email fails
-      }
-    } else {
-      console.warn('⚠️ RESEND_API_KEY not set - verification email not sent')
+    // Send verification email (uses Mailhog in dev, Resend in prod)
+    try {
+      await sendVerificationEmail(email, result.token)
+      console.log(`✓ Verification email sent to ${email}`)
+    } catch (error) {
+      console.error('Failed to send verification email:', error)
+      // Don't fail registration if email fails
     }
     
     return NextResponse.json({
