@@ -6,9 +6,10 @@ const resend = new Resend(process.env.RESEND_API_KEY)
 // Check if we're in development mode
 const isDev = process.env.NODE_ENV === 'development'
 
+
 // Create Mailhog transporter for development
 const mailhogTransporter = isDev ? nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'mailhog',
+  host: process.env.SMTP_HOST || 'localhost',
   port: parseInt(process.env.SMTP_PORT || '1025'),
   ignoreTLS: true,
 }) : null

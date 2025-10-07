@@ -79,14 +79,20 @@ export async function DELETE(req: NextRequest) {
         where: { tenantId: tenant.id },
       })
       
-      // 3. Delete slot holds
-      await tx.slotHold.deleteMany({
-        where: {
-          professional: {
-            tenantId: tenant.id,
-          },
-        },
+      // 3. Delete slot holds (get professional IDs first)
+      const professionals = await tx.professional.findMany({
+        where: { tenantId: tenant.id },
+        select: { id: true },
       })
+      const professionalIds = professionals.map(p => p.id)
+      
+      if (professionalIds.length > 0) {
+        await tx.slotHold.deleteMany({
+          where: {
+            professionalId: { in: professionalIds },
+          },
+        })
+      }
       
       // 4. Delete bookings
       await tx.booking.deleteMany({

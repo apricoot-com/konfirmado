@@ -36,16 +36,19 @@ export async function POST(req: NextRequest) {
       )
     }
     
-    // Update user email verification
-    await prisma.$transaction([
-      prisma.user.update({
+    // Update user email verification and delete token
+    await prisma.$transaction(async (tx) => {
+      // Update user
+      await tx.user.update({
         where: { email: verificationToken.identifier },
         data: { emailVerified: new Date() },
-      }),
-      prisma.verificationToken.delete({
+      })
+      
+      // Delete token (use deleteMany to avoid error if already deleted)
+      await tx.verificationToken.deleteMany({
         where: { token },
-      }),
-    ])
+      })
+    })
     
     return NextResponse.json({
       success: true,
