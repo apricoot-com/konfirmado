@@ -66,6 +66,11 @@ export async function POST(req: NextRequest) {
         },
       })
       
+      // Delete any existing verification tokens for this email
+      await tx.verificationToken.deleteMany({
+        where: { identifier: email },
+      })
+      
       // Create verification token
       const token = generateToken(32)
       await tx.verificationToken.create({

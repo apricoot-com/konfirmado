@@ -43,17 +43,30 @@ export default function LoginPage() {
       })
 
       if (result?.error) {
-        if (result.error === 'EMAIL_NOT_VERIFIED') {
-          setError('Tu correo electrónico aún no ha sido verificado.')
-          setShowResendVerification(true)
-        } else {
-          setError('Credenciales inválidas. Por favor intenta nuevamente.')
+        // Login failed - check if it's because email is not verified
+        const checkResponse = await fetch('/api/auth/check-verification', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        })
+        
+        if (checkResponse.ok) {
+          const data = await checkResponse.json()
+          if (!data.verified) {
+            setError('Tu correo electrónico aún no ha sido verificado.')
+            setShowResendVerification(true)
+            return
+          }
         }
+        
+        // Not an email verification issue - wrong credentials
+        setError('Credenciales inválidas. Por favor verifica tu email y contraseña.')
       } else {
         router.push('/dashboard')
         router.refresh()
       }
     } catch (error) {
+      console.error('Login error:', error)
       setError('Ocurrió un error. Por favor intenta nuevamente.')
     } finally {
       setIsLoading(false)

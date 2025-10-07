@@ -73,20 +73,22 @@ export async function POST(req: NextRequest) {
       },
     })
     
-    // Send verification email
-    if (process.env.RESEND_API_KEY) {
-      try {
-        await sendVerificationEmail(email, token)
-      } catch (error) {
-        console.error('Failed to send verification email:', error)
-        return NextResponse.json(
-          { error: 'Error al enviar el correo' },
-          { status: 500 }
-        )
-      }
+    // Send verification email (uses Mailhog in dev, Resend in prod)
+    try {
+      await sendVerificationEmail(email, token)
+      console.log(`✓ Verification email resent to ${email}`)
+    } catch (error) {
+      console.error('Failed to send verification email:', error)
+      return NextResponse.json(
+        { error: 'Error al enviar el correo' },
+        { status: 500 }
+      )
     }
     
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ 
+      success: true,
+      message: 'Correo de verificación enviado' 
+    })
   } catch (error) {
     console.error('Resend verification error:', error)
     return NextResponse.json(
