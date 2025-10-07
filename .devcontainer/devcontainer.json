@@ -73,6 +73,12 @@
     "ghcr.io/devcontainers/features/git:1": {}
   },
   
+  // Mount git config and SSH keys from host
+  "mounts": [
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.gitconfig,target=/home/node/.gitconfig,type=bind,consistency=cached",
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.ssh,target=/home/node/.ssh,type=bind,consistency=cached"
+  ],
+  
   // Uncomment to connect as root instead
   // "remoteUser": "root"
   "remoteUser": "node"
