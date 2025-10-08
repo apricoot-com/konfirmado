@@ -13,6 +13,7 @@ interface ImageUploadProps {
   disabled?: boolean
   aspectRatio?: 'square' | 'video' | 'auto'
   maxSizeMB?: number
+  maxHeight?: string
 }
 
 export function ImageUpload({
@@ -22,6 +23,7 @@ export function ImageUpload({
   disabled = false,
   aspectRatio = 'auto',
   maxSizeMB = 5,
+  maxHeight,
 }: ImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState('')
@@ -105,6 +107,9 @@ export function ImageUpload({
     ? 'max-h-32 w-auto mx-auto object-contain'
     : 'w-full h-full object-contain'
 
+  // Apply custom max height if provided
+  const containerStyle = maxHeight ? { maxHeight } : {}
+
   return (
     <div className="space-y-3">
       <Label>{label}</Label>
@@ -112,7 +117,10 @@ export function ImageUpload({
       {/* Preview */}
       {value && (
         <div className="relative group">
-          <div className={`border border-gray-200 rounded-lg overflow-hidden bg-gray-50 flex items-center justify-center ${aspectRatioClass}`}>
+          <div 
+            className={`border border-gray-200 rounded-lg overflow-hidden bg-gray-50 flex items-center justify-center ${aspectRatioClass}`}
+            style={containerStyle}
+          >
             <img
               src={value}
               alt="Preview"

@@ -124,57 +124,67 @@ export function ProfessionalForm({ professional, services }: ProfessionalFormPro
             </div>
           )}
 
-          <div className="space-y-2">
-            <Label htmlFor="name">Nombre *</Label>
-            <Input
-              id="name"
-              name="name"
-              type="text"
-              placeholder="Dr. Juan Pérez"
-              value={formData.name}
-              onChange={handleChange}
-              required
-              disabled={isLoading}
-            />
-          </div>
+          {/* Photo and Basic Info Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Photo Upload - Left Side */}
+            <div className="lg:col-span-1">
+              <ImageUpload
+                label="Foto del profesional"
+                value={formData.photoUrl}
+                onChange={(url) => setFormData(prev => ({ ...prev, photoUrl: url }))}
+                disabled={isLoading}
+                aspectRatio="square"
+                maxSizeMB={5}
+                maxHeight="200px"
+              />
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              placeholder="doctor@ejemplo.com"
-              value={formData.email}
-              onChange={handleChange}
-              disabled={isLoading}
-            />
-            <p className="text-xs text-gray-500">
-              Se enviará un correo con el link de conexión de calendario
-            </p>
-          </div>
+            {/* Basic Info - Right Side */}
+            <div className="lg:col-span-2 space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Nombre *</Label>
+                <Input
+                  id="name"
+                  name="name"
+                  type="text"
+                  placeholder="Dr. Juan Pérez"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
+                  disabled={isLoading}
+                />
+              </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="description">Descripción</Label>
-            <Textarea
-              id="description"
-              name="description"
-              placeholder="Especialidad, experiencia, etc."
-              value={formData.description}
-              onChange={handleChange}
-              disabled={isLoading}
-              rows={3}
-            />
-          </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="doctor@ejemplo.com"
+                  value={formData.email}
+                  onChange={handleChange}
+                  disabled={isLoading}
+                />
+                <p className="text-xs text-gray-500">
+                  Se enviará un correo con el link de conexión de calendario
+                </p>
+              </div>
 
-          <ImageUpload
-            label="Foto del profesional"
-            value={formData.photoUrl}
-            onChange={(url) => setFormData(prev => ({ ...prev, photoUrl: url }))}
-            disabled={isLoading}
-            aspectRatio="square"
-            maxSizeMB={3}
-          />
+              <div className="space-y-2">
+                <Label htmlFor="description">Descripción</Label>
+                <Textarea
+                  id="description"
+                  name="description"
+                  placeholder="Especialidad, experiencia, etc."
+                  value={formData.description}
+                  onChange={handleChange}
+                  disabled={isLoading}
+                  rows={3}
+                />
+              </div>
+            </div>
+          </div>
 
           <div className="space-y-2">
             <Label>Servicios que ofrece</Label>

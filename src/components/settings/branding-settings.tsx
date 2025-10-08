@@ -85,29 +85,38 @@ export function BrandingSettings({ tenant }: BrandingSettingsProps) {
             </div>
           )}
 
-          <div className="space-y-2">
-            <Label htmlFor="name">Nombre de la empresa</Label>
-            <Input
-              id="name"
-              name="name"
-              type="text"
-              value={formData.name}
-              onChange={handleChange}
-              required
-              disabled={isLoading}
-            />
-          </div>
+          {/* Logo and Company Name Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Logo Upload - Left Side */}
+            <div className="lg:col-span-1">
+              <ImageUpload
+                label="Logo"
+                value={formData.logoUrl}
+                onChange={(url) => setFormData(prev => ({ ...prev, logoUrl: url }))}
+                disabled={isLoading}
+                aspectRatio="auto"
+                maxSizeMB={2}
+                maxHeight="200px"
+              />
+            </div>
 
-          <ImageUpload
-            label="Logo"
-            value={formData.logoUrl}
-            onChange={(url) => setFormData(prev => ({ ...prev, logoUrl: url }))}
-            disabled={isLoading}
-            aspectRatio="auto"
-            maxSizeMB={2}
-          />
+            {/* Company Name and Colors - Right Side */}
+            <div className="lg:col-span-2 space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Nombre de la empresa *</Label>
+                <Input
+                  id="name"
+                  name="name"
+                  type="text"
+                  placeholder="Mi Empresa"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
+                  disabled={isLoading}
+                />
+              </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="primaryColor">Color primario</Label>
               <div className="flex gap-2">
@@ -149,6 +158,8 @@ export function BrandingSettings({ tenant }: BrandingSettingsProps) {
                   placeholder="#10B981"
                   disabled={isLoading}
                 />
+              </div>
+            </div>
               </div>
             </div>
           </div>

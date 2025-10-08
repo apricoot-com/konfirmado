@@ -125,7 +125,23 @@ export function ServiceForm({ service, professionals }: ServiceFormProps) {
             </div>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Image and Basic Info Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Image Upload - Left Side */}
+            <div className="lg:col-span-1">
+              <ImageUpload
+                label="Imagen del servicio"
+                value={formData.imageUrl}
+                onChange={(url) => setFormData(prev => ({ ...prev, imageUrl: url }))}
+                disabled={isLoading}
+                aspectRatio="square"
+                maxSizeMB={5}
+                maxHeight="200px"
+              />
+            </div>
+
+            {/* Basic Info - Right Side */}
+            <div className="lg:col-span-2 space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name">Nombre del servicio *</Label>
               <Input
@@ -140,36 +156,37 @@ export function ServiceForm({ service, professionals }: ServiceFormProps) {
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="durationMinutes">Duración (minutos) *</Label>
-              <Input
-                id="durationMinutes"
-                name="durationMinutes"
-                type="number"
-                min="15"
-                max="480"
-                step="15"
-                placeholder="30"
-                value={formData.durationMinutes}
-                onChange={handleChange}
-                required
-                disabled={isLoading}
-              />
-            </div>
-          </div>
+              <div className="space-y-2">
+                <Label htmlFor="durationMinutes">Duración (minutos) *</Label>
+                <Input
+                  id="durationMinutes"
+                  name="durationMinutes"
+                  type="number"
+                  min="15"
+                  max="480"
+                  step="15"
+                  placeholder="30"
+                  value={formData.durationMinutes}
+                  onChange={handleChange}
+                  required
+                  disabled={isLoading}
+                />
+              </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="description">Descripción *</Label>
-            <Textarea
-              id="description"
-              name="description"
-              placeholder="Describe el servicio que ofreces..."
-              value={formData.description}
-              onChange={handleChange}
-              required
-              disabled={isLoading}
-              rows={4}
-            />
+              <div className="space-y-2">
+                <Label htmlFor="description">Descripción *</Label>
+                <Textarea
+                  id="description"
+                  name="description"
+                  placeholder="Describe el servicio que ofreces..."
+                  value={formData.description}
+                  onChange={handleChange}
+                  required
+                  disabled={isLoading}
+                  rows={4}
+                />
+              </div>
+            </div>
           </div>
 
           <div className="space-y-2">
@@ -187,15 +204,6 @@ export function ServiceForm({ service, professionals }: ServiceFormProps) {
               Este mensaje se mostrará al cliente después de completar el pago exitosamente
             </p>
           </div>
-
-          <ImageUpload
-            label="Imagen del servicio"
-            value={formData.imageUrl}
-            onChange={(url) => setFormData(prev => ({ ...prev, imageUrl: url }))}
-            disabled={isLoading}
-            aspectRatio="video"
-            maxSizeMB={5}
-          />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
