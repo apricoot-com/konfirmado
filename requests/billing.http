@@ -1,0 +1,22 @@
+### Subscription Billing Cron
+# Processes monthly subscription renewals
+# Runs daily at 2 AM (configured in vercel.json)
+
+### Trigger billing cron (manual)
+POST http://localhost:3000/api/cron/billing
+Authorization: Bearer dev-cron-secret
+Content-Type: application/json
+
+###
+
+### Trigger billing cron (GET - for testing)
+GET http://localhost:3000/api/cron/billing
+Authorization: Bearer dev-cron-secret
+
+###
+
+### Production billing cron (replace with your domain)
+POST https://your-domain.vercel.app/api/cron/billing
+Authorization: Bearer {{$processEnv CRON_SECRET}}
+
+###

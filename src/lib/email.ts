@@ -505,3 +505,152 @@ export async function sendVerificationEmail(email: string, token: string) {
     html,
   })
 }
+
+/**
+ * Send subscription renewal success email
+ */
+export async function sendSubscriptionRenewalEmail({
+  email,
+  tenantName,
+  plan,
+  amount,
+  nextBillingDate,
+}: {
+  email: string
+  tenantName: string
+  plan: string
+  amount: number
+  nextBillingDate: string
+}) {
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; }
+          .footer { text-align: center; margin-top: 20px; color: #666; font-size: 12px; }
+          .button { display: inline-block; padding: 12px 24px; background: #667eea; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+          .details { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; }
+          .detail-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #e5e7eb; }
+          .detail-row:last-child { border-bottom: none; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>✅ Suscripción Renovada</h1>
+          </div>
+          <div class="content">
+            <p>Hola,</p>
+            <p>Tu suscripción de <strong>${tenantName}</strong> ha sido renovada exitosamente.</p>
+            
+            <div class="details">
+              <div class="detail-row">
+                <span><strong>Plan:</strong></span>
+                <span>${plan}</span>
+              </div>
+              <div class="detail-row">
+                <span><strong>Monto cobrado:</strong></span>
+                <span>$${amount.toLocaleString('es-CO')} COP</span>
+              </div>
+              <div class="detail-row">
+                <span><strong>Próxima facturación:</strong></span>
+                <span>${nextBillingDate}</span>
+              </div>
+            </div>
+            
+            <p>Tu servicio continuará sin interrupciones.</p>
+            <p>Gracias por confiar en Konfirmado.</p>
+          </div>
+          <div class="footer">
+            <p>© ${new Date().getFullYear()} Konfirmado. Todos los derechos reservados.</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `
+
+  return sendEmail({
+    to: email,
+    subject: `Suscripción renovada - ${tenantName}`,
+    html,
+  })
+}
+
+/**
+ * Send subscription payment failed email
+ */
+export async function sendSubscriptionFailedEmail({
+  email,
+  tenantName,
+  plan,
+  amount,
+  reason,
+}: {
+  email: string
+  tenantName: string
+  plan: string
+  amount: number
+  reason: string
+}) {
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; }
+          .footer { text-align: center; margin-top: 20px; color: #666; font-size: 12px; }
+          .button { display: inline-block; padding: 12px 24px; background: #ef4444; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+          .warning { background: #fef2f2; border-left: 4px solid #ef4444; padding: 15px; margin: 20px 0; border-radius: 4px; }
+          .details { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>⚠️ Problema con tu Suscripción</h1>
+          </div>
+          <div class="content">
+            <p>Hola,</p>
+            <p>No pudimos procesar el pago de tu suscripción de <strong>${tenantName}</strong>.</p>
+            
+            <div class="warning">
+              <strong>⚠️ Acción requerida:</strong> Tu suscripción ha sido cancelada. Para continuar usando el servicio, actualiza tu método de pago.
+            </div>
+            
+            <div class="details">
+              <p><strong>Plan:</strong> ${plan}</p>
+              <p><strong>Monto:</strong> $${amount.toLocaleString('es-CO')} COP</p>
+              <p><strong>Razón:</strong> ${reason}</p>
+            </div>
+            
+            <p style="text-align: center;">
+              <a href="${process.env.NEXTAUTH_URL}/dashboard/subscription" class="button">
+                Actualizar Método de Pago
+              </a>
+            </p>
+            
+            <p>Si tienes alguna pregunta, no dudes en contactarnos.</p>
+          </div>
+          <div class="footer">
+            <p>© ${new Date().getFullYear()} Konfirmado. Todos los derechos reservados.</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `
+
+  return sendEmail({
+    to: email,
+    subject: `⚠️ Problema con tu suscripción - ${tenantName}`,
+    html,
+  })
+}

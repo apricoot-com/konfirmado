@@ -4,24 +4,21 @@ import { createAcceptanceToken, createTokenTransaction, getPlatformWompiConfig }
 import { decrypt } from '@/lib/encryption'
 import { SUBSCRIPTION_PLANS } from '@/lib/subscriptions'
 import { generateToken } from '@/lib/utils'
+import { sendSubscriptionRenewalEmail, sendSubscriptionFailedEmail } from '@/lib/email'
+import { format } from 'date-fns'
+import { es } from 'date-fns/locale'
 
 /**
  * Cron job to charge monthly subscriptions
- * Should be called daily by a cron service (e.g., Vercel Cron, GitHub Actions)
+ * Should be called daily by a cron service (e.g., Vercel Cron)
  * 
- * TODO: This feature is not fully implemented yet
- * - Needs email notification system
- * - Needs proper error handling
- * - Needs retry logic
+ * Handles:
+ * - Charging active subscriptions that need renewal
+ * - Creating subscription records
+ * - Updating tenant subscription status
+ * - Handling failed payments
  */
 export async function POST(req: NextRequest) {
-  // TODO: Implement subscription billing
-  return NextResponse.json({
-    error: 'Subscription billing not yet implemented',
-  }, { status: 501 })
-  
-  /* DISABLED UNTIL FULLY IMPLEMENTED
-export async function POST_DISABLED(req: NextRequest) {
   try {
     // Verify cron secret
     const authHeader = req.headers.get('authorization')
@@ -39,6 +36,12 @@ export async function POST_DISABLED(req: NextRequest) {
         subscriptionPlan: { not: 'trial' },
         subscriptionEndsAt: { lte: now },
         paymentMethodInfo: { not: Prisma.JsonNull },
+      },
+      include: {
+        users: {
+          take: 1,
+          orderBy: { createdAt: 'asc' },
+        },
       },
     })
     
@@ -136,6 +139,21 @@ export async function POST_DISABLED(req: NextRequest) {
           
           results.success++
           console.log(`✓ Renewed ${tenant.name} - ${reference}`)
+          
+          // Send success email
+          try {
+            await sendSubscriptionRenewalEmail({
+              email: user.email,
+              tenantName: tenant.name,
+              plan: planDetails.name,
+              amount: planDetails.price,
+              nextBillingDate: format(periodEnd, "dd 'de' MMMM 'de' yyyy", { locale: es }),
+            })
+            console.log(`✓ Renewal email sent to ${user.email}`)
+          } catch (emailError) {
+            console.error(`Failed to send renewal email to ${user.email}:`, emailError)
+            // Don't fail the renewal if email fails
+          }
         } else {
           // Payment failed - mark as cancelled
           await prisma.tenant.update({
@@ -148,6 +166,21 @@ export async function POST_DISABLED(req: NextRequest) {
           results.failed++
           results.errors.push(`${tenant.name}: Payment ${transaction.data.status}`)
           console.log(`✗ Failed ${tenant.name} - ${transaction.data.status}`)
+          
+          // Send failure email
+          try {
+            await sendSubscriptionFailedEmail({
+              email: user.email,
+              tenantName: tenant.name,
+              plan: planDetails.name,
+              amount: planDetails.price,
+              reason: transaction.data.status_message || transaction.data.status,
+            })
+            console.log(`✓ Failure email sent to ${user.email}`)
+          } catch (emailError) {
+            console.error(`Failed to send failure email to ${user.email}:`, emailError)
+            // Don't fail if email fails
+          }
         }
       } catch (error: any) {
         results.failed++
@@ -167,5 +200,8 @@ export async function POST_DISABLED(req: NextRequest) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
-*/
+
+// Also allow GET for manual testing
+export async function GET(req: NextRequest) {
+  return POST(req)
 }

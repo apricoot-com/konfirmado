@@ -1,0 +1,21 @@
+### Cleanup Expired Holds Cron
+# Deletes expired slot holds (temporary reservations)
+# Runs every 5 minutes (configured in vercel.json)
+
+### Trigger cleanup cron (manual)
+GET http://localhost:3000/api/cron/cleanup-holds
+Authorization: Bearer dev-cron-secret
+
+###
+
+### Trigger cleanup cron (POST)
+POST http://localhost:3000/api/cron/cleanup-holds
+Authorization: Bearer dev-cron-secret
+
+###
+
+### Production cleanup cron (replace with your domain)
+GET https://your-domain.vercel.app/api/cron/cleanup-holds
+Authorization: Bearer {{$processEnv CRON_SECRET}}
+
+###
