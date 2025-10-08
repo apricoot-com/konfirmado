@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { auth } from '@/lib/auth'
+import { isSuperAdmin } from '@/lib/superadmin'
 import { DashboardLayoutClient } from '@/components/dashboard/layout-client'
 
 export default async function DashboardLayout({
@@ -13,5 +14,7 @@ export default async function DashboardLayout({
     redirect('/auth/login')
   }
   
-  return <DashboardLayoutClient user={session.user}>{children}</DashboardLayoutClient>
+  const isSuper = await isSuperAdmin()
+  
+  return <DashboardLayoutClient user={session.user} isSuperAdmin={isSuper}>{children}</DashboardLayoutClient>
 }

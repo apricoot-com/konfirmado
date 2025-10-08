@@ -1,17 +1,19 @@
 'use client'
 
 import { signOut } from 'next-auth/react'
-import { LogOut, User, Menu } from 'lucide-react'
+import { LogOut, User, Menu, Shield } from 'lucide-react'
+import Link from 'next/link'
 
 interface DashboardHeaderProps {
   user: {
     email?: string | null
     name?: string | null
   }
+  isSuperAdmin?: boolean
   onMenuClick?: () => void
 }
 
-export function DashboardHeader({ user, onMenuClick }: DashboardHeaderProps) {
+export function DashboardHeader({ user, isSuperAdmin = false, onMenuClick }: DashboardHeaderProps) {
   return (
     <header className="bg-white border-b border-gray-200 h-16">
       <div className="flex items-center justify-between h-full px-4 md:px-8">
@@ -26,6 +28,16 @@ export function DashboardHeader({ user, onMenuClick }: DashboardHeaderProps) {
         </div>
         
         <div className="flex items-center gap-4">
+          {isSuperAdmin && (
+            <Link
+              href="/superadmin/dashboard"
+              className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-purple-700 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors"
+            >
+              <Shield className="w-4 h-4" />
+              <span className="hidden md:inline">Superadmin</span>
+            </Link>
+          )}
+          
           <div className="hidden md:flex items-center gap-2 text-sm text-gray-700">
             <User className="w-4 h-4" />
             <span>{user.email}</span>

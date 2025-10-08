@@ -67,9 +67,10 @@ const navItems = [
 interface DashboardNavProps {
   isOpen?: boolean
   onClose?: () => void
+  isSuperAdmin?: boolean
 }
 
-export function DashboardNav({ isOpen = false, onClose }: DashboardNavProps) {
+export function DashboardNav({ isOpen = false, onClose, isSuperAdmin = false }: DashboardNavProps) {
   const pathname = usePathname()
   
   return (
