@@ -301,7 +301,7 @@ vercel env pull .env.production
 - [ ] Database credentials secured
 - [ ] API routes have authentication
 - [ ] CORS configured correctly
-- [ ] Rate limiting enabled (if using Upstash)
+- [ ] Rate limiting configured (database-based)
 
 ---
 

@@ -305,7 +305,7 @@ konfirmado/
 - **Encriptación**: Refresh tokens y secrets con AES-256-GCM
 - **Firmas**: HMAC-SHA256 para callbacks
 - **Validación**: Zod schemas en todos los endpoints
-- **Rate limiting**: Preparado (Upstash Redis)
+- **Rate limiting**: Database-based (email verification, etc.)
 - **HTTPS**: Obligatorio en producción
 - **Scopes mínimos**: Solo lectura de calendarios
 
