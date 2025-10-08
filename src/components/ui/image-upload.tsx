@@ -25,8 +25,6 @@ export function ImageUpload({
 }: ImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState('')
-  const [showUrlInput, setShowUrlInput] = useState(false)
-  const [urlInput, setUrlInput] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -80,14 +78,6 @@ export function ImageUpload({
       if (fileInputRef.current) {
         fileInputRef.current.value = ''
       }
-    }
-  }
-
-  const handleUrlSubmit = () => {
-    if (urlInput.trim()) {
-      onChange(urlInput.trim())
-      setUrlInput('')
-      setShowUrlInput(false)
     }
   }
 
@@ -145,84 +135,36 @@ export function ImageUpload({
         </div>
       )}
 
-      {/* Upload Options */}
+      {/* Upload Button */}
       {!value && (
-        <div className="space-y-2">
-          {/* File Upload Button */}
-          <div>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleFileSelect}
-              disabled={disabled || isUploading}
-              className="hidden"
-            />
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={disabled || isUploading}
-            >
-              {isUploading ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Subiendo...
-                </>
-              ) : (
-                <>
-                  <Upload className="w-4 h-4 mr-2" />
-                  Subir imagen
-                </>
-              )}
-            </Button>
-          </div>
-
-          {/* URL Input Toggle */}
-          {!showUrlInput ? (
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="w-full text-xs"
-              onClick={() => setShowUrlInput(true)}
-              disabled={disabled || isUploading}
-            >
-              O usar URL de imagen
-            </Button>
-          ) : (
-            <div className="flex gap-2">
-              <Input
-                type="url"
-                placeholder="https://ejemplo.com/imagen.jpg"
-                value={urlInput}
-                onChange={(e) => setUrlInput(e.target.value)}
-                disabled={disabled || isUploading}
-                className="text-sm"
-              />
-              <Button
-                type="button"
-                size="sm"
-                onClick={handleUrlSubmit}
-                disabled={disabled || isUploading || !urlInput.trim()}
-              >
-                OK
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setShowUrlInput(false)
-                  setUrlInput('')
-                }}
-                disabled={disabled || isUploading}
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
-          )}
+        <div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleFileSelect}
+            disabled={disabled || isUploading}
+            className="hidden"
+          />
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={disabled || isUploading}
+          >
+            {isUploading ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Subiendo...
+              </>
+            ) : (
+              <>
+                <Upload className="w-4 h-4 mr-2" />
+                Subir imagen
+              </>
+            )}
+          </Button>
         </div>
       )}
 

@@ -27,12 +27,6 @@ export default async function BookingsPage() {
     },
     paid: {
       icon: CheckCircle,
-      color: 'text-blue-600',
-      bg: 'bg-blue-100',
-      label: 'Pagada',
-    },
-    confirmed: {
-      icon: CheckCircle,
       color: 'text-green-600',
       bg: 'bg-green-100',
       label: 'Confirmada',
@@ -62,7 +56,7 @@ export default async function BookingsPage() {
       </div>
 
       {bookings.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-white rounded-lg border border-gray-200 p-4">
             <div className="flex items-center gap-2 text-yellow-600 mb-2">
               <AlertCircle className="w-5 h-5" />
@@ -74,22 +68,12 @@ export default async function BookingsPage() {
           </div>
           
           <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <div className="flex items-center gap-2 text-blue-600 mb-2">
-              <CheckCircle className="w-5 h-5" />
-              <span className="font-medium">Pagadas</span>
-            </div>
-            <div className="text-2xl font-bold text-gray-900">
-              {bookings.filter(b => b.status === 'paid').length}
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
             <div className="flex items-center gap-2 text-green-600 mb-2">
               <CheckCircle className="w-5 h-5" />
               <span className="font-medium">Confirmadas</span>
             </div>
             <div className="text-2xl font-bold text-gray-900">
-              {bookings.filter(b => b.status === 'confirmed').length}
+              {bookings.filter(b => b.status === 'paid').length}
             </div>
           </div>
           

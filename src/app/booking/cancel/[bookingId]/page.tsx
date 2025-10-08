@@ -184,7 +184,13 @@ export default function CancelBookingPage({ params, searchParams }: PageProps) {
           <Button
             variant="outline"
             className="flex-1"
-            onClick={() => router.back()}
+            onClick={() => {
+              if (window.history.length > 1) {
+                router.back()
+              } else {
+                router.push(`/booking/confirmation/${resolvedParams.bookingId}`)
+              }
+            }}
             disabled={isCancelling}
           >
             Volver

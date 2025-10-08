@@ -19,7 +19,6 @@ export function BrandingSettings({ tenant }: BrandingSettingsProps) {
     logoUrl: tenant.logoUrl || '',
     primaryColor: tenant.primaryColor,
     secondaryColor: tenant.secondaryColor,
-    subdomain: tenant.subdomain || '',
     privacyPolicyUrl: tenant.privacyPolicyUrl || '',
     termsUrl: tenant.termsUrl || '',
   })
@@ -152,25 +151,6 @@ export function BrandingSettings({ tenant }: BrandingSettingsProps) {
                 />
               </div>
             </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="subdomain">Subdominio (opcional)</Label>
-            <div className="flex items-center gap-2">
-              <Input
-                id="subdomain"
-                name="subdomain"
-                type="text"
-                placeholder="miempresa"
-                value={formData.subdomain}
-                onChange={handleChange}
-                disabled={isLoading}
-              />
-              <span className="text-sm text-gray-500">.konfirmado.com</span>
-            </div>
-            <p className="text-xs text-gray-500">
-              Solo letras minúsculas, números y guiones
-            </p>
           </div>
 
           <div className="border-t border-gray-200 pt-6 mt-6">

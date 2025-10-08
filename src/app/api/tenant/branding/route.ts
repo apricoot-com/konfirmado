@@ -6,10 +6,9 @@ import { z } from 'zod'
 
 const brandingSchema = z.object({
   name: z.string().min(3).max(100),
-  logoUrl: z.string().url().optional().or(z.literal('')),
+  logoUrl: z.string().optional().or(z.literal('')),
   primaryColor: z.string().regex(/^#[0-9A-F]{6}$/i),
   secondaryColor: z.string().regex(/^#[0-9A-F]{6}$/i),
-  subdomain: z.string().regex(/^[a-z0-9-]*$/).optional().or(z.literal('')),
   privacyPolicyUrl: z.string().url().optional().or(z.literal('')),
   termsUrl: z.string().url().optional().or(z.literal('')),
 })
@@ -28,29 +27,10 @@ export async function PATCH(req: NextRequest) {
       )
     }
     
-    const { subdomain, ...data } = validated.data
-    
-    // Check if subdomain is already taken
-    if (subdomain && subdomain !== tenant.subdomain) {
-      const existing = await prisma.tenant.findUnique({
-        where: { subdomain },
-      })
-      
-      if (existing) {
-        return NextResponse.json(
-          { error: 'Subdomain already taken' },
-          { status: 400 }
-        )
-      }
-    }
-    
     // Update tenant
     const updatedTenant = await prisma.tenant.update({
       where: { id: tenant.id },
-      data: {
-        ...data,
-        subdomain: subdomain || null,
-      },
+      data: validated.data,
     })
     
     // Audit log

@@ -82,6 +82,16 @@ export default async function ConfirmationPage({
               <h2 className="text-xl font-semibold text-gray-900 mb-4">
                 Detalles de tu reserva
               </h2>
+
+               {/* Custom Confirmation Message */}
+              {isPaid && booking.service.confirmationMessage && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-5">
+                  <h3 className="font-semibold text-green-900 mb-2">Importante</h3>
+                  <p className="text-sm text-green-800 whitespace-pre-wrap">
+                    {booking.service.confirmationMessage}
+                  </p>
+                </div>
+              )}
               
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
@@ -162,16 +172,6 @@ export default async function ConfirmationPage({
                 </div>
               </div>
             </div>
-            
-            {/* Custom Confirmation Message */}
-            {isPaid && booking.service.confirmationMessage && (
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <h3 className="font-semibold text-green-900 mb-2">Mensaje importante</h3>
-                <p className="text-sm text-green-800 whitespace-pre-wrap">
-                  {booking.service.confirmationMessage}
-                </p>
-              </div>
-            )}
             
             {/* Next Steps */}
             {isPaid && (

@@ -160,6 +160,9 @@ export function AvailabilityStep({
     acc[date].push(slot)
     return acc
   }, {} as Record<string, TimeSlot[]>)
+  
+  // Sort dates to ensure correct order
+  const sortedDates = Object.keys(slotsByDate).sort()
 
   return (
     <div className="flex flex-col h-full">
@@ -231,39 +234,46 @@ export function AvailabilityStep({
           </Card>
         ) : (
           <div className="space-y-6 max-h-96 overflow-y-auto">
-            {Object.entries(slotsByDate).map(([date, dateSlots]) => (
-              <div key={date}>
-                <h3 className="font-semibold text-gray-900 mb-3 sticky top-0 bg-white py-2 z-10 border-b">
-                  {formatInTimeZone(new Date(date), timezone, "EEEE, dd 'de' MMMM", { locale: es })}
-                </h3>
-                <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
-                  {dateSlots.map((slot, idx) => {
-                    const isSelected =
-                      selectedSlot?.start === slot.start &&
-                      selectedSlot?.end === slot.end
+            {sortedDates.map((date) => {
+              const dateSlots = slotsByDate[date]
+              // Parse date string correctly (YYYY-MM-DD) to avoid timezone issues
+              const [year, month, day] = date.split('-').map(Number)
+              const dateObj = new Date(year, month - 1, day)
+              
+              return (
+                <div key={date}>
+                  <h3 className="font-semibold text-gray-900 mb-3 sticky top-0 bg-white py-2 z-10 border-b">
+                    {format(dateObj, "EEEE, dd 'de' MMMM", { locale: es })}
+                  </h3>
+                  <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+                    {dateSlots.map((slot, idx) => {
+                      const isSelected =
+                        selectedSlot?.start === slot.start &&
+                        selectedSlot?.end === slot.end
 
-                    return (
-                      <button
-                        key={idx}
-                        onClick={() => handleSlotSelect(slot)}
-                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                          isSelected
-                            ? 'ring-2 ring-offset-2 text-white'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        }`}
-                        style={
-                          isSelected
-                            ? { backgroundColor: primaryColor }
-                            : {}
-                        }
-                      >
-                        {formatInTimeZone(new Date(slot.start), timezone, 'HH:mm')}
-                      </button>
-                    )
-                  })}
+                      return (
+                        <button
+                          key={idx}
+                          onClick={() => handleSlotSelect(slot)}
+                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                            isSelected
+                              ? 'ring-2 ring-offset-2 text-white'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                          style={
+                            isSelected
+                              ? { backgroundColor: primaryColor }
+                              : {}
+                          }
+                        >
+                          {formatInTimeZone(new Date(slot.start), timezone, 'HH:mm')}
+                        </button>
+                      )
+                    })}
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </div>

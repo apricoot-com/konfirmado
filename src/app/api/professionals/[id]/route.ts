@@ -7,7 +7,7 @@ import { z } from 'zod'
 const professionalSchema = z.object({
   name: z.string().min(2).max(100),
   description: z.string().max(500).optional().or(z.literal('')),
-  photoUrl: z.string().url().optional().or(z.literal('')),
+  photoUrl: z.string().optional().or(z.literal('')),
   isActive: z.boolean().optional(),
   serviceIds: z.array(z.string().cuid()).optional(),
 })

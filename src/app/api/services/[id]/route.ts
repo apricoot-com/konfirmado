@@ -7,7 +7,7 @@ import { z } from 'zod'
 const serviceSchema = z.object({
   name: z.string().min(3).max(100),
   description: z.string().min(10).max(2000),
-  imageUrl: z.string().url().optional().or(z.literal('')),
+  imageUrl: z.string().optional().or(z.literal('')),
   durationMinutes: z.number().int().min(15).max(480),
   price: z.number().int().min(0),
   chargeType: z.enum(['partial', 'total']),
