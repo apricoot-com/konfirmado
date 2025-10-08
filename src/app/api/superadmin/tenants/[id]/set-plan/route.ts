@@ -28,19 +28,35 @@ export async function PATCH(
     
     const { plan } = validated.data
     
+    // Calculate dates based on plan
+    const now = new Date()
+    const updateData: any = {
+      subscriptionPlan: plan,
+      subscriptionStatus: 'active',
+    }
+    
+    if (plan === 'unlimited') {
+      // Unlimited: set far future date, clear trial
+      updateData.subscriptionEndsAt = new Date('2099-12-31')
+      updateData.trialEndsAt = null
+    } else if (plan === 'trial') {
+      // Trial: set 30 days trial, clear subscription end
+      const trialEnd = new Date(now)
+      trialEnd.setDate(trialEnd.getDate() + 30)
+      updateData.trialEndsAt = trialEnd
+      updateData.subscriptionEndsAt = null
+    } else {
+      // Paid plans: set 30 days subscription, clear trial
+      const subscriptionEnd = new Date(now)
+      subscriptionEnd.setMonth(subscriptionEnd.getMonth() + 1)
+      updateData.subscriptionEndsAt = subscriptionEnd
+      updateData.trialEndsAt = null
+    }
+    
     // Update tenant plan
     const tenant = await prisma.tenant.update({
       where: { id },
-      data: {
-        subscriptionPlan: plan,
-        subscriptionStatus: 'active',
-        // For unlimited plan, set far future date
-        subscriptionEndsAt: plan === 'unlimited' 
-          ? new Date('2099-12-31')
-          : undefined,
-        // Clear trial for paid/unlimited plans
-        trialEndsAt: plan !== 'trial' ? null : undefined,
-      },
+      data: updateData,
     })
     
     console.log(`✓ Superadmin set ${tenant.name} to ${plan} plan`)
