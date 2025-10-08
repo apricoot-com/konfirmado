@@ -2,24 +2,33 @@ import { requireAuth } from '@/lib/tenant'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import { Calendar, Users, Briefcase, Link2, ArrowRight, CheckCircle, AlertCircle } from 'lucide-react'
+import { GettingStarted } from '@/components/dashboard/getting-started'
 
 export default async function DashboardPage() {
   const { user, tenant } = await requireAuth()
   
   // Get quick stats
-  const [bookingsCount, servicesCount, professionalsCount, linksCount] = await Promise.all([
+  const [bookingsCount, servicesCount, professionalsCount, linksCount, connectedProfessionals] = await Promise.all([
     prisma.booking.count({ where: { tenantId: tenant.id } }),
     prisma.service.count({ where: { tenantId: tenant.id, isActive: true } }),
     prisma.professional.count({ where: { tenantId: tenant.id, isActive: true } }),
     prisma.bookingLink.count({ where: { tenantId: tenant.id, isActive: true } }),
+    prisma.professional.count({ 
+      where: { 
+        tenantId: tenant.id, 
+        calendarStatus: 'connected' 
+      } 
+    }),
   ])
   
   // Check setup status
   const hasServices = servicesCount > 0
   const hasProfessionals = professionalsCount > 0
   const hasLinks = linksCount > 0
+  const hasConnectedCalendar = connectedProfessionals > 0
   const paymentConfig = (tenant.paymentConfig as any) || {}
   const hasWompi = !!paymentConfig.publicKey && !!paymentConfig.privateKey
+  const hasBranding = !!tenant.logoUrl
   
   const setupComplete = hasServices && hasProfessionals && hasLinks && hasWompi
   
@@ -30,8 +39,20 @@ export default async function DashboardPage() {
         <p className="text-gray-600 mt-2">Bienvenido, {user.email}</p>
       </div>
       
-      {/* Setup Checklist */}
-      {!setupComplete && (
+      {/* Getting Started Guide */}
+      <GettingStarted
+        stats={{
+          hasServices,
+          hasProfessionals,
+          hasConnectedCalendar,
+          hasPaymentConfig: hasWompi,
+          hasBookingLinks: hasLinks,
+          hasBranding,
+        }}
+      />
+      
+      {/* Old Setup Checklist - Keep as fallback */}
+      {false && !setupComplete && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
           <h2 className="text-lg font-semibold text-blue-900 mb-4">Completa la configuración inicial</h2>
           <div className="space-y-2">

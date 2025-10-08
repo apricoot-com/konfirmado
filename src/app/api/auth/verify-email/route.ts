@@ -18,20 +18,46 @@ export async function POST(req: NextRequest) {
     })
     
     if (!verificationToken) {
+      console.error('Verification token not found:', token)
       return NextResponse.json(
         { error: 'Invalid or expired token' },
         { status: 400 }
       )
     }
     
+    console.log('Token found:', {
+      identifier: verificationToken.identifier,
+      expires: verificationToken.expires,
+      now: new Date(),
+      isExpired: verificationToken.expires < new Date()
+    })
+    
     // Check if token is expired
     if (verificationToken.expires < new Date()) {
+      console.error('Token expired:', {
+        expires: verificationToken.expires,
+        now: new Date()
+      })
+      
       await prisma.verificationToken.delete({
         where: { token },
       })
       
       return NextResponse.json(
-        { error: 'Token has expired' },
+        { error: 'Token has expired. Please request a new verification email.' },
+        { status: 400 }
+      )
+    }
+    
+    // Check if user exists
+    const user = await prisma.user.findUnique({
+      where: { email: verificationToken.identifier },
+    })
+    
+    if (!user) {
+      console.error('User not found for email:', verificationToken.identifier)
+      return NextResponse.json(
+        { error: 'User not found' },
         { status: 400 }
       )
     }
@@ -49,6 +75,8 @@ export async function POST(req: NextRequest) {
         where: { token },
       })
     })
+    
+    console.log('✓ Email verified successfully for:', user.email)
     
     return NextResponse.json({
       success: true,
