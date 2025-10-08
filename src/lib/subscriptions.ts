@@ -11,6 +11,25 @@ export interface SubscriptionPlan {
 }
 
 export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
+  unlimited: {
+    id: 'unlimited',
+    name: 'Unlimited',
+    price: 0,
+    limits: {
+      professionals: 999999,
+      services: 999999,
+      bookingsPerMonth: 999999,
+    },
+    features: [
+      'Profesionales ilimitados',
+      'Servicios ilimitados',
+      'Reservas ilimitadas',
+      'Google Calendar',
+      'Pagos con Wompi',
+      'Soporte prioritario',
+      'Sin restricciones',
+    ],
+  },
   trial: {
     id: 'trial',
     name: 'Trial',

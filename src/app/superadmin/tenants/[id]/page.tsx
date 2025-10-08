@@ -140,10 +140,18 @@ export default async function TenantDetailPage({ params }: PageProps) {
           <div className="lg:col-span-2 space-y-6">
             {/* Subscription Info */}
             <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <CreditCard className="w-5 h-5" />
-                Información de Suscripción
-              </h2>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                  <CreditCard className="w-5 h-5" />
+                  Información de Suscripción
+                </h2>
+                <Link
+                  href={`/superadmin/tenants/${tenant.id}/change-plan`}
+                  className="text-sm text-blue-600 hover:text-blue-700"
+                >
+                  Cambiar plan →
+                </Link>
+              </div>
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
