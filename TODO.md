@@ -1,8 +1,8 @@
 # tareas pendientes
 
 [] El monto de cobro es incorrecto
-[] Probar el flujo de creación de usuario
-[] Eliminación de cuenta
+[x] Probar el flujo de creación de usuario
+[x] Eliminación de cuenta
 [] Mandar email de agendamiento al cliente cuando se hace el agendamiento
 [] Corregir el error en los cards del profesional
 [] Enviar email con invitacion del correo al profesional
