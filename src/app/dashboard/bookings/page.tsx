@@ -4,6 +4,7 @@ import { formatPrice } from '@/lib/utils'
 import { Calendar, User, Clock, DollarSign, CheckCircle, XCircle, AlertCircle } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
+import { ExportBookingsButton } from '@/components/bookings/export-bookings-button'
 
 export default async function BookingsPage() {
   const { tenant } = await requireAuth()
@@ -52,6 +53,10 @@ export default async function BookingsPage() {
             <span className="text-gray-600">Total: </span>
             <span className="font-semibold text-gray-900">{bookings.length}</span>
           </div>
+          
+          {bookings.length > 0 && (
+            <ExportBookingsButton tenantId={tenant.id} />
+          )}
         </div>
       </div>
 
