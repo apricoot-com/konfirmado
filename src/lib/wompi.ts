@@ -12,9 +12,9 @@ interface WompiConfig {
 /**
  * Get Wompi API base URL based on environment
  */
-function getWompiBaseUrl(): string {
+function getWompiBaseUrl(key: string): string {
   // Use sandbox in development or if using test keys
-  const isDev = process.env.NODE_ENV === 'development'
+  const isDev = key.startsWith('pub_test_') || key.startsWith('priv_test_')
   return isDev ? 'https://sandbox.wompi.co/v1' : 'https://production.wompi.co/v1'
 }
 
@@ -32,12 +32,14 @@ export function getPlatformWompiConfig(): WompiConfig | null {
     return null
   }
 
+  const mode = publicKey.startsWith('pub_test_') || privateKey.startsWith('priv_test_') ? 'test' : 'production'
+
   return {
     publicKey,
     privateKey,
     integritySecret,
     eventsSecret,
-    mode: process.env.NODE_ENV === 'development' ? 'test' : 'production',
+    mode,
   }
 }
 
@@ -175,7 +177,7 @@ export async function getTransactionStatus(
   transactionId: string,
   privateKey: string
 ): Promise<any> {
-  const baseUrl = getWompiBaseUrl()
+  const baseUrl = getWompiBaseUrl(privateKey)
   const response = await fetch(
     `${baseUrl}/transactions/${transactionId}`,
     {
@@ -196,7 +198,7 @@ export async function getTransactionStatus(
  * Create acceptance token (required for tokenization)
  */
 export async function createAcceptanceToken(publicKey: string): Promise<string> {
-  const baseUrl = getWompiBaseUrl()
+  const baseUrl = getWompiBaseUrl(publicKey)
   const response = await fetch(`${baseUrl}/merchants/${publicKey}`, {
     method: 'GET',
   })
@@ -220,7 +222,7 @@ export async function tokenizeCard(params: {
   card_holder: string
   publicKey: string
 }): Promise<{ id: string; type: string; mask: string }> {
-  const baseUrl = getWompiBaseUrl()
+  const baseUrl = getWompiBaseUrl(params.publicKey)
   const response = await fetch(`${baseUrl}/tokens/cards`, {
     method: 'POST',
     headers: {
@@ -264,7 +266,7 @@ export async function createTokenTransaction(params: {
   privateKey: string
   integritySecret: string
 }): Promise<any> {
-  const baseUrl = getWompiBaseUrl()
+  const baseUrl = getWompiBaseUrl(params.privateKey)
   
   // Generate integrity signature
   const signatureString = `${params.reference}${params.amountInCents}${params.currency}${params.integritySecret}`
