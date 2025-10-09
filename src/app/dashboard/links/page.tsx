@@ -1,8 +1,9 @@
 import { requireAuth } from '@/lib/tenant'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
-import { Plus, Link2, Calendar, User, Copy, ExternalLink } from 'lucide-react'
+import { Plus, Link2, Calendar, User, Copy, ExternalLink, Edit } from 'lucide-react'
 import { CopyLinkButton } from '@/components/booking-links/copy-link-button'
+import { LinkCardActions } from '@/components/booking-links/link-card-actions'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 
@@ -62,7 +63,7 @@ export default async function BookingLinksPage() {
                 className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow"
               >
                 {/* Desktop Layout */}
-                <div className="hidden md:grid md:grid-cols-12 md:gap-4 md:items-center">
+                <div className="hidden lg:grid lg:grid-cols-12 lg:gap-4 lg:items-center">
                   {/* Name */}
                   <div className="col-span-3">
                     <div className="flex items-center gap-2">
@@ -132,23 +133,25 @@ export default async function BookingLinksPage() {
                       href={bookingUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-600 hover:text-blue-700"
+                      className="inline-flex items-center gap-1 px-3 py-1.5 text-sm text-blue-600 hover:text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors"
                       title="Abrir link"
                     >
                       <ExternalLink className="w-4 h-4" />
+                      Abrir
                     </a>
                     <Link
                       href={`/dashboard/links/${link.id}/edit`}
-                      className="text-gray-600 hover:text-gray-900 text-sm"
+                      className="inline-flex items-center gap-1 px-3 py-1.5 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                       title="Editar"
                     >
+                      <Edit className="w-4 h-4" />
                       Editar
                     </Link>
                   </div>
                 </div>
 
                 {/* Mobile Layout */}
-                <div className="md:hidden space-y-3">
+                <div className="lg:hidden space-y-3">
                   {/* Header: Name and Status */}
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-2">
@@ -197,28 +200,12 @@ export default async function BookingLinksPage() {
                   )}
 
                   {/* Stats and Actions */}
-                  <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                    <div className="text-sm text-gray-600">
-                      <span className="font-medium text-gray-900">{link._count.bookings}</span> reservas
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <a
-                        href={bookingUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700"
-                      >
-                        <ExternalLink className="w-4 h-4" />
-                        Abrir
-                      </a>
-                      <Link
-                        href={`/dashboard/links/${link.id}/edit`}
-                        className="text-sm text-gray-600 hover:text-gray-900"
-                      >
-                        Editar
-                      </Link>
-                    </div>
-                  </div>
+                  <LinkCardActions
+                    linkId={link.id}
+                    linkName={link.name}
+                    bookingUrl={bookingUrl}
+                    bookingsCount={link._count.bookings}
+                  />
 
                   {/* Expiration */}
                   {link.expiresAt && !isExpired && (
