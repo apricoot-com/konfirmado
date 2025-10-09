@@ -83,7 +83,7 @@ export function BusinessHoursConfig({ businessHours, onChange }: BusinessHoursCo
           size="sm"
           onClick={applyToAll}
         >
-          Aplicar lunes a todos
+          Copiar Lunes
         </Button>
       </div>
 
@@ -93,7 +93,7 @@ export function BusinessHoursConfig({ businessHours, onChange }: BusinessHoursCo
           const isOpen = dayHours !== null
 
           return (
-            <div key={key} className="flex items-center gap-4">
+            <div key={key} className="flex flex-wrap items-center gap-4 border border-gray-100 p-2">
               <div className="w-32">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
@@ -108,7 +108,7 @@ export function BusinessHoursConfig({ businessHours, onChange }: BusinessHoursCo
 
               {isOpen ? (
                 <div className="flex items-center gap-3 flex-1">
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-col">
                     <Label htmlFor={`${key}-start`} className="text-sm text-gray-600 whitespace-nowrap">
                       Desde
                     </Label>
@@ -121,7 +121,7 @@ export function BusinessHoursConfig({ businessHours, onChange }: BusinessHoursCo
                     />
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-col">
                     <Label htmlFor={`${key}-end`} className="text-sm text-gray-600 whitespace-nowrap">
                       Hasta
                     </Label>
