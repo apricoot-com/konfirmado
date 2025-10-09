@@ -16,11 +16,19 @@ export default async function SettingsPage() {
       </div>
 
       <Tabs defaultValue="branding" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="branding">Marca</TabsTrigger>
-          <TabsTrigger value="integration">Integración</TabsTrigger>
-          <TabsTrigger value="payments">Pagos</TabsTrigger>
-          <TabsTrigger value="danger" className="text-red-600">Zona de Peligro</TabsTrigger>
+        <TabsList className="h-auto sm:h-12 p-1 bg-gray-100 w-full grid grid-cols-2 sm:flex sm:w-fit gap-1">
+          <TabsTrigger value="branding" className="h-10 md:px-6 text-sm sm:text-base">
+            Marca
+          </TabsTrigger>
+          <TabsTrigger value="integration" className="h-10 md:px-6 text-sm sm:text-base">
+            Integración
+          </TabsTrigger>
+          <TabsTrigger value="payments" className="h-10 md:px-6 text-sm sm:text-base">
+            Pagos
+          </TabsTrigger>
+          <TabsTrigger value="danger" className="h-10 md:px-6 text-sm sm:text-base text-red-600 data-[state=active]:text-red-700">
+            Zona de Peligro
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="branding">
