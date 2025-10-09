@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { AlertCircle, CheckCircle, Loader2 } from 'lucide-react'
+import { AlertCircle, CheckCircle, Loader2, Copy, Check } from 'lucide-react'
 import type { Tenant } from '@prisma/client'
 import Image from 'next/image'
 
@@ -36,6 +36,19 @@ export function PaymentProviderSettings({ tenant }: PaymentProviderSettingsProps
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [copiedWebhook, setCopiedWebhook] = useState(false)
+
+  const webhookUrl = `${typeof window !== 'undefined' ? window.location.origin : process.env.NEXT_PUBLIC_APP_URL || 'https://tudominio.com'}/api/webhooks/payments`
+
+  const copyWebhookUrl = async () => {
+    try {
+      await navigator.clipboard.writeText(webhookUrl)
+      setCopiedWebhook(true)
+      setTimeout(() => setCopiedWebhook(false), 2000)
+    } catch (err) {
+      console.error('Failed to copy:', err)
+    }
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({
@@ -230,12 +243,47 @@ export function PaymentProviderSettings({ tenant }: PaymentProviderSettingsProps
               </div>
 
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <p className="text-sm text-blue-900 font-medium mb-2">📍 Dónde encontrar</p>
+                <p className="text-sm text-blue-900 font-medium mb-2">📍 Dónde encontrar las credenciales</p>
                 <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
                   <li>Ingresa a <a href="https://comercios.wompi.co" target="_blank" className="underline">comercios.wompi.co</a></li>
                   <li>Ve a Configuración → Credenciales API</li>
                   <li>Copia las 4 llaves y pégalas aquí</li>
                 </ol>
+              </div>
+
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <p className="text-sm text-yellow-900 font-medium mb-2">⚠️ Importante: Configura el Webhook</p>
+                <p className="text-sm text-yellow-800 mb-2">
+                  En Wompi, configura la URL de eventos (webhook) para recibir notificaciones de pago:
+                </p>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 bg-white rounded border border-yellow-300 p-2">
+                    <code className="text-xs font-mono text-yellow-900 break-all">
+                      {webhookUrl}
+                    </code>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={copyWebhookUrl}
+                    className="flex items-center gap-1 px-4 py-3 text-sm bg-white border border-yellow-300 text-yellow-900 rounded hover:bg-yellow-100 transition-colors"
+                    title="Copiar URL"
+                  >
+                    {copiedWebhook ? (
+                      <>
+                        <Check className="w-4 h-4" />
+                        <span className="hidden sm:inline">Copiado</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-4 h-4" />
+                        <span className="hidden sm:inline">Copiar</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+                <p className="text-xs text-yellow-700 mt-2">
+                  Ve a Configuración → Eventos → URL de eventos en tu panel de Wompi
+                </p>
               </div>
             </div>
           )}
@@ -302,12 +350,47 @@ export function PaymentProviderSettings({ tenant }: PaymentProviderSettingsProps
               </div>
 
               <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <p className="text-sm text-green-900 font-medium mb-2">📍 Dónde encontrar</p>
+                <p className="text-sm text-green-900 font-medium mb-2">📍 Dónde encontrar las credenciales</p>
                 <ol className="text-sm text-green-800 space-y-1 list-decimal list-inside">
                   <li>Ingresa a <a href="https://merchants.payulatam.com" target="_blank" className="underline">merchants.payulatam.com</a></li>
                   <li>Ve a Configuración → Configuración técnica</li>
                   <li>Copia Merchant ID, API Key, API Login y Account ID</li>
                 </ol>
+              </div>
+
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <p className="text-sm text-yellow-900 font-medium mb-2">⚠️ Importante: Configura el Webhook</p>
+                <p className="text-sm text-yellow-800 mb-2">
+                  En PayU, configura la URL de confirmación para recibir notificaciones de pago:
+                </p>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 bg-white rounded border border-yellow-300 p-2">
+                    <code className="text-xs font-mono text-yellow-900 break-all">
+                      {webhookUrl}
+                    </code>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={copyWebhookUrl}
+                    className="flex items-center gap-1 px-4 py-3 text-sm bg-white border border-yellow-300 text-yellow-900 rounded hover:bg-yellow-100 transition-colors"
+                    title="Copiar URL"
+                  >
+                    {copiedWebhook ? (
+                      <>
+                        <Check className="w-4 h-4" />
+                        <span className="hidden sm:inline">Copiado</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-4 h-4" />
+                        <span className="hidden sm:inline">Copiar</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+                <p className="text-xs text-yellow-700 mt-2">
+                  Ve a Configuración → Configuración técnica → URL de confirmación en tu panel de PayU
+                </p>
               </div>
             </div>
           )}
