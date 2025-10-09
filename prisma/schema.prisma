@@ -32,6 +32,9 @@ model Tenant {
   paymentProvider     String?   @default("wompi") // wompi | mercadopago | stripe
   paymentConfig       Json?     // Provider-specific config (encrypted keys, etc.)
   
+  // Billing/Invoicing information
+  billingInfo         Json?     // { businessName, personType, documentType, fiscalId, email, phone, address, city, state, postalCode, country, currency }
+  
   // Subscription
   subscriptionPlan    String    @default("trial") // trial | basic | pro | enterprise
   subscriptionStatus  String    @default("active") // active | cancelled | expired

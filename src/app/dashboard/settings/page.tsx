@@ -3,6 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { BrandingSettings } from '@/components/settings/branding-settings'
 import { IntegrationSettings } from '@/components/settings/integration-settings'
 import { PaymentSettings } from '@/components/settings/payment-settings'
+import { BillingSettings } from '@/components/settings/billing-settings'
 import { DangerZoneSettings } from '@/components/settings/danger-zone-settings'
 
 export default async function SettingsPage() {
@@ -16,7 +17,7 @@ export default async function SettingsPage() {
       </div>
 
       <Tabs defaultValue="branding" className="space-y-6">
-        <TabsList className="h-auto sm:h-12 p-1 bg-gray-100 w-full grid grid-cols-2 sm:flex sm:w-fit gap-1">
+        <TabsList className="h-auto sm:h-12 p-1 bg-gray-100 w-full grid grid-cols-2 sm:grid-cols-3 lg:flex lg:w-fit gap-1">
           <TabsTrigger value="branding" className="h-10 md:px-6 text-sm sm:text-base">
             Marca
           </TabsTrigger>
@@ -25,6 +26,9 @@ export default async function SettingsPage() {
           </TabsTrigger>
           <TabsTrigger value="payments" className="h-10 md:px-6 text-sm sm:text-base">
             Pagos
+          </TabsTrigger>
+          <TabsTrigger value="billing" className="h-10 md:px-6 text-sm sm:text-base">
+            Facturación
           </TabsTrigger>
           <TabsTrigger value="danger" className="h-10 md:px-6 text-sm sm:text-base text-red-600 data-[state=active]:text-red-700">
             Zona de Peligro
@@ -41,6 +45,10 @@ export default async function SettingsPage() {
 
         <TabsContent value="payments">
           <PaymentSettings tenant={tenant} />
+        </TabsContent>
+
+        <TabsContent value="billing">
+          <BillingSettings tenant={tenant} />
         </TabsContent>
 
         <TabsContent value="danger">
