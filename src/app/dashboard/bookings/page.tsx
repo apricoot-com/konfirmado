@@ -96,103 +96,123 @@ export default async function BookingsPage() {
           <p className="text-gray-600">Las reservas aparecerán aquí cuando los clientes completen el proceso de agendamiento</p>
         </div>
       ) : (
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Cliente
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Servicio
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Profesional
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Fecha y Hora
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Monto
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Estado
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {bookings.map((booking) => {
-                  const status = statusConfig[booking.status as keyof typeof statusConfig]
-                  const StatusIcon = status.icon
-                  
-                  return (
-                    <tr key={booking.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4">
-                        <div>
-                          <div className="font-medium text-gray-900">{booking.userName}</div>
-                          <div className="text-sm text-gray-500">{booking.userEmail}</div>
-                          <div className="text-sm text-gray-500">{booking.userPhone}</div>
-                        </div>
-                      </td>
-                      
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          <Calendar className="w-4 h-4 text-gray-400" />
-                          <div>
-                            <div className="font-medium text-gray-900">{booking.service.name}</div>
-                            <div className="text-sm text-gray-500 flex items-center gap-1">
-                              <Clock className="w-3 h-3" />
-                              {booking.service.durationMinutes} min
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          <User className="w-4 h-4 text-gray-400" />
-                          <span className="text-gray-900">{booking.professional.name}</span>
-                        </div>
-                      </td>
-                      
-                      <td className="px-6 py-4">
-                        <div>
-                          <div className="font-medium text-gray-900">
-                            {format(new Date(booking.startTime), 'dd MMM yyyy', { locale: es })}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {format(new Date(booking.startTime), 'HH:mm', { locale: es })} - {format(new Date(booking.endTime), 'HH:mm', { locale: es })}
-                          </div>
-                        </div>
-                      </td>
-                      
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-1">
-                          <DollarSign className="w-4 h-4 text-gray-400" />
-                          <span className="font-medium text-gray-900">
-                            {booking.payment ? formatPrice(booking.payment.amount) : '-'}
-                          </span>
-                        </div>
-                      </td>
-                      
-                      <td className="px-6 py-4">
-                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${status.bg} ${status.color}`}>
-                          <StatusIcon className="w-3 h-3" />
-                          {status.label}
+        <div className="grid grid-cols-1 gap-3">
+          {bookings.map((booking) => {
+            const status = statusConfig[booking.status as keyof typeof statusConfig]
+            const StatusIcon = status.icon
+            
+            return (
+              <div
+                key={booking.id}
+                className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow"
+              >
+                {/* Desktop Layout */}
+                <div className="hidden md:grid md:grid-cols-12 md:gap-4 md:items-center">
+                  {/* Date & Time */}
+                  <div className="col-span-2">
+                    <div className="font-medium text-gray-900">
+                      {format(new Date(booking.startTime), 'dd MMM', { locale: es })}
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      {format(new Date(booking.startTime), 'HH:mm', { locale: es })}
+                    </div>
+                  </div>
+
+                  {/* Service & Professional */}
+                  <div className="col-span-3">
+                    <div className="font-medium text-gray-900">{booking.service.name}</div>
+                    <div className="text-sm text-gray-600">{booking.professional.name}</div>
+                  </div>
+
+                  {/* Client */}
+                  <div className="col-span-3">
+                    <div className="text-sm text-gray-900">{booking.userName}</div>
+                    <div className="text-xs text-gray-600">{booking.userEmail}</div>
+                  </div>
+
+                  {/* Amount */}
+                  <div className="col-span-2">
+                    <div className="font-medium text-gray-900">
+                      {booking.payment ? formatPrice(booking.payment.amount) : '-'}
+                    </div>
+                    {booking.payment && (
+                      <div className="text-xs text-gray-500">
+                        {booking.payment.reference}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Status */}
+                  <div className="col-span-2 flex justify-end">
+                    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${status.bg} ${status.color}`}>
+                      <StatusIcon className="w-3 h-3" />
+                      {status.label}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Mobile Layout */}
+                <div className="md:hidden space-y-3">
+                  {/* Header: Status and Date */}
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <div className="font-semibold text-gray-900 text-lg">
+                        {format(new Date(booking.startTime), 'dd MMM yyyy', { locale: es })}
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        {format(new Date(booking.startTime), 'HH:mm', { locale: es })} - {format(new Date(booking.endTime), 'HH:mm', { locale: es })}
+                      </div>
+                    </div>
+                    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${status.bg} ${status.color}`}>
+                      <StatusIcon className="w-3 h-3" />
+                      {status.label}
+                    </span>
+                  </div>
+
+                  {/* Service and Professional */}
+                  <div className="space-y-2 pb-3 border-b border-gray-100">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                      <div>
+                        <span className="font-medium text-gray-900">{booking.service.name}</span>
+                        <span className="text-sm text-gray-500 ml-2">
+                          ({booking.service.durationMinutes} min)
                         </span>
-                        {booking.payment && (
-                          <div className="text-xs text-gray-500 mt-1">
-                            Ref: {booking.payment.reference}
-                          </div>
-                        )}
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <User className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                      <span className="text-gray-900">{booking.professional.name}</span>
+                    </div>
+                  </div>
+
+                  {/* Client Info */}
+                  <div className="space-y-1">
+                    <div className="text-sm font-medium text-gray-700">Cliente:</div>
+                    <div className="text-sm text-gray-900">{booking.userName}</div>
+                    <div className="text-sm text-gray-600">{booking.userEmail}</div>
+                    <div className="text-sm text-gray-600">{booking.userPhone}</div>
+                  </div>
+
+                  {/* Payment Info */}
+                  <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                    <div className="flex items-center gap-1">
+                      <DollarSign className="w-4 h-4 text-gray-400" />
+                      <span className="font-semibold text-gray-900">
+                        {booking.payment ? formatPrice(booking.payment.amount) : '-'}
+                      </span>
+                    </div>
+                    {booking.payment && (
+                      <div className="text-xs text-gray-500">
+                        Ref: {booking.payment.reference}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )
+          })}
         </div>
       )}
     </div>

@@ -51,125 +51,185 @@ export default async function BookingLinksPage() {
           </Link>
         </div>
       ) : (
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Nombre
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Link
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Preselección
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Reservas
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Estado
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Acciones
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {links.map((link) => {
-                const bookingUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/book/${link.publicId}`
-                const isExpired = link.expiresAt && link.expiresAt < new Date()
-                
-                return (
-                  <tr key={link.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        <Link2 className="w-4 h-4 text-gray-400" />
-                        <span className="font-medium text-gray-900">{link.name}</span>
-                      </div>
-                    </td>
-                    
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        <code className="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded">
-                          /book/{link.publicId.slice(0, 8)}...
-                        </code>
-                        <CopyLinkButton url={bookingUrl} />
-                      </div>
-                    </td>
-                    
-                    <td className="px-6 py-4">
-                      <div className="flex flex-col gap-1">
-                        {link.serviceId && (
-                          <div className="flex items-center gap-1 text-xs text-gray-600">
-                            <Calendar className="w-3 h-3" />
-                            <span>Servicio</span>
-                          </div>
-                        )}
-                        {link.professionalId && (
-                          <div className="flex items-center gap-1 text-xs text-gray-600">
-                            <User className="w-3 h-3" />
-                            <span>Profesional</span>
-                          </div>
-                        )}
-                        {!link.serviceId && !link.professionalId && (
-                          <span className="text-xs text-gray-400">Ninguna</span>
-                        )}
-                      </div>
-                    </td>
-                    
-                    <td className="px-6 py-4">
-                      <span className="text-sm font-medium text-gray-900">
-                        {link._count.bookings}
+        <div className="grid grid-cols-1 gap-3">
+          {links.map((link) => {
+            const bookingUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/book/${link.publicId}`
+            const isExpired = link.expiresAt && link.expiresAt < new Date()
+            
+            return (
+              <div
+                key={link.id}
+                className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow"
+              >
+                {/* Desktop Layout */}
+                <div className="hidden md:grid md:grid-cols-12 md:gap-4 md:items-center">
+                  {/* Name */}
+                  <div className="col-span-3">
+                    <div className="flex items-center gap-2">
+                      <Link2 className="w-4 h-4 text-gray-400" />
+                      <span className="font-medium text-gray-900">{link.name}</span>
+                    </div>
+                  </div>
+
+                  {/* Link */}
+                  <div className="col-span-3">
+                    <div className="flex items-center gap-2">
+                      <code className="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded truncate">
+                        /book/{link.publicId.slice(0, 8)}...
+                      </code>
+                      <CopyLinkButton url={bookingUrl} />
+                    </div>
+                  </div>
+
+                  {/* Preselection */}
+                  <div className="col-span-2">
+                    <div className="flex flex-wrap gap-1">
+                      {link.serviceId && (
+                        <span className="inline-flex items-center gap-1 text-xs text-gray-600 bg-gray-100 px-2 py-0.5 rounded">
+                          <Calendar className="w-3 h-3" />
+                          Servicio
+                        </span>
+                      )}
+                      {link.professionalId && (
+                        <span className="inline-flex items-center gap-1 text-xs text-gray-600 bg-gray-100 px-2 py-0.5 rounded">
+                          <User className="w-3 h-3" />
+                          Prof.
+                        </span>
+                      )}
+                      {!link.serviceId && !link.professionalId && (
+                        <span className="text-xs text-gray-400">-</span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Bookings */}
+                  <div className="col-span-1 text-center">
+                    <span className="text-sm font-medium text-gray-900">
+                      {link._count.bookings}
+                    </span>
+                  </div>
+
+                  {/* Status */}
+                  <div className="col-span-2">
+                    {isExpired ? (
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                        Expirado
                       </span>
-                    </td>
-                    
-                    <td className="px-6 py-4">
-                      {isExpired ? (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                          Expirado
-                        </span>
-                      ) : !link.isActive ? (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                          Inactivo
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                          Activo
+                    ) : !link.isActive ? (
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                        Inactivo
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        Activo
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Actions */}
+                  <div className="col-span-1 flex items-center justify-end gap-2">
+                    <a
+                      href={bookingUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-700"
+                      title="Abrir link"
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                    </a>
+                    <Link
+                      href={`/dashboard/links/${link.id}/edit`}
+                      className="text-gray-600 hover:text-gray-900 text-sm"
+                      title="Editar"
+                    >
+                      Editar
+                    </Link>
+                  </div>
+                </div>
+
+                {/* Mobile Layout */}
+                <div className="md:hidden space-y-3">
+                  {/* Header: Name and Status */}
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-2">
+                      <Link2 className="w-4 h-4 text-gray-400" />
+                      <span className="font-semibold text-gray-900">{link.name}</span>
+                    </div>
+                    {isExpired ? (
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                        Expirado
+                      </span>
+                    ) : !link.isActive ? (
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                        Inactivo
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        Activo
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Link */}
+                  <div className="flex items-center gap-2 p-2 bg-gray-50 rounded">
+                    <code className="text-xs text-gray-600 flex-1 truncate">
+                      {bookingUrl}
+                    </code>
+                    <CopyLinkButton url={bookingUrl} />
+                  </div>
+
+                  {/* Preselection */}
+                  {(link.serviceId || link.professionalId) && (
+                    <div className="flex flex-wrap gap-2">
+                      {link.serviceId && (
+                        <span className="inline-flex items-center gap-1 text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded">
+                          <Calendar className="w-3 h-3" />
+                          Servicio preseleccionado
                         </span>
                       )}
-                      {link.expiresAt && !isExpired && (
-                        <p className="text-xs text-gray-500 mt-1">
-                          Expira: {format(link.expiresAt, 'dd MMM yyyy', { locale: es })}
-                        </p>
+                      {link.professionalId && (
+                        <span className="inline-flex items-center gap-1 text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded">
+                          <User className="w-3 h-3" />
+                          Profesional preseleccionado
+                        </span>
                       )}
-                    </td>
-                    
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        <a
-                          href={bookingUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 hover:text-blue-700"
-                          title="Abrir link"
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                        </a>
-                        <Link
-                          href={`/dashboard/links/${link.id}/edit`}
-                          className="text-gray-600 hover:text-gray-900"
-                          title="Editar"
-                        >
-                          Editar
-                        </Link>
-                      </div>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
+                    </div>
+                  )}
+
+                  {/* Stats and Actions */}
+                  <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                    <div className="text-sm text-gray-600">
+                      <span className="font-medium text-gray-900">{link._count.bookings}</span> reservas
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <a
+                        href={bookingUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                        Abrir
+                      </a>
+                      <Link
+                        href={`/dashboard/links/${link.id}/edit`}
+                        className="text-sm text-gray-600 hover:text-gray-900"
+                      >
+                        Editar
+                      </Link>
+                    </div>
+                  </div>
+
+                  {/* Expiration */}
+                  {link.expiresAt && !isExpired && (
+                    <div className="text-xs text-gray-500">
+                      Expira: {format(link.expiresAt, 'dd MMM yyyy', { locale: es })}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )
+          })}
         </div>
       )}
     </div>
