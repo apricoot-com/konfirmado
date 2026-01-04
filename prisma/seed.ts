@@ -115,6 +115,7 @@ async function main() {
     {
       name: 'Consulta General',
       description: 'Consulta médica general de 30 minutos. Incluye evaluación inicial y recomendaciones básicas.',
+      imageUrl: 'https://picsum.photos/400/300?random=1',
       durationMinutes: 30,
       price: 120000, // 120,000 COP
       chargeType: 'partial' as const,
@@ -125,6 +126,7 @@ async function main() {
     {
       name: 'Consulta Especializada',
       description: 'Consulta con especialista de 60 minutos. Evaluación detallada y plan de tratamiento.',
+      imageUrl: 'https://picsum.photos/400/300?random=2',
       durationMinutes: 60,
       price: 250000, // 250,000 COP
       chargeType: 'total' as const,
@@ -134,6 +136,7 @@ async function main() {
     {
       name: 'Seguimiento',
       description: 'Consulta de seguimiento de 20 minutos para revisar evolución del tratamiento.',
+      imageUrl: 'https://picsum.photos/400/300?random=3',
       durationMinutes: 20,
       price: 80000, // 80,000 COP
       chargeType: 'partial' as const,
@@ -173,6 +176,7 @@ async function main() {
       name: 'Dra. María López',
       email: 'maria.lopez@clinic.com',
       description: 'Médica general con 10 años de experiencia. Especializada en medicina familiar.',
+      photoUrl: 'https://i.pravatar.cc/300?img=47',
       calendarStatus: 'pending' as const,
       isActive: true,
     },
@@ -180,6 +184,7 @@ async function main() {
       name: 'Dr. Carlos Rodríguez',
       email: 'carlos.rodriguez@clinic.com',
       description: 'Especialista en medicina interna. Atención personalizada y seguimiento continuo.',
+      photoUrl: 'https://i.pravatar.cc/300?img=13',
       calendarStatus: 'pending' as const,
       isActive: true,
     },
@@ -187,6 +192,7 @@ async function main() {
       name: 'Dra. Ana Martínez',
       email: 'ana.martinez@clinic.com',
       description: 'Médica general con enfoque en medicina preventiva y bienestar.',
+      photoUrl: 'https://i.pravatar.cc/300?img=45',
       calendarStatus: 'pending' as const,
       isActive: true,
     },

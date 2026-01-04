@@ -9,7 +9,9 @@
     "prisma": "prisma db push --accept-data-loss",
     "postinstall": "prisma generate",
     "vercel-build": "prisma generate && prisma db push && next build --turbopack",
-    "seed": "tsx prisma/seed.ts"
+    "seed": "tsx prisma/seed.ts",
+    "db:clear": "tsx prisma/clear.ts",
+    "db:reset": "npm run db:clear && npm run seed"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
