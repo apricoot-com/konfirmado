@@ -9,6 +9,20 @@ import { formatInTimeZone } from 'date-fns-tz'
 import { es } from 'date-fns/locale'
 import type { BookingState } from '../booking-wizard'
 
+interface Service {
+  id: string
+  name: string
+  imageUrl: string | null
+  description?: string | null
+}
+
+interface Professional {
+  id: string
+  name: string
+  photoUrl: string | null
+  description?: string | null
+}
+
 interface AvailabilityStepProps {
   bookingState: BookingState
   updateBookingState: (updates: Partial<BookingState>) => void
@@ -17,6 +31,9 @@ interface AvailabilityStepProps {
   primaryColor: string
   currentStep: number
   totalSteps: number
+  services: Service[]
+  professionals: Professional[]
+  isReadOnly?: boolean
 }
 
 interface TimeSlot {
@@ -32,7 +49,12 @@ export function AvailabilityStep({
   primaryColor,
   currentStep,
   totalSteps,
+  services,
+  professionals,
+  isReadOnly = false,
 }: AvailabilityStepProps) {
+  const selectedService = services.find(s => s.id === bookingState.serviceId)
+  const selectedProfessional = professionals.find(p => p.id === bookingState.professionalId)
   const [currentDate, setCurrentDate] = useState(startOfDay(new Date()))
   const [slots, setSlots] = useState<TimeSlot[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -170,6 +192,51 @@ export function AvailabilityStep({
 
   return (
     <div className="flex flex-col h-full">
+      {/* Selected Service and Professional Panel */}
+      {(selectedService || selectedProfessional) && (
+        <div className="flex-shrink-0 mb-4 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+          <div className="text-xs text-gray-500 uppercase tracking-wide mb-2">Resumen de selección</div>
+          <div className="flex items-center gap-4">
+            {selectedService && (
+              <div className="flex items-center gap-2 flex-1">
+                {selectedService.imageUrl && (
+                  <img
+                    src={selectedService.imageUrl}
+                    alt={selectedService.name}
+                    className="w-12 h-12 rounded-lg object-cover"
+                  />
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className="text-xs text-gray-500 mb-0.5">Servicio</div>
+                  <div className="font-semibold text-gray-900 truncate">{selectedService.name}</div>
+                </div>
+              </div>
+            )}
+            {selectedProfessional && (
+              <div className="flex items-center gap-2 flex-1">
+                {selectedProfessional.photoUrl ? (
+                  <img
+                    src={selectedProfessional.photoUrl}
+                    alt={selectedProfessional.name}
+                    className="w-12 h-12 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
+                    <span className="text-lg font-semibold text-gray-600">
+                      {selectedProfessional.name.charAt(0)}
+                    </span>
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className="text-xs text-gray-500 mb-0.5">Profesional</div>
+                  <div className="font-semibold text-gray-900 truncate">{selectedProfessional.name}</div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Header - Fixed */}
       <div className="flex-shrink-0 mb-4">
         {/* Selected slot indicator */}
@@ -305,23 +372,28 @@ export function AvailabilityStep({
           </div>
         </div>
         
-        {/* Buttons */}
-        <div className="flex justify-between pb-4">
-          <Button variant="outline" onClick={onBack}>
-            <ChevronLeft className="w-5 h-5 mr-2" />
-            Atrás
-          </Button>
+          {/* Buttons */}
+          <div className="flex justify-between pb-4">
+            <Button 
+              variant="outline" 
+              onClick={onBack}
+              disabled={isReadOnly}
+              className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
+            >
+              <ChevronLeft className="w-5 h-5 mr-2" />
+              Atrás
+            </Button>
 
-          <Button
-            onClick={handleContinue}
-            disabled={!selectedSlot}
-            style={selectedSlot ? { backgroundColor: primaryColor } : {}}
-            className="hover:opacity-90 disabled:opacity-50"
-          >
-            Continuar
-            <ChevronRight className="w-5 h-5 ml-2" />
-          </Button>
-        </div>
+            <Button
+              onClick={handleContinue}
+              disabled={!selectedSlot}
+              style={selectedSlot ? { backgroundColor: primaryColor } : {}}
+              className="hover:opacity-90 disabled:opacity-50"
+            >
+              Continuar
+              <ChevronRight className="w-5 h-5 ml-2" />
+            </Button>
+          </div>
       </div>
     </div>
   )

@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Clock, ChevronRight, CheckCircle2 } from 'lucide-react'
+import { Clock, ChevronRight, CheckCircle2, Lock } from 'lucide-react'
 import { formatPrice } from '@/lib/utils'
 import type { BookingState } from '../booking-wizard'
 
@@ -36,6 +36,8 @@ interface ServiceSelectionStepProps {
   primaryColor: string
   currentStep: number
   totalSteps: number
+  preselectedServiceId?: string
+  isReadOnly?: boolean
 }
 
 export function ServiceSelectionStep({
@@ -46,13 +48,32 @@ export function ServiceSelectionStep({
   primaryColor,
   currentStep,
   totalSteps,
+  preselectedServiceId,
+  isReadOnly = false,
 }: ServiceSelectionStepProps) {
   const [selectedService, setSelectedService] = useState<string | null>(
-    bookingState.serviceId
+    preselectedServiceId || bookingState.serviceId
   )
 
+  // Auto-continue if preselected and read-only
+  useEffect(() => {
+    if (preselectedServiceId && isReadOnly && selectedService === preselectedServiceId) {
+      // Small delay to show the preselected value
+      const timer = setTimeout(() => {
+        updateBookingState({
+          serviceId: preselectedServiceId,
+          professionalId: null, // Reset professional
+        })
+        onNext()
+      }, 500)
+      return () => clearTimeout(timer)
+    }
+  }, [preselectedServiceId, isReadOnly, selectedService, updateBookingState, onNext])
+
   const handleServiceSelect = (serviceId: string) => {
-    setSelectedService(serviceId)
+    if (!isReadOnly) {
+      setSelectedService(serviceId)
+    }
   }
 
   const handleContinue = () => {
@@ -76,20 +97,37 @@ export function ServiceSelectionStep({
 
   const isSelected = (serviceId: string) => selectedService === serviceId
 
+  const preselectedService = preselectedServiceId 
+    ? services.find(s => s.id === preselectedServiceId)
+    : null
+
   return (
     <div className="flex flex-col h-full">
+      {/* Preselected Notice */}
+      {isReadOnly && preselectedService && (
+        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center gap-2">
+          <Lock className="w-4 h-4 text-blue-600 flex-shrink-0" />
+          <p className="text-sm text-blue-800">
+            Este servicio ha sido preseleccionado: <strong>{preselectedService.name}</strong>
+          </p>
+        </div>
+      )}
+
       {/* Content - Scrollable */}
       <div className="flex-1 overflow-y-auto min-h-0 -mx-2 px-2 mb-4">
         <div className="grid grid-cols-1 pt-2 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 pb-20 px-2 md:px-4">
           {services.map((service) => {
             const selected = isSelected(service.id)
+            const isPreselected = preselectedServiceId === service.id && isReadOnly
             return (
               <Card
                 key={service.id}
-                className={`relative p-2 md:p-5 cursor-pointer transition-all max-w-sm mx-auto w-full ${
-                  selected
-                    ? 'ring-2 ring-offset-2 shadow-lg scale-[1.02]'
-                    : 'hover:shadow-lg hover:scale-[1.01]'
+                className={`relative p-2 md:p-5 transition-all max-w-sm mx-auto w-full ${
+                  isReadOnly && !selected
+                    ? 'opacity-50 cursor-not-allowed'
+                    : selected
+                    ? 'ring-2 ring-offset-2 shadow-lg scale-[1.02] cursor-pointer'
+                    : 'hover:shadow-lg hover:scale-[1.01] cursor-pointer'
                 }`}
                 style={
                   selected
@@ -100,7 +138,7 @@ export function ServiceSelectionStep({
                       } as React.CSSProperties
                     : {}
                 }
-                onClick={() => handleServiceSelect(service.id)}
+                onClick={() => !isReadOnly && handleServiceSelect(service.id)}
               >
 
                 {/* Checkmark Overlay */}
@@ -171,41 +209,43 @@ export function ServiceSelectionStep({
       </div>
 
       {/* Footer - Sticky */}
-      <div className="flex-shrink-0 border-t bg-white sticky bottom-0 z-20 -mx-4 px-4">
-        {/* Progress Bar */}
-        <div className="pt-4 pb-3">
-          <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
-            <div
-              className="h-full rounded-full transition-all duration-300 ease-out"
-              style={{
-                width: `${(currentStep / totalSteps) * 100}%`,
-                backgroundColor: primaryColor,
-              }}
-            />
+      {!isReadOnly && (
+        <div className="flex-shrink-0 border-t bg-white sticky bottom-0 z-20 -mx-4 px-4">
+          {/* Progress Bar */}
+          <div className="pt-4 pb-3">
+            <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all duration-300 ease-out"
+                style={{
+                  width: `${(currentStep / totalSteps) * 100}%`,
+                  backgroundColor: primaryColor,
+                }}
+              />
+            </div>
+            <div className="flex items-center justify-between mt-2">
+              <span className="text-xs font-medium text-gray-600">
+                Paso {currentStep} de {totalSteps}
+              </span>
+              <span className="text-xs font-medium text-gray-600">
+                {Math.round((currentStep / totalSteps) * 100)}%
+              </span>
+            </div>
           </div>
-          <div className="flex items-center justify-between mt-2">
-            <span className="text-xs font-medium text-gray-600">
-              Paso {currentStep} de {totalSteps}
-            </span>
-            <span className="text-xs font-medium text-gray-600">
-              {Math.round((currentStep / totalSteps) * 100)}%
-            </span>
+          
+          {/* Buttons */}
+          <div className="flex justify-end pb-4">
+            <Button
+              onClick={handleContinue}
+              disabled={!selectedService}
+              style={selectedService ? { backgroundColor: primaryColor } : {}}
+              className="hover:opacity-90 disabled:opacity-50 transition-all"
+            >
+              Continuar
+              <ChevronRight className="w-5 h-5 ml-2" />
+            </Button>
           </div>
         </div>
-        
-        {/* Buttons */}
-        <div className="flex justify-end pb-4">
-          <Button
-            onClick={handleContinue}
-            disabled={!selectedService}
-            style={selectedService ? { backgroundColor: primaryColor } : {}}
-            className="hover:opacity-90 disabled:opacity-50 transition-all"
-          >
-            Continuar
-            <ChevronRight className="w-5 h-5 ml-2" />
-          </Button>
-        </div>
-      </div>
+      )}
     </div>
   )
 }

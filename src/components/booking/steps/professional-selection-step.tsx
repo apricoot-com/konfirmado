@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { ChevronLeft, ChevronRight, User, CheckCircle2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, User, CheckCircle2, Lock } from 'lucide-react'
 import type { BookingState } from '../booking-wizard'
 
 interface Service {
@@ -36,6 +36,8 @@ interface ProfessionalSelectionStepProps {
   primaryColor: string
   currentStep: number
   totalSteps: number
+  preselectedProfessionalId?: string
+  isReadOnly?: boolean
 }
 
 export function ProfessionalSelectionStep({
@@ -47,14 +49,30 @@ export function ProfessionalSelectionStep({
   primaryColor,
   currentStep,
   totalSteps,
+  preselectedProfessionalId,
+  isReadOnly = false,
 }: ProfessionalSelectionStepProps) {
   const [selectedProfessional, setSelectedProfessional] = useState<string | null>(
-    bookingState.professionalId
+    preselectedProfessionalId || bookingState.professionalId
   )
 
   // Get professionals for selected service
   const selectedService = services.find(s => s.id === bookingState.serviceId)
   const availableProfessionals = selectedService?.professionals.map(sp => sp.professional) || []
+
+  // Auto-continue if preselected and read-only
+  useEffect(() => {
+    if (preselectedProfessionalId && isReadOnly && selectedProfessional === preselectedProfessionalId) {
+      // Small delay to show the preselected value
+      const timer = setTimeout(() => {
+        updateBookingState({
+          professionalId: preselectedProfessionalId,
+        })
+        onNext()
+      }, 500)
+      return () => clearTimeout(timer)
+    }
+  }, [preselectedProfessionalId, isReadOnly, selectedProfessional, updateBookingState, onNext])
 
   // Helper function to convert hex to rgba
   const hexToRgba = (hex: string, alpha: number) => {
@@ -75,12 +93,38 @@ export function ProfessionalSelectionStep({
     }
   }
 
+  const preselectedProfessional = preselectedProfessionalId
+    ? availableProfessionals.find(p => p.id === preselectedProfessionalId)
+    : null
+
   return (
     <div className="flex flex-col h-full">
-      {/* Service context */}
+      {/* Selected Service Display */}
       {selectedService && (
-        <div className="flex-shrink-0 mb-4 text-sm text-gray-500 text-center">
-          Servicio: <span className="font-medium text-gray-700">{selectedService.name}</span>
+        <div className="flex-shrink-0 mb-4 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+          <div className="flex items-center gap-3">
+            {selectedService.imageUrl && (
+              <img
+                src={selectedService.imageUrl}
+                alt={selectedService.name}
+                className="w-12 h-12 rounded-lg object-cover"
+              />
+            )}
+            <div className="flex-1">
+              <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Servicio seleccionado</div>
+              <div className="font-semibold text-gray-900">{selectedService.name}</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Preselected Notice */}
+      {isReadOnly && preselectedProfessional && (
+        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center gap-2">
+          <Lock className="w-4 h-4 text-blue-600 flex-shrink-0" />
+          <p className="text-sm text-blue-800">
+            Este profesional ha sido preseleccionado: <strong>{preselectedProfessional.name}</strong>
+          </p>
         </div>
       )}
 
@@ -100,13 +144,16 @@ export function ProfessionalSelectionStep({
           <div className="grid grid-cols-1 pt-2 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 pb-20 px-2 md:px-4">
             {availableProfessionals.map((professional) => {
               const selected = isSelected(professional.id)
+              const isPreselected = preselectedProfessionalId === professional.id && isReadOnly
               return (
                 <Card
                   key={professional.id}
-                  className={`relative p-4 md:p-5 cursor-pointer transition-all max-w-sm mx-auto w-full ${
-                    selected
-                      ? 'ring-2 ring-offset-2 shadow-lg scale-[1.02]'
-                      : 'hover:shadow-lg hover:scale-[1.01]'
+                  className={`relative p-4 md:p-5 transition-all max-w-sm mx-auto w-full ${
+                    isReadOnly && !selected
+                      ? 'opacity-50 cursor-not-allowed'
+                      : selected
+                      ? 'ring-2 ring-offset-2 shadow-lg scale-[1.02] cursor-pointer'
+                      : 'hover:shadow-lg hover:scale-[1.01] cursor-pointer'
                   }`}
                   style={
                     selected
@@ -117,7 +164,7 @@ export function ProfessionalSelectionStep({
                         } as React.CSSProperties
                       : {}
                   }
-                  onClick={() => setSelectedProfessional(professional.id)}
+                  onClick={() => !isReadOnly && setSelectedProfessional(professional.id)}
                 >
                   {/* Checkmark Overlay */}
                   {selected && (
@@ -177,46 +224,53 @@ export function ProfessionalSelectionStep({
       </div>
 
       {/* Footer - Sticky */}
-      <div className="flex-shrink-0 border-t bg-white sticky bottom-0 z-20 -mx-4 px-4">
-        {/* Progress Bar */}
-        <div className="pt-4 pb-3">
-          <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
-            <div
-              className="h-full rounded-full transition-all duration-300 ease-out"
-              style={{
-                width: `${(currentStep / totalSteps) * 100}%`,
-                backgroundColor: primaryColor,
-              }}
-            />
+      {!isReadOnly && (
+        <div className="flex-shrink-0 border-t bg-white sticky bottom-0 z-20 -mx-4 px-4">
+          {/* Progress Bar */}
+          <div className="pt-4 pb-3">
+            <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all duration-300 ease-out"
+                style={{
+                  width: `${(currentStep / totalSteps) * 100}%`,
+                  backgroundColor: primaryColor,
+                }}
+              />
+            </div>
+            <div className="flex items-center justify-between mt-2">
+              <span className="text-xs font-medium text-gray-600">
+                Paso {currentStep} de {totalSteps}
+              </span>
+              <span className="text-xs font-medium text-gray-600">
+                {Math.round((currentStep / totalSteps) * 100)}%
+              </span>
+            </div>
           </div>
-          <div className="flex items-center justify-between mt-2">
-            <span className="text-xs font-medium text-gray-600">
-              Paso {currentStep} de {totalSteps}
-            </span>
-            <span className="text-xs font-medium text-gray-600">
-              {Math.round((currentStep / totalSteps) * 100)}%
-            </span>
-          </div>
-        </div>
-        
-        {/* Buttons */}
-        <div className="flex justify-between pb-4">
-          <Button variant="outline" onClick={onBack}>
-            <ChevronLeft className="w-5 h-5 mr-2" />
-            Atrás
-          </Button>
+          
+          {/* Buttons */}
+          <div className="flex justify-between pb-4">
+            <Button 
+              variant="outline" 
+              onClick={onBack}
+              disabled={isReadOnly}
+              className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
+            >
+              <ChevronLeft className="w-5 h-5 mr-2" />
+              Atrás
+            </Button>
 
-          <Button
-            onClick={handleContinue}
-            disabled={!selectedProfessional}
-            style={selectedProfessional ? { backgroundColor: primaryColor } : {}}
-            className="hover:opacity-90 disabled:opacity-50 transition-all"
-          >
-            Continuar
-            <ChevronRight className="w-5 h-5 ml-2" />
-          </Button>
+            <Button
+              onClick={handleContinue}
+              disabled={!selectedProfessional}
+              style={selectedProfessional ? { backgroundColor: primaryColor } : {}}
+              className="hover:opacity-90 disabled:opacity-50 transition-all"
+            >
+              Continuar
+              <ChevronRight className="w-5 h-5 ml-2" />
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }

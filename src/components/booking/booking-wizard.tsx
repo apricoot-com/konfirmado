@@ -85,7 +85,15 @@ export function BookingWizard({
   preselectedProfessionalId,
   retryBooking,
 }: BookingWizardProps) {
-  const [currentStep, setCurrentStep] = useState(retryBooking ? 5 : 1)
+  // Calculate initial step based on preselected values
+  const getInitialStep = () => {
+    if (retryBooking) return 5
+    if (preselectedServiceId && preselectedProfessionalId) return 3 // Skip service and professional selection
+    if (preselectedServiceId) return 2 // Skip service selection
+    return 1 // Start from beginning
+  }
+
+  const [currentStep, setCurrentStep] = useState(getInitialStep())
   const [bookingState, setBookingState] = useState<BookingState>({
     serviceId: preselectedServiceId || null,
     professionalId: preselectedProfessionalId || null,
@@ -107,11 +115,23 @@ export function BookingWizard({
   }
 
   const goToNextStep = () => {
-    setCurrentStep(prev => Math.min(prev + 1, 5))
+    setCurrentStep(prev => {
+      const next = prev + 1
+      // Skip steps that are already completed by preselection
+      if (next === 1 && preselectedServiceId) return 2
+      if (next === 2 && preselectedServiceId && preselectedProfessionalId) return 3
+      return Math.min(next, 5)
+    })
   }
 
   const goToPreviousStep = () => {
-    setCurrentStep(prev => Math.max(prev - 1, 1))
+    setCurrentStep(prev => {
+      const previous = prev - 1
+      // Skip steps that are preselected
+      if (previous === 1 && preselectedServiceId) return 1 // Can't go back before step 1
+      if (previous === 2 && preselectedServiceId && preselectedProfessionalId) return 1 // Skip professional selection
+      return Math.max(previous, 1)
+    })
   }
 
   // Step titles and descriptions
@@ -172,6 +192,8 @@ export function BookingWizard({
             primaryColor={tenant.primaryColor}
             currentStep={currentStep}
             totalSteps={5}
+            preselectedServiceId={preselectedServiceId}
+            isReadOnly={!!preselectedServiceId}
           />
         )}
 
@@ -186,6 +208,8 @@ export function BookingWizard({
               primaryColor={tenant.primaryColor}
               currentStep={currentStep}
               totalSteps={5}
+              preselectedProfessionalId={preselectedProfessionalId}
+              isReadOnly={!!preselectedProfessionalId}
             />
           </div>
         )}
@@ -200,6 +224,9 @@ export function BookingWizard({
               primaryColor={tenant.primaryColor}
               currentStep={currentStep}
               totalSteps={5}
+              services={services}
+              professionals={professionals}
+              isReadOnly={!!preselectedServiceId || !!preselectedProfessionalId}
             />
           </div>
         )}
