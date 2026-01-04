@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { ChevronLeft, ChevronRight, User } from 'lucide-react'
+import { ChevronLeft, ChevronRight, User, CheckCircle2 } from 'lucide-react'
 import type { BookingState } from '../booking-wizard'
 
 interface Service {
@@ -52,6 +52,16 @@ export function ProfessionalSelectionStep({
   const selectedService = services.find(s => s.id === bookingState.serviceId)
   const availableProfessionals = selectedService?.professionals.map(sp => sp.professional) || []
 
+  // Helper function to convert hex to rgba
+  const hexToRgba = (hex: string, alpha: number) => {
+    const r = parseInt(hex.slice(1, 3), 16)
+    const g = parseInt(hex.slice(3, 5), 16)
+    const b = parseInt(hex.slice(5, 7), 16)
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`
+  }
+
+  const isSelected = (professionalId: string) => selectedProfessional === professionalId
+
   const handleContinue = () => {
     if (selectedProfessional) {
       updateBookingState({
@@ -83,48 +93,81 @@ export function ProfessionalSelectionStep({
             </p>
           </Card>
         ) : (
-          <div className="grid gap-4 pb-20">
-            {availableProfessionals.map((professional) => (
-              <Card
-                key={professional.id}
-                className={`p-6 cursor-pointer transition-all ${
-                  selectedProfessional === professional.id
-                    ? 'ring-2 ring-offset-2'
-                    : 'hover:shadow-md'
-                }`}
-                style={
-                  selectedProfessional === professional.id
-                    ? { borderColor: primaryColor, '--tw-ring-color': primaryColor } as React.CSSProperties
-                    : {}
-                }
-                onClick={() => setSelectedProfessional(professional.id)}
-              >
-                <div className="flex items-start gap-4">
-                  {professional.photoUrl ? (
-                    <img
-                      src={professional.photoUrl}
-                      alt={professional.name}
-                      className="w-16 h-16 rounded-full object-cover flex-shrink-0"
-                    />
-                  ) : (
-                    <div
-                      className="w-16 h-16 rounded-full flex items-center justify-center text-white text-2xl font-bold flex-shrink-0"
-                      style={{ backgroundColor: primaryColor }}
-                    >
-                      {professional.name.charAt(0).toUpperCase()}
+          <div className="grid grid-cols-1 pt-2 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 pb-20 px-2 md:px-4">
+            {availableProfessionals.map((professional) => {
+              const selected = isSelected(professional.id)
+              return (
+                <Card
+                  key={professional.id}
+                  className={`relative p-4 md:p-5 cursor-pointer transition-all max-w-sm mx-auto w-full ${
+                    selected
+                      ? 'ring-2 ring-offset-2 shadow-lg scale-[1.02]'
+                      : 'hover:shadow-lg hover:scale-[1.01]'
+                  }`}
+                  style={
+                    selected
+                      ? {
+                          borderColor: primaryColor,
+                          '--tw-ring-color': primaryColor,
+                          backgroundColor: hexToRgba(primaryColor, 0.05),
+                        } as React.CSSProperties
+                      : {}
+                  }
+                  onClick={() => setSelectedProfessional(professional.id)}
+                >
+                  {/* Checkmark Overlay */}
+                  {selected && (
+                    <div className="absolute top-2 left-2 z-10">
+                      <div
+                        className="w-6 h-6 rounded-full flex items-center justify-center shadow-md"
+                        style={{ backgroundColor: primaryColor }}
+                      >
+                        <CheckCircle2 className="w-4 h-4 text-white" />
+                      </div>
                     </div>
                   )}
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                      {professional.name}
-                    </h3>
-                    {professional.description && (
-                      <p className="text-sm text-gray-600">{professional.description}</p>
+
+                  {/* Photo */}
+                  <div className="flex flex-col items-center mb-4">
+                    {professional.photoUrl ? (
+                      <div className="relative w-24 h-24 md:w-28 md:h-28 rounded-full overflow-hidden mb-3 ring-2 ring-gray-200">
+                        <img
+                          src={professional.photoUrl}
+                          alt={professional.name}
+                          className="w-full h-full object-cover"
+                        />
+                        {selected && (
+                          <div
+                            className="absolute inset-0 rounded-full"
+                            style={{ backgroundColor: hexToRgba(primaryColor, 0.1) }}
+                          />
+                        )}
+                      </div>
+                    ) : (
+                      <div
+                        className="w-24 h-24 md:w-28 md:h-28 rounded-full flex items-center justify-center text-white text-2xl md:text-3xl font-bold mb-3 ring-2 ring-gray-200"
+                        style={{ backgroundColor: primaryColor }}
+                      >
+                        {professional.name.charAt(0).toUpperCase()}
+                      </div>
                     )}
                   </div>
-                </div>
-              </Card>
-            ))}
+
+                  {/* Content */}
+                  <div className="space-y-2 text-center">
+                    <h3 className="text-lg md:text-xl font-semibold text-gray-900 leading-tight">
+                      {professional.name}
+                    </h3>
+                    
+                    {professional.description && (
+                      <p className="text-gray-600 text-sm line-clamp-3 min-h-[3rem]">
+                        {professional.description}
+                      </p>
+                    )}
+                  </div>
+                </Card>
+              )
+            })}
           </div>
         )}
       </div>
@@ -140,7 +183,7 @@ export function ProfessionalSelectionStep({
           onClick={handleContinue}
           disabled={!selectedProfessional}
           style={selectedProfessional ? { backgroundColor: primaryColor } : {}}
-          className="hover:opacity-90 disabled:opacity-50"
+          className="hover:opacity-90 disabled:opacity-50 transition-all"
         >
           Continuar
           <ChevronRight className="w-5 h-5 ml-2" />

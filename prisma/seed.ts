@@ -62,60 +62,61 @@ async function main() {
 
   // Client tenant and user
   let clientTenant = await prisma.tenant.findFirst({
-    where: { name: 'Test Client' },
+    where: { name: 'CliniTest' },
   })
 
   if (!clientTenant) {
     clientTenant = await prisma.tenant.create({
       data: {
-        name: 'Test Client',
+        name: 'CliniTest',
         callbackUrl: 'http://localhost:3000/api/callback',
         returnUrl: 'http://localhost:3000/thanks',
         subscriptionPlan: 'trial',
         subscriptionStatus: 'active',
       },
     })
-    console.log('✓ Created client tenant')
+    console.log('✓ Created CliniTest tenant')
   } else {
     clientTenant = await prisma.tenant.update({
       where: { id: clientTenant.id },
       data: {
         callbackUrl: 'http://localhost:3000/api/callback',
         returnUrl: 'http://localhost:3000/thanks',
+        logoUrl: 'https://thord-public.s3.us-east-1.amazonaws.com/konfirmado_dev_images/clinitest/logo-clinitest.png',
         subscriptionPlan: 'trial',
         subscriptionStatus: 'active',
       },
     })
-    console.log('✓ Updated client tenant')
+    console.log('✓ Updated CliniTest tenant')
   }
 
   const clientUserBefore = await prisma.user.findUnique({
-    where: { email: 'user@client.com' },
+    where: { email: 'user@clinitest.com' },
   })
 
   const clientUser = await prisma.user.upsert({
-    where: { email: 'user@client.com' },
+    where: { email: 'user@clinitest.com' },
     update: {
       password: hashedPassword,
       emailVerified: now,
       tenantId: clientTenant.id,
     },
     create: {
-      email: 'user@client.com',
+      email: 'user@clinitest.com',
       password: hashedPassword,
       emailVerified: now,
       tenantId: clientTenant.id,
     },
   })
 
-  console.log(`✓ Client user: ${clientUser.email} (${clientUserBefore ? 'updated' : 'created'})`)
+  console.log(`✓ CliniTest user: ${clientUser.email} (${clientUserBefore ? 'updated' : 'created'})`)
 
   // Create services for client tenant
   const services = [
     {
       name: 'Consulta General',
       description: 'Consulta médica general de 30 minutos. Incluye evaluación inicial y recomendaciones básicas.',
-      imageUrl: 'https://picsum.photos/400/300?random=1',
+      imageUrl: 'https://thord-public.s3.us-east-1.amazonaws.com/konfirmado_dev_images/clinitest/service-1.jpg',
       durationMinutes: 30,
       price: 120000, // 120,000 COP
       chargeType: 'partial' as const,
@@ -126,7 +127,7 @@ async function main() {
     {
       name: 'Consulta Especializada',
       description: 'Consulta con especialista de 60 minutos. Evaluación detallada y plan de tratamiento.',
-      imageUrl: 'https://picsum.photos/400/300?random=2',
+      imageUrl: 'https://thord-public.s3.us-east-1.amazonaws.com/konfirmado_dev_images/clinitest/service-2.png',
       durationMinutes: 60,
       price: 250000, // 250,000 COP
       chargeType: 'total' as const,
@@ -136,7 +137,7 @@ async function main() {
     {
       name: 'Seguimiento',
       description: 'Consulta de seguimiento de 20 minutos para revisar evolución del tratamiento.',
-      imageUrl: 'https://picsum.photos/400/300?random=3',
+      imageUrl: 'https://thord-public.s3.us-east-1.amazonaws.com/konfirmado_dev_images/clinitest/service-3.jpg',
       durationMinutes: 20,
       price: 80000, // 80,000 COP
       chargeType: 'partial' as const,
@@ -176,7 +177,7 @@ async function main() {
       name: 'Dra. María López',
       email: 'maria.lopez@clinic.com',
       description: 'Médica general con 10 años de experiencia. Especializada en medicina familiar.',
-      photoUrl: 'https://i.pravatar.cc/300?img=47',
+      photoUrl: 'https://thord-public.s3.us-east-1.amazonaws.com/konfirmado_dev_images/clinitest/doctora-1.png',
       calendarStatus: 'pending' as const,
       isActive: true,
     },
@@ -184,7 +185,7 @@ async function main() {
       name: 'Dr. Carlos Rodríguez',
       email: 'carlos.rodriguez@clinic.com',
       description: 'Especialista en medicina interna. Atención personalizada y seguimiento continuo.',
-      photoUrl: 'https://i.pravatar.cc/300?img=13',
+      photoUrl: 'https://thord-public.s3.us-east-1.amazonaws.com/konfirmado_dev_images/clinitest/doctor-1.png',
       calendarStatus: 'pending' as const,
       isActive: true,
     },
@@ -192,7 +193,7 @@ async function main() {
       name: 'Dra. Ana Martínez',
       email: 'ana.martinez@clinic.com',
       description: 'Médica general con enfoque en medicina preventiva y bienestar.',
-      photoUrl: 'https://i.pravatar.cc/300?img=45',
+      photoUrl: 'https://thord-public.s3.us-east-1.amazonaws.com/konfirmado_dev_images/clinitest/doctora-2.png',
       calendarStatus: 'pending' as const,
       isActive: true,
     },
@@ -225,9 +226,31 @@ async function main() {
 
   // Link services to professionals
   console.log('\n🔗 Linking services to professionals...')
-  // All professionals can offer all services
-  for (const service of createdServices) {
-    for (const professional of createdProfessionals) {
+  // Define specific links:
+  // - Consulta General: 1 professional (Dra. María López)
+  // - Consulta Especializada: 2 professionals (Dr. Carlos Rodríguez & Dra. Ana Martínez)
+  // - Seguimiento: 3 professionals (all professionals)
+
+  const serviceProfessionalLinks = [
+    // createdServices[0] = Consulta General - 1 professional
+    {
+      service: createdServices[0],
+      professionals: [createdProfessionals[0]], // Dra. María López
+    },
+    // createdServices[1] = Consulta Especializada - 2 professionals
+    {
+      service: createdServices[1],
+      professionals: [createdProfessionals[1], createdProfessionals[2]], // Dr. Carlos Rodríguez & Dra. Ana Martínez
+    },
+    // createdServices[2] = Seguimiento - 3 professionals (all)
+    {
+      service: createdServices[2],
+      professionals: [createdProfessionals[0], createdProfessionals[1], createdProfessionals[2]], // All professionals
+    },
+  ]
+
+  for (const { service, professionals } of serviceProfessionalLinks) {
+    for (const professional of professionals) {
       const existingLink = await prisma.serviceProfessional.findUnique({
         where: {
           serviceId_professionalId: {
