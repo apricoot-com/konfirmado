@@ -136,49 +136,26 @@ export function BookingWizard({
         <div className="bg-white rounded-lg md:rounded-xl shadow-lg flex flex-col h-full overflow-hidden">
           {/* Card Header */}
           <div className="flex-shrink-0 border-b border-gray-200 px-4 md:px-6 py-4 md:py-6">
-            <div className="flex items-center justify-between mb-4">
-              {tenant.logoUrl ? (
+            {/* Logo and Name */}
+            <div className="flex flex-col items-center justify-center mb-4">
+              {tenant.logoUrl && (
                 <img
                   src={tenant.logoUrl}
                   alt={tenant.name}
-                  className="h-8 md:h-10 object-contain"
+                  className="h-12 md:h-16 lg:h-20 object-contain max-w-full mb-2"
                 />
-              ) : (
-                <h1 className="text-xl md:text-2xl font-bold" style={{ color: tenant.primaryColor }}>
-                  {tenant.name}
-                </h1>
               )}
-            </div>
-            
-            {/* Progress indicator */}
-            <div className="flex items-center justify-center gap-2 mb-6">
-              {[1, 2, 3, 4, 5].map((step) => (
-                <div
-                  key={step}
-                  className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center text-xs md:text-sm font-medium ${
-                    step === currentStep
-                      ? 'text-white'
-                      : step < currentStep
-                      ? 'bg-green-100 text-green-700'
-                      : 'bg-gray-100 text-gray-400'
-                  }`}
-                  style={
-                    step === currentStep
-                      ? { backgroundColor: tenant.primaryColor }
-                      : {}
-                  }
-                >
-                  {step < currentStep ? '✓' : step}
-                </div>
-              ))}
+              <h1 className="text-xl md:text-2xl font-bold" style={{ color: tenant.primaryColor }}>
+                {tenant.name}
+              </h1>
             </div>
             
             {/* Step title and description */}
             <div className="text-center">
-              <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">
+              <h2 className="text-lg md:text-xl font-bold text-gray-900 mb-1">
                 {stepInfo[currentStep as keyof typeof stepInfo].title}
               </h2>
-              <p className="text-sm md:text-base text-gray-600">
+              <p className="text-sm text-gray-600">
                 {stepInfo[currentStep as keyof typeof stepInfo].description}
               </p>
             </div>
@@ -193,6 +170,8 @@ export function BookingWizard({
             updateBookingState={updateBookingState}
             onNext={goToNextStep}
             primaryColor={tenant.primaryColor}
+            currentStep={currentStep}
+            totalSteps={5}
           />
         )}
 
@@ -205,6 +184,8 @@ export function BookingWizard({
               onNext={goToNextStep}
               onBack={goToPreviousStep}
               primaryColor={tenant.primaryColor}
+              currentStep={currentStep}
+              totalSteps={5}
             />
           </div>
         )}
@@ -217,6 +198,8 @@ export function BookingWizard({
               onNext={goToNextStep}
               onBack={goToPreviousStep}
               primaryColor={tenant.primaryColor}
+              currentStep={currentStep}
+              totalSteps={5}
             />
           </div>
         )}
@@ -230,6 +213,8 @@ export function BookingWizard({
             onBack={goToPreviousStep}
             primaryColor={tenant.primaryColor}
             tenant={tenant}
+            currentStep={currentStep}
+            totalSteps={5}
           />
           </div>
         )}
@@ -240,6 +225,8 @@ export function BookingWizard({
             bookingState={bookingState}
             tenant={tenant}
             onBack={goToPreviousStep}
+            currentStep={currentStep}
+            totalSteps={5}
           />
         )}
           </div>

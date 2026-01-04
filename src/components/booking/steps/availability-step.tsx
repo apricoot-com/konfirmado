@@ -15,6 +15,8 @@ interface AvailabilityStepProps {
   onNext: () => void
   onBack: () => void
   primaryColor: string
+  currentStep: number
+  totalSteps: number
 }
 
 interface TimeSlot {
@@ -28,6 +30,8 @@ export function AvailabilityStep({
   onNext,
   onBack,
   primaryColor,
+  currentStep,
+  totalSteps,
 }: AvailabilityStepProps) {
   const [currentDate, setCurrentDate] = useState(startOfDay(new Date()))
   const [slots, setSlots] = useState<TimeSlot[]>([])
@@ -279,21 +283,45 @@ export function AvailabilityStep({
       </div>
 
       {/* Footer - Sticky */}
-      <div className="flex-shrink-0 flex justify-between pt-6 border-t bg-white sticky bottom-0 z-20 -mx-4 px-4 pb-4">
-        <Button variant="outline" onClick={onBack}>
-          <ChevronLeft className="w-5 h-5 mr-2" />
-          Atrás
-        </Button>
+      <div className="flex-shrink-0 border-t bg-white sticky bottom-0 z-20 -mx-4 px-4">
+        {/* Progress Bar */}
+        <div className="pt-4 pb-3">
+          <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+            <div
+              className="h-full rounded-full transition-all duration-300 ease-out"
+              style={{
+                width: `${(currentStep / totalSteps) * 100}%`,
+                backgroundColor: primaryColor,
+              }}
+            />
+          </div>
+          <div className="flex items-center justify-between mt-2">
+            <span className="text-xs font-medium text-gray-600">
+              Paso {currentStep} de {totalSteps}
+            </span>
+            <span className="text-xs font-medium text-gray-600">
+              {Math.round((currentStep / totalSteps) * 100)}%
+            </span>
+          </div>
+        </div>
+        
+        {/* Buttons */}
+        <div className="flex justify-between pb-4">
+          <Button variant="outline" onClick={onBack}>
+            <ChevronLeft className="w-5 h-5 mr-2" />
+            Atrás
+          </Button>
 
-        <Button
-          onClick={handleContinue}
-          disabled={!selectedSlot}
-          style={selectedSlot ? { backgroundColor: primaryColor } : {}}
-          className="hover:opacity-90 disabled:opacity-50"
-        >
-          Continuar
-          <ChevronRight className="w-5 h-5 ml-2" />
-        </Button>
+          <Button
+            onClick={handleContinue}
+            disabled={!selectedSlot}
+            style={selectedSlot ? { backgroundColor: primaryColor } : {}}
+            className="hover:opacity-90 disabled:opacity-50"
+          >
+            Continuar
+            <ChevronRight className="w-5 h-5 ml-2" />
+          </Button>
+        </div>
       </div>
     </div>
   )

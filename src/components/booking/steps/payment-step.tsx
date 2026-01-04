@@ -16,6 +16,8 @@ interface PaymentStepProps {
   bookingState: BookingState
   tenant: Tenant
   onBack: () => void
+  currentStep: number
+  totalSteps: number
 }
 
 export function PaymentStep({
@@ -23,6 +25,8 @@ export function PaymentStep({
   bookingState,
   tenant,
   onBack,
+  currentStep,
+  totalSteps,
 }: PaymentStepProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
@@ -148,8 +152,28 @@ export function PaymentStep({
         </div>
       </Card>
 
+      {/* Progress Bar */}
+      <div className="pt-4 pb-3 border-t">
+        <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+          <div
+            className="h-full rounded-full transition-all duration-300 ease-out"
+            style={{
+              width: `${(currentStep / totalSteps) * 100}%`,
+              backgroundColor: '#3b82f6', // Blue color for payment step
+            }}
+          />
+        </div>
+        <div className="flex items-center justify-between mt-2">
+          <span className="text-xs font-medium text-gray-600">
+            Paso {currentStep} de {totalSteps}
+          </span>
+          <span className="text-xs font-medium text-gray-600">
+            {Math.round((currentStep / totalSteps) * 100)}%
+          </span>
+        </div>
+      </div>
 
-      <div className="flex justify-between pt-4">
+      <div className="flex justify-between pt-2">
         <Button variant="outline" onClick={onBack} disabled={isLoading}>
           <ChevronLeft className="w-5 h-5 mr-2" />
           Atrás

@@ -71,6 +71,7 @@ async function main() {
         name: 'CliniTest',
         callbackUrl: 'http://localhost:3000/api/callback',
         returnUrl: 'http://localhost:3000/thanks',
+        logoUrl: 'https://thord-public.s3.us-east-1.amazonaws.com/konfirmado_dev_images/clinitest/logo-clinitest.png',
         subscriptionPlan: 'trial',
         subscriptionStatus: 'active',
       },

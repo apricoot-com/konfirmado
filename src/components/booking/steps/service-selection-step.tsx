@@ -34,6 +34,8 @@ interface ServiceSelectionStepProps {
   updateBookingState: (updates: Partial<BookingState>) => void
   onNext: () => void
   primaryColor: string
+  currentStep: number
+  totalSteps: number
 }
 
 export function ServiceSelectionStep({
@@ -42,6 +44,8 @@ export function ServiceSelectionStep({
   updateBookingState,
   onNext,
   primaryColor,
+  currentStep,
+  totalSteps,
 }: ServiceSelectionStepProps) {
   const [selectedService, setSelectedService] = useState<string | null>(
     bookingState.serviceId
@@ -167,16 +171,40 @@ export function ServiceSelectionStep({
       </div>
 
       {/* Footer - Sticky */}
-      <div className="flex-shrink-0 flex justify-end pt-6 border-t bg-white sticky bottom-0 z-20 -mx-4 px-4 pb-4">
-        <Button
-          onClick={handleContinue}
-          disabled={!selectedService}
-          style={selectedService ? { backgroundColor: primaryColor } : {}}
-          className="hover:opacity-90 disabled:opacity-50 transition-all"
-        >
-          Continuar
-          <ChevronRight className="w-5 h-5 ml-2" />
-        </Button>
+      <div className="flex-shrink-0 border-t bg-white sticky bottom-0 z-20 -mx-4 px-4">
+        {/* Progress Bar */}
+        <div className="pt-4 pb-3">
+          <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+            <div
+              className="h-full rounded-full transition-all duration-300 ease-out"
+              style={{
+                width: `${(currentStep / totalSteps) * 100}%`,
+                backgroundColor: primaryColor,
+              }}
+            />
+          </div>
+          <div className="flex items-center justify-between mt-2">
+            <span className="text-xs font-medium text-gray-600">
+              Paso {currentStep} de {totalSteps}
+            </span>
+            <span className="text-xs font-medium text-gray-600">
+              {Math.round((currentStep / totalSteps) * 100)}%
+            </span>
+          </div>
+        </div>
+        
+        {/* Buttons */}
+        <div className="flex justify-end pb-4">
+          <Button
+            onClick={handleContinue}
+            disabled={!selectedService}
+            style={selectedService ? { backgroundColor: primaryColor } : {}}
+            className="hover:opacity-90 disabled:opacity-50 transition-all"
+          >
+            Continuar
+            <ChevronRight className="w-5 h-5 ml-2" />
+          </Button>
+        </div>
       </div>
     </div>
   )
