@@ -1,18 +1,31 @@
 import { Resend } from 'resend'
 import nodemailer from 'nodemailer'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
-
 // Check if we're in development mode
 const isDev = process.env.NODE_ENV === 'development'
 
-
 // Create Mailhog transporter for development
+// Mailhog runs on localhost:1025 (SMTP) and localhost:8025 (Web UI)
+// Since the app runs outside Docker Compose, we use localhost
 const mailhogTransporter = isDev ? nodemailer.createTransport({
   host: process.env.SMTP_HOST || 'localhost',
   port: parseInt(process.env.SMTP_PORT || '1025'),
   ignoreTLS: true,
+  secure: false, // Mailhog doesn't use TLS
 }) : null
+
+// Lazy-load Resend only when needed (production with API key)
+let resendInstance: Resend | null = null
+function getResend(): Resend {
+  if (!resendInstance) {
+    const apiKey = process.env.RESEND_API_KEY
+    if (!apiKey) {
+      throw new Error('RESEND_API_KEY is not configured. Cannot send email in production.')
+    }
+    resendInstance = new Resend(apiKey)
+  }
+  return resendInstance
+}
 
 interface SendEmailParams {
   to: string
@@ -28,7 +41,7 @@ export async function sendEmail({ to, subject, html, from }: SendEmailParams) {
   const fromAddress = from || 'Konfirmado <noreply@konfirmado.com>'
   
   try {
-    // Use Mailhog in development
+    // Always use Mailhog in development (even if RESEND_API_KEY is set)
     if (isDev && mailhogTransporter) {
       console.log(`📧 [DEV] Sending email to ${to} via Mailhog`)
       const info = await mailhogTransporter.sendMail({
@@ -37,11 +50,12 @@ export async function sendEmail({ to, subject, html, from }: SendEmailParams) {
         subject,
         html,
       })
-      console.log(`✓ Email sent to Mailhog: http://localhost:8025`)
+      console.log(`✓ Email sent to Mailhog. View at: http://localhost:8025`)
       return { id: info.messageId }
     }
     
-    // Use Resend in production
+    // Use Resend in production (only if API key is configured)
+    const resend = getResend()
     const { data, error } = await resend.emails.send({
       from: fromAddress,
       to,
