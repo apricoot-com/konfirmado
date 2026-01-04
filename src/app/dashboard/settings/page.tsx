@@ -4,6 +4,7 @@ import { BrandingSettings } from '@/components/settings/branding-settings'
 import { IntegrationSettings } from '@/components/settings/integration-settings'
 import { PaymentSettings } from '@/components/settings/payment-settings'
 import { BillingSettings } from '@/components/settings/billing-settings'
+import { PasswordSettings } from '@/components/settings/password-settings'
 import { DangerZoneSettings } from '@/components/settings/danger-zone-settings'
 
 export default async function SettingsPage() {
@@ -30,6 +31,9 @@ export default async function SettingsPage() {
           <TabsTrigger value="billing" className="h-10 md:px-6 text-sm sm:text-base">
             Facturación
           </TabsTrigger>
+          <TabsTrigger value="security" className="h-10 md:px-6 text-sm sm:text-base">
+            Seguridad
+          </TabsTrigger>
           <TabsTrigger value="danger" className="h-10 md:px-6 text-sm sm:text-base text-red-600 data-[state=active]:text-red-700">
             Zona de Peligro
           </TabsTrigger>
@@ -49,6 +53,10 @@ export default async function SettingsPage() {
 
         <TabsContent value="billing">
           <BillingSettings tenant={tenant} />
+        </TabsContent>
+
+        <TabsContent value="security">
+          <PasswordSettings />
         </TabsContent>
 
         <TabsContent value="danger">
