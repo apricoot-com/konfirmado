@@ -13,3 +13,6 @@
 [] Detect test/prod in wompy based on key prefix
 [x] Make New service/professional/links buttons smaller in mobile
 []
+
+
+[] Actualizar el cron de eliminación de reservas para que se haga cada 5 minutos
