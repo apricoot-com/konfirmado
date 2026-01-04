@@ -3,12 +3,13 @@ import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import { Calendar, Users, Briefcase, Link2, ArrowRight, CheckCircle, AlertCircle } from 'lucide-react'
 import { GettingStarted } from '@/components/dashboard/getting-started'
+import { CopyLinkButton } from '@/components/booking-links/copy-link-button'
 
 export default async function DashboardPage() {
   const { user, tenant } = await requireAuth()
   
   // Get quick stats
-  const [bookingsCount, servicesCount, professionalsCount, linksCount, connectedProfessionals] = await Promise.all([
+  const [bookingsCount, servicesCount, professionalsCount, linksCount, connectedProfessionals, recentLinks] = await Promise.all([
     prisma.booking.count({ where: { tenantId: tenant.id } }),
     prisma.service.count({ where: { tenantId: tenant.id, isActive: true } }),
     prisma.professional.count({ where: { tenantId: tenant.id, isActive: true } }),
@@ -19,6 +20,48 @@ export default async function DashboardPage() {
         calendarStatus: 'connected' 
       } 
     }),
+    (async () => {
+      const links = await prisma.bookingLink.findMany({
+        where: { tenantId: tenant.id },
+        include: {
+          _count: {
+            select: { bookings: true },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 5,
+      })
+      
+      // Fetch service and professional data for links that have them
+      const serviceIds = links.filter(l => l.serviceId).map(l => l.serviceId!)
+      const professionalIds = links.filter(l => l.professionalId).map(l => l.professionalId!)
+      
+      const [services, professionals] = await Promise.all([
+        serviceIds.length > 0
+          ? prisma.service.findMany({
+              where: { id: { in: serviceIds } },
+              select: { id: true, name: true },
+            })
+          : [],
+        professionalIds.length > 0
+          ? prisma.professional.findMany({
+              where: { id: { in: professionalIds } },
+              select: { id: true, name: true },
+            })
+          : [],
+      ])
+      
+      // Map services and professionals by ID for quick lookup
+      const servicesMap = new Map(services.map(s => [s.id, s]))
+      const professionalsMap = new Map(professionals.map(p => [p.id, p]))
+      
+      // Add service and professional data to links
+      return links.map(link => ({
+        ...link,
+        service: link.serviceId ? servicesMap.get(link.serviceId) || null : null,
+        professional: link.professionalId ? professionalsMap.get(link.professionalId) || null : null,
+      }))
+    })(),
   ])
   
   // Check setup status
@@ -174,6 +217,147 @@ export default async function DashboardPage() {
         </Link>
       </div>
       
+      {/* Recent Booking Links */}
+      {recentLinks.length > 0 && (
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-gray-900">Links de Agendamiento</h2>
+            <Link
+              href="/dashboard/links"
+              className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
+            >
+              Ver todos
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+          <div className="space-y-3">
+            {recentLinks.map((link) => {
+              const bookingUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/book/${link.publicId}`
+              const isExpired = link.expiresAt && link.expiresAt < new Date()
+              
+              return (
+                <div
+                  key={link.id}
+                  className="border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors overflow-hidden"
+                >
+                  {/* Desktop Layout */}
+                  <div className="hidden md:flex items-center justify-between p-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Link2 className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                        <span className="font-medium text-gray-900 truncate">{link.name}</span>
+                        {!link.isActive && (
+                          <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded">
+                            Inactivo
+                          </span>
+                        )}
+                        {isExpired && (
+                          <span className="text-xs px-2 py-0.5 bg-red-100 text-red-600 rounded">
+                            Expirado
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-3 text-sm text-gray-600 flex-wrap">
+                        <code className="text-xs bg-gray-100 px-2 py-1 rounded font-mono break-all">
+                          {bookingUrl}
+                        </code>
+                        {(link.service || link.professional) && (
+                          <div className="flex items-center gap-2">
+                            {link.service && (
+                              <span className="inline-flex items-center gap-1 text-xs text-gray-500">
+                                <Calendar className="w-3 h-3" />
+                                {link.service.name}
+                              </span>
+                            )}
+                            {link.professional && (
+                              <span className="inline-flex items-center gap-1 text-xs text-gray-500">
+                                <Users className="w-3 h-3" />
+                                {link.professional.name}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                        <span className="text-xs text-gray-400">
+                          {link._count.bookings} reserva{link._count.bookings !== 1 ? 's' : ''}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 ml-4">
+                      <CopyLinkButton url={bookingUrl} />
+                    </div>
+                  </div>
+
+                  {/* Mobile Layout */}
+                  <div className="md:hidden p-4 space-y-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Link2 className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                          <span className="font-medium text-gray-900">{link.name}</span>
+                        </div>
+                        {!link.isActive && (
+                          <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded inline-block mt-1">
+                            Inactivo
+                          </span>
+                        )}
+                        {isExpired && (
+                          <span className="text-xs px-2 py-0.5 bg-red-100 text-red-600 rounded inline-block mt-1">
+                            Expirado
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        {(link.service || link.professional) && (
+                          <div className="flex items-center gap-2 flex-wrap">
+                            {link.service && (
+                              <span className="inline-flex items-center gap-1 text-xs text-gray-500">
+                                <Calendar className="w-3 h-3" />
+                                {link.service.name}
+                              </span>
+                            )}
+                            {link.professional && (
+                              <span className="inline-flex items-center gap-1 text-xs text-gray-500">
+                                <Users className="w-3 h-3" />
+                                {link.professional.name}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                        <span className="text-xs text-gray-400 ml-auto">
+                          {link._count.bookings} reserva{link._count.bookings !== 1 ? 's' : ''}
+                        </span>
+                      </div>
+                      
+                      <div className="bg-gray-50 rounded-lg p-2 mb-2">
+                        <code className="text-xs text-gray-700 break-all block">
+                          {bookingUrl}
+                        </code>
+                      </div>
+                      
+                      <CopyLinkButton url={bookingUrl} variant="button" />
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+          {linksCount > 5 && (
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <Link
+                href="/dashboard/links"
+                className="text-sm text-blue-600 hover:text-blue-700 flex items-center justify-center gap-1"
+              >
+                Ver todos los {linksCount} links
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Quick Actions */}
       <div className="bg-white rounded-lg border border-gray-200 p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Acciones rápidas</h2>
