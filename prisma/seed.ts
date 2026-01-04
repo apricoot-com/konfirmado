@@ -167,9 +167,22 @@ async function main() {
       createdServices.push(service)
       console.log(`✓ Created service: ${service.name}`)
     } else {
-      createdServices.push(existingService)
-      console.log(`✓ Service already exists: ${existingService.name}`)
+      // Update existing service to ensure it has the latest data
+      const updatedService = await prisma.service.update({
+        where: { id: existingService.id },
+        data: {
+          ...serviceData,
+          tenantId: clientTenant.id,
+        },
+      })
+      createdServices.push(updatedService)
+      console.log(`✓ Updated service: ${updatedService.name}`)
     }
+  }
+
+  // Ensure we have exactly 3 services
+  if (createdServices.length !== 3) {
+    throw new Error(`Expected 3 services, but found ${createdServices.length}`)
   }
 
   // Create professionals for client tenant
@@ -220,9 +233,22 @@ async function main() {
       createdProfessionals.push(professional)
       console.log(`✓ Created professional: ${professional.name}`)
     } else {
-      createdProfessionals.push(existingProfessional)
-      console.log(`✓ Professional already exists: ${existingProfessional.name}`)
+      // Update existing professional to ensure it has the latest data
+      const updatedProfessional = await prisma.professional.update({
+        where: { id: existingProfessional.id },
+        data: {
+          ...professionalData,
+          tenantId: clientTenant.id,
+        },
+      })
+      createdProfessionals.push(updatedProfessional)
+      console.log(`✓ Updated professional: ${updatedProfessional.name}`)
     }
+  }
+
+  // Ensure we have exactly 3 professionals
+  if (createdProfessionals.length !== 3) {
+    throw new Error(`Expected 3 professionals, but found ${createdProfessionals.length}`)
   }
 
   // Link services to professionals
@@ -232,21 +258,35 @@ async function main() {
   // - Consulta Especializada: 2 professionals (Dr. Carlos Rodríguez & Dra. Ana Martínez)
   // - Seguimiento: 3 professionals (all professionals)
 
+  // Find services by name to ensure correct mapping
+  const consultaGeneral = createdServices.find(s => s.name === 'Consulta General')
+  const consultaEspecializada = createdServices.find(s => s.name === 'Consulta Especializada')
+  const seguimiento = createdServices.find(s => s.name === 'Seguimiento')
+
+  // Find professionals by name to ensure correct mapping
+  const draMariaLopez = createdProfessionals.find(p => p.name === 'Dra. María López')
+  const drCarlosRodriguez = createdProfessionals.find(p => p.name === 'Dr. Carlos Rodríguez')
+  const draAnaMartinez = createdProfessionals.find(p => p.name === 'Dra. Ana Martínez')
+
+  if (!consultaGeneral || !consultaEspecializada || !seguimiento) {
+    throw new Error('Could not find all required services')
+  }
+  if (!draMariaLopez || !drCarlosRodriguez || !draAnaMartinez) {
+    throw new Error('Could not find all required professionals')
+  }
+
   const serviceProfessionalLinks = [
-    // createdServices[0] = Consulta General - 1 professional
     {
-      service: createdServices[0],
-      professionals: [createdProfessionals[0]], // Dra. María López
+      service: consultaGeneral,
+      professionals: [draMariaLopez],
     },
-    // createdServices[1] = Consulta Especializada - 2 professionals
     {
-      service: createdServices[1],
-      professionals: [createdProfessionals[1], createdProfessionals[2]], // Dr. Carlos Rodríguez & Dra. Ana Martínez
+      service: consultaEspecializada,
+      professionals: [drCarlosRodriguez, draAnaMartinez],
     },
-    // createdServices[2] = Seguimiento - 3 professionals (all)
     {
-      service: createdServices[2],
-      professionals: [createdProfessionals[0], createdProfessionals[1], createdProfessionals[2]], // All professionals
+      service: seguimiento,
+      professionals: [draMariaLopez, drCarlosRodriguez, draAnaMartinez],
     },
   ]
 
@@ -269,11 +309,19 @@ async function main() {
           },
         })
         console.log(`✓ Linked ${service.name} to ${professional.name}`)
+      } else {
+        console.log(`✓ Link already exists: ${service.name} ↔ ${professional.name}`)
       }
     }
   }
 
   // Create booking links for client tenant
+  // Find services and professionals by name to ensure correct mapping
+  const consultaGeneralService = createdServices.find(s => s.name === 'Consulta General')
+  const consultaEspecializadaService = createdServices.find(s => s.name === 'Consulta Especializada')
+  const draMariaLopezProf = createdProfessionals.find(p => p.name === 'Dra. María López')
+  const drCarlosRodriguezProf = createdProfessionals.find(p => p.name === 'Dr. Carlos Rodríguez')
+
   const bookingLinks = [
     {
       name: 'Link General - Todos los Servicios',
@@ -284,15 +332,15 @@ async function main() {
     },
     {
       name: 'Link Consulta General - Dra. López',
-      serviceId: createdServices[0]?.id, // Consulta General
-      professionalId: createdProfessionals[0]?.id, // Dra. María López
+      serviceId: consultaGeneralService?.id || null,
+      professionalId: draMariaLopezProf?.id || null,
       expiresAt: null,
       isActive: true,
     },
     {
       name: 'Link Especializada - Dr. Rodríguez',
-      serviceId: createdServices[1]?.id, // Consulta Especializada
-      professionalId: createdProfessionals[1]?.id, // Dr. Carlos Rodríguez
+      serviceId: consultaEspecializadaService?.id || null,
+      professionalId: drCarlosRodriguezProf?.id || null,
       expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // Expires in 30 days
       isActive: true,
     },
@@ -316,14 +364,22 @@ async function main() {
       })
       console.log(`✓ Created booking link: ${link.name} (ID: ${link.publicId})`)
     } else {
-      console.log(`✓ Booking link already exists: ${existingLink.name}`)
+      // Update existing link to ensure it has the latest data
+      const updatedLink = await prisma.bookingLink.update({
+        where: { id: existingLink.id },
+        data: {
+          ...linkData,
+          tenantId: clientTenant.id,
+        },
+      })
+      console.log(`✓ Updated booking link: ${updatedLink.name} (ID: ${updatedLink.publicId})`)
     }
   }
 
   console.log('\n✅ Database seed completed!')
   console.log('📧 Login credentials:')
   console.log(`   Admin: admin@konfirmado.com / ${password}`)
-  console.log(`   Client: user@client.com / ${password}`)
+  console.log(`   Client: user@clinitest.com / ${password}`)
   console.log('\n📊 Seed summary:')
   console.log(`   Services: ${createdServices.length}`)
   console.log(`   Professionals: ${createdProfessionals.length}`)
