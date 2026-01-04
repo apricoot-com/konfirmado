@@ -163,7 +163,7 @@ Guardamos.
 Ahora, para que el sistema muestre disponibilidad real,
 el profesional debe conectar su Google Calendar.
 
-Hacemos clic en "Enviar invitación"...
+Hacemos clic en "Invitar"...
 
 [CLIC en botón]
 

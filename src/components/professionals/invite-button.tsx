@@ -57,7 +57,7 @@ export function InviteButton({ professionalId, status }: InviteButtonProps) {
       <Button
         onClick={handleInvite}
         disabled={isLoading}
-        className={`flex-1 ${status === 'error' ? 'bg-red-600 hover:bg-red-700' : ''}`}
+        className={status === 'error' ? 'bg-red-600 hover:bg-red-700' : ''}
       >
         {isLoading ? (
           <>
@@ -67,7 +67,7 @@ export function InviteButton({ professionalId, status }: InviteButtonProps) {
         ) : (
           <>
             <Send className="w-4 h-4 mr-2" />
-            {status === 'error' ? 'Reconectar' : 'Enviar Invitación'}
+            {status === 'error' ? 'Reconectar' : 'Invitar'}
           </>
         )}
       </Button>
