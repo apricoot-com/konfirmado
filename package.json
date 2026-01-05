@@ -11,7 +11,9 @@
     "vercel-build": "prisma generate && prisma db push && next build --turbopack",
     "seed": "tsx prisma/seed.ts",
     "db:clear": "tsx prisma/clear.ts",
-    "db:reset": "npm run db:clear && npm run seed"
+    "db:reset": "npm run db:clear && npm run seed",
+    "type-check": "tsc --noEmit",
+    "prepare": "husky"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -52,6 +54,7 @@
     "@types/nodemailer": "^6.4.16",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "husky": "^9.1.7",
     "prisma": "^5.22.0",
     "tailwindcss": "^4",
     "tsx": "^4.19.2",

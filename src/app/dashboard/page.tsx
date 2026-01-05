@@ -52,8 +52,12 @@ export default async function DashboardPage() {
       ])
       
       // Map services and professionals by ID for quick lookup
-      const servicesMap = new Map(services.map(s => [s.id, s]))
-      const professionalsMap = new Map(professionals.map(p => [p.id, p]))
+      const servicesMap = new Map<string, { id: string; name: string }>(
+        services.map(s => [s.id, s] as [string, { id: string; name: string }])
+      )
+      const professionalsMap = new Map<string, { id: string; name: string }>(
+        professionals.map(p => [p.id, p] as [string, { id: string; name: string }])
+      )
       
       // Add service and professional data to links
       return links.map(link => ({
